@@ -1,0 +1,7 @@
+services:
+    akeneo_communication_channel.query.api.find_announcement_items:
+        alias: akeneo_communication_channel.query.local_filestorage.find_announcement_items
+
+    akeneo_communication_channel.query.api.find_new_announcement_ids:
+        alias: akeneo_communication_channel.query.local_filestorage.find_new_announcement_ids
+
