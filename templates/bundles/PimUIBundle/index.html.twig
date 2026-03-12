@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Loading...</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="favicon.ico" />
+
+        <link rel="stylesheet" href="{{ asset('css/pim.css', 'frontend') }}"/>
+        <link rel="stylesheet" href="{{ asset('branding/brand-overrides.css') }}"/>
+
+        {{ external_javascript_dependencies() }}
+        <script type="text/javascript" src="{{ asset('dist/vendor.min.js', 'frontend') }} "></script>
+        <script type="text/javascript" src="{{ asset('dist/main.min.js', 'frontend') }} "></script>
+    </head>
+    <body class="BrandShell">
+        <div class="app">
+            <div class="AknDefault-progressContainer">
+                <h3>
+                    Loading ...
+                </h3>
+                <img src="{{ asset('bundles/pimui/images/main-loader.gif') }}"/>
+                {% if true == oro_config_value('pim_ui.loading_message_enabled') %}
+                <h4 class="AknDefault-progressContainer--loadingMessages">
+                    {{ random(oro_config_value('pim_ui.loading_messages')|split('\n')) }}
+                </h4>
+                {% endif %}
+            </div>
+        </div>
+        <div class="hash-loading-mask"></div>
+    </body>
+</html>
