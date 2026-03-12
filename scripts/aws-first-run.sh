@@ -39,12 +39,22 @@ sudo chown -R "$USER:$USER" "$HOME/.cache"
 sed -i 's/\r$//' "$PROJECT_ROOT/docker/wait_docker_up.sh"
 chmod +x "$PROJECT_ROOT/docker/wait_docker_up.sh"
 
+cat <<'EOF' | sudo tee /etc/sysctl.d/99-akeneo-elasticsearch.conf > /dev/null
+vm.max_map_count=1048576
+EOF
+sudo sysctl --system > /dev/null
+
 set_env_value "AKENEO_PIM_URL" "$PIM_URL"
 set_env_value "APP_SECRET" "$APP_SECRET_VALUE"
 set_env_value "DOCKER_PORT_HTTP" "80"
 
 echo "Using AKENEO_PIM_URL=$PIM_URL"
 echo "Using DOCKER_PORT_HTTP=80"
+echo "Configured vm.max_map_count=$(sysctl -n vm.max_map_count)"
 
 sg docker -c "cd '$PROJECT_ROOT' && docker compose down -v --remove-orphans || true"
-sg docker -c "cd '$PROJECT_ROOT' && make prod"
+if ! sg docker -c "cd '$PROJECT_ROOT' && make prod"; then
+  sg docker -c "cd '$PROJECT_ROOT' && docker compose ps -a"
+  sg docker -c "cd '$PROJECT_ROOT' && docker compose logs --tail=120 elasticsearch"
+  exit 1
+fi
