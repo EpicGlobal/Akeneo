@@ -47,9 +47,11 @@ sudo sysctl --system > /dev/null
 set_env_value "AKENEO_PIM_URL" "$PIM_URL"
 set_env_value "APP_SECRET" "$APP_SECRET_VALUE"
 set_env_value "DOCKER_PORT_HTTP" "80"
+set_env_value "ES_JAVA_OPTS" "-Xms1g -Xmx1g -XX:-UseContainerSupport -Dlog4j2.disable.jmx=true"
 
 echo "Using AKENEO_PIM_URL=$PIM_URL"
 echo "Using DOCKER_PORT_HTTP=80"
+echo "Using ES_JAVA_OPTS=-Xms1g -Xmx1g -XX:-UseContainerSupport -Dlog4j2.disable.jmx=true"
 echo "Configured vm.max_map_count=$(sysctl -n vm.max_map_count)"
 
 sg docker -c "cd '$PROJECT_ROOT' && docker compose down -v --remove-orphans || true"
