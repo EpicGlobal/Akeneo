@@ -77,12 +77,12 @@ textarea:focus,
 }
 
 .BrandShell .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
-  background: url('/branding/logo-mark.svg') no-repeat center 16px / 36px auto;
+  background: url('/branding/logo-mark.png') no-repeat center 16px / 38px auto;
 }
 
 .BrandShell .AknHeader-menuItemContainer:first-child .AknHeader-logoImage {
   opacity: 0;
-  width: 36px;
+  width: 38px;
   height: 56px;
   pointer-events: none;
 }
@@ -129,7 +129,7 @@ textarea:focus,
 }
 
 .BrandShell--login .BrandLogo-image {
-  width: 108px;
+  width: 112px;
   height: auto;
   max-width: none;
   max-height: none;
@@ -155,7 +155,7 @@ textarea:focus,
 }
 
 .BrandShell--login .IllustrationLogin {
-  background-image: url('/branding/logo-mark.svg');
+  background-image: url('/branding/logo-mark.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: min(50%, 320px);
