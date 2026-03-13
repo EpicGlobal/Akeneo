@@ -4,16 +4,24 @@
   --brand-green-dark: #3f9722;
   --brand-green-soft: #98cf80;
   --brand-orange: #f28b33;
+  --brand-orange-soft: #fff1e4;
   --brand-blue: #1497cf;
   --brand-blue-dark: #0e74b9;
+  --brand-blue-soft: #eaf7fd;
   --brand-ink: #0f1f17;
   --brand-surface: #f5fbef;
   --brand-surface-alt: #eef7fe;
+  --brand-border: #dbe9dd;
   --brand-focus: rgba(20, 151, 207, 0.2);
 }
 
 body {
   accent-color: var(--brand-green);
+  color: var(--brand-ink);
+}
+
+::selection {
+  background: rgba(20, 151, 207, 0.18);
 }
 
 a {
@@ -55,6 +63,79 @@ textarea:focus,
   color: #fff !important;
 }
 
+.AknButton--important {
+  background-color: var(--brand-orange) !important;
+  border-color: var(--brand-orange) !important;
+  color: #fff !important;
+}
+
+.AknButton--important:hover,
+.AknButton--important.AknButton--active {
+  background-color: #d97622 !important;
+  border-color: #d97622 !important;
+  color: #fff !important;
+}
+
+.AknButton--action {
+  background-color: var(--brand-blue) !important;
+  border-color: var(--brand-blue) !important;
+  color: #fff !important;
+}
+
+.AknButton--action:hover,
+.AknButton--action.AknButton--active {
+  background-color: var(--brand-blue-dark) !important;
+  border-color: var(--brand-blue-dark) !important;
+  color: #fff !important;
+}
+
+.AknButton--grey,
+.AknButton--greyLight,
+.AknButton--ghost {
+  background-color: var(--brand-blue-soft) !important;
+  border-color: #c9e7f6 !important;
+  color: var(--brand-blue-dark) !important;
+}
+
+.AknButton--grey:hover,
+.AknButton--greyLight:hover,
+.AknButton--ghost:hover {
+  background-color: #d9f0fb !important;
+  border-color: #abd8ef !important;
+  color: var(--brand-blue-dark) !important;
+}
+
+.AknDropdownButton--apply .AknDropdownButton-button,
+.AknDropdownButton--apply .AknDropdownButton-caretContainer {
+  background-color: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+  color: #fff !important;
+}
+
+.AknDropdownButton--apply:hover .AknDropdownButton-button,
+.AknDropdownButton--apply.open .AknDropdownButton-button {
+  background-color: var(--brand-green-dark) !important;
+}
+
+.AknDropdownButton--important .AknDropdownButton-button,
+.AknDropdownButton--important .AknDropdownButton-caretContainer {
+  background-color: var(--brand-orange) !important;
+  border-color: var(--brand-orange) !important;
+  color: #fff !important;
+}
+
+.AknDropdownButton--important:hover .AknDropdownButton-button,
+.AknDropdownButton--important.open .AknDropdownButton-button {
+  background-color: #d97622 !important;
+}
+
+.AknDropdownButton--grey .AknDropdownButton-button,
+.AknDropdownButton--grey .AknDropdownButton-caretContainer {
+  background-color: var(--brand-blue-soft) !important;
+  border-color: #c9e7f6 !important;
+  color: var(--brand-blue-dark) !important;
+}
+
 .BrandShell .AknHeader-menu {
   border-right-color: #d9e6dc;
   background:
@@ -88,6 +169,7 @@ textarea:focus,
 }
 
 .BrandShell .AknTitleContainer {
+  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%);
   box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03);
 }
 
@@ -97,6 +179,70 @@ textarea:focus,
   color: var(--brand-blue);
 }
 
+.BrandShell .AknTabHeader {
+  border-bottom-color: var(--brand-blue-dark);
+  background: linear-gradient(180deg, #ffffff 0, #f8fbf9 100%);
+}
+
+.BrandShell .AknTabHeader-title,
+.BrandShell .AknSubsection-title,
+.BrandShell .AknSubsection-titleLabel {
+  color: var(--brand-green-dark);
+}
+
+.BrandShell .AknSubsection-title {
+  border-bottom-color: var(--brand-border);
+}
+
+.BrandShell .AknVerticalList-item.active,
+.BrandShell .AknVerticalList-item--active {
+  background: linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%);
+  box-shadow: inset 3px 0 0 var(--brand-green);
+}
+
+.BrandShell .AknVerticalList-itemLink:hover,
+.BrandShell .AknDropdown-menuLink:hover,
+.BrandShell .AknDropdown-menuLink--active {
+  color: var(--brand-blue-dark);
+  background-color: var(--brand-blue-soft);
+}
+
+.BrandShell .AknDropdown-menuTitle {
+  color: var(--brand-green-dark);
+}
+
+.BrandShell .AknSquareList-item--selected,
+.BrandShell .AknSquareList-item:hover {
+  border-color: var(--brand-blue);
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue-dark);
+}
+
+.BrandShell .AknBadge--enabled,
+.BrandShell .AknBadge--success,
+.BrandShell .AknBadge--primary {
+  background-color: var(--brand-green);
+}
+
+.BrandShell .AknBadge--info,
+.BrandShell .AknBadge--secondary {
+  background-color: var(--brand-blue);
+}
+
+.BrandShell .AknBadge--warning {
+  background-color: var(--brand-orange);
+}
+
+.BrandShell .AknBadge--active {
+  background-color: var(--brand-lime);
+  color: var(--brand-ink);
+}
+
+.BrandShell .AknNotificationMenu-count {
+  background-color: var(--brand-orange);
+}
+
+.BrandShell .AknFilterBox-search:focus,
 .BrandShell .AknFilterBox-addFilterButton.ui-state-active,
 .BrandShell .ui-multiselect-header .ui-multiselect-filter input:focus {
   border-color: var(--brand-blue);
