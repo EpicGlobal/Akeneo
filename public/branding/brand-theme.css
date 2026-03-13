@@ -1,0 +1,345 @@
+:root {
+  --brand-lime: #b1d74c;
+  --brand-green: #54af31;
+  --brand-green-dark: #3f9722;
+  --brand-green-soft: #98cf80;
+  --brand-orange: #f28b33;
+  --brand-orange-soft: #fff1e4;
+  --brand-blue: #1497cf;
+  --brand-blue-dark: #0e74b9;
+  --brand-blue-soft: #eaf7fd;
+  --brand-ink: #0f1f17;
+  --brand-surface: #f5fbef;
+  --brand-surface-alt: #eef7fe;
+  --brand-border: #dbe9dd;
+  --brand-focus: rgba(20, 151, 207, 0.2);
+}
+
+body {
+  accent-color: var(--brand-green);
+  color: var(--brand-ink);
+}
+
+::selection {
+  background: rgba(20, 151, 207, 0.18);
+}
+
+a {
+  color: var(--brand-blue);
+}
+
+a:visited {
+  color: var(--brand-blue);
+}
+
+a:hover,
+a:focus {
+  color: var(--brand-blue-dark);
+}
+
+a:visited:hover,
+a:visited:focus {
+  color: var(--brand-blue-dark);
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.select2-container-active .select2-choice,
+.select2-container-active .select2-choices {
+  border-color: var(--brand-blue) !important;
+  box-shadow: 0 0 0 2px var(--brand-focus) !important;
+  outline: none;
+}
+
+.AknButton--apply {
+  background-color: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+  color: #fff !important;
+}
+
+.AknButton--apply:hover,
+.AknButton--apply.AknButton--active {
+  background-color: var(--brand-green-dark) !important;
+  border-color: var(--brand-green-dark) !important;
+  color: #fff !important;
+}
+
+.AknButton--apply.AknButton--disabled,
+.AknButton--apply:disabled {
+  background-color: var(--brand-green-soft) !important;
+  border-color: var(--brand-green-soft) !important;
+  color: #fff !important;
+}
+
+.AknButton--important {
+  background-color: var(--brand-orange) !important;
+  border-color: var(--brand-orange) !important;
+  color: #fff !important;
+}
+
+.AknButton--important:hover,
+.AknButton--important.AknButton--active {
+  background-color: #d97622 !important;
+  border-color: #d97622 !important;
+  color: #fff !important;
+}
+
+.AknButton--action {
+  background-color: var(--brand-blue) !important;
+  border-color: var(--brand-blue) !important;
+  color: #fff !important;
+}
+
+.AknButton--action:hover,
+.AknButton--action.AknButton--active {
+  background-color: var(--brand-blue-dark) !important;
+  border-color: var(--brand-blue-dark) !important;
+  color: #fff !important;
+}
+
+.AknButton--grey,
+.AknButton--greyLight,
+.AknButton--ghost {
+  background-color: var(--brand-blue-soft) !important;
+  border-color: #c9e7f6 !important;
+  color: var(--brand-blue-dark) !important;
+}
+
+.AknButton--grey:hover,
+.AknButton--greyLight:hover,
+.AknButton--ghost:hover {
+  background-color: #d9f0fb !important;
+  border-color: #abd8ef !important;
+  color: var(--brand-blue-dark) !important;
+}
+
+.AknDropdownButton--apply .AknDropdownButton-button,
+.AknDropdownButton--apply .AknDropdownButton-caretContainer {
+  background-color: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+  color: #fff !important;
+}
+
+.AknDropdownButton--apply:hover .AknDropdownButton-button,
+.AknDropdownButton--apply.open .AknDropdownButton-button {
+  background-color: var(--brand-green-dark) !important;
+}
+
+.AknDropdownButton--important .AknDropdownButton-button,
+.AknDropdownButton--important .AknDropdownButton-caretContainer {
+  background-color: var(--brand-orange) !important;
+  border-color: var(--brand-orange) !important;
+  color: #fff !important;
+}
+
+.AknDropdownButton--important:hover .AknDropdownButton-button,
+.AknDropdownButton--important.open .AknDropdownButton-button {
+  background-color: #d97622 !important;
+}
+
+.AknDropdownButton--grey .AknDropdownButton-button,
+.AknDropdownButton--grey .AknDropdownButton-caretContainer {
+  background-color: var(--brand-blue-soft) !important;
+  border-color: #c9e7f6 !important;
+  color: var(--brand-blue-dark) !important;
+}
+
+.BrandShell .AknHeader-menu {
+  border-right-color: #d9e6dc;
+  background:
+    linear-gradient(180deg, rgba(177, 215, 76, 0.14) 0, rgba(177, 215, 76, 0) 84px),
+    linear-gradient(180deg, #ffffff 0, #f7fbf8 100%);
+}
+
+.BrandShell .AknHeader-menuItem {
+  border-color: var(--brand-orange) !important;
+}
+
+.BrandShell .AknHeader-menuItem:hover,
+.BrandShell .AknHeader-menuItem--active {
+  color: var(--brand-green) !important;
+  border-left-color: var(--brand-orange) !important;
+}
+
+.BrandShell .AknHeader-menuItem:hover .AknHeader-menuItemImage,
+.BrandShell .AknHeader-menuItem--active .AknHeader-menuItemImage {
+  filter: hue-rotate(110deg) saturate(1.25) !important;
+}
+
+.BrandShell .AknHeader-menuBlock:first-child .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
+  background: url('/branding/brand-logo.png') no-repeat center 14px / 44px auto;
+}
+
+.BrandShell .AknHeader-menuBlock:first-child .AknHeader-menuItemContainer:first-child .AknHeader-logoImage {
+  opacity: 0 !important;
+  width: 44px;
+  height: 56px;
+  pointer-events: none;
+}
+
+.BrandShell .AknTitleContainer {
+  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%);
+  box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03);
+}
+
+.BrandShell .AknTitleContainer-backLink a,
+.BrandShell .AknTitleContainer-breadcrumbs a,
+.BrandShell .AknSubsection-title a {
+  color: var(--brand-blue);
+}
+
+.BrandShell .AknTabHeader {
+  border-bottom-color: var(--brand-blue-dark);
+  background: linear-gradient(180deg, #ffffff 0, #f8fbf9 100%);
+}
+
+.BrandShell .AknTabHeader-title,
+.BrandShell .AknSubsection-title,
+.BrandShell .AknSubsection-titleLabel {
+  color: var(--brand-green-dark);
+}
+
+.BrandShell .AknSubsection-title {
+  border-bottom-color: var(--brand-border);
+}
+
+.BrandShell .AknVerticalList-item.active,
+.BrandShell .AknVerticalList-item--active {
+  background: linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%);
+  box-shadow: inset 3px 0 0 var(--brand-green);
+}
+
+.BrandShell .AknVerticalList-itemLink:hover,
+.BrandShell .AknDropdown-menuLink:hover,
+.BrandShell .AknDropdown-menuLink--active {
+  color: var(--brand-blue-dark);
+  background-color: var(--brand-blue-soft);
+}
+
+.BrandShell .AknDropdown-menuTitle {
+  color: var(--brand-green-dark);
+}
+
+.BrandShell .AknSquareList-item--selected,
+.BrandShell .AknSquareList-item:hover {
+  border-color: var(--brand-blue);
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue-dark);
+}
+
+.BrandShell .AknBadge--enabled,
+.BrandShell .AknBadge--success,
+.BrandShell .AknBadge--primary {
+  background-color: var(--brand-green);
+}
+
+.BrandShell .AknBadge--info,
+.BrandShell .AknBadge--secondary {
+  background-color: var(--brand-blue);
+}
+
+.BrandShell .AknBadge--warning {
+  background-color: var(--brand-orange);
+}
+
+.BrandShell .AknBadge--active {
+  background-color: var(--brand-lime);
+  color: var(--brand-ink);
+}
+
+.BrandShell .AknNotificationMenu-count {
+  background-color: var(--brand-orange);
+}
+
+.BrandShell .AknFilterBox-search:focus,
+.BrandShell .AknFilterBox-addFilterButton.ui-state-active,
+.BrandShell .ui-multiselect-header .ui-multiselect-filter input:focus {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 2px var(--brand-focus);
+}
+
+.BrandShell--login .AuthenticationWrapper {
+  color: var(--brand-ink);
+}
+
+.BrandShell--login .LeftWrapper {
+  background:
+    radial-gradient(circle at top left, rgba(177, 215, 76, 0.16), transparent 26%),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%);
+}
+
+.BrandShell--login .RightWrapper {
+  background:
+    radial-gradient(circle at 74% 22%, rgba(20, 151, 207, 0.16), transparent 17%),
+    radial-gradient(circle at 56% 14%, rgba(242, 139, 51, 0.16), transparent 14%),
+    linear-gradient(160deg, var(--brand-surface) 0, #ffffff 46%, var(--brand-surface-alt) 100%);
+}
+
+.BrandShell--login .FormWrapper {
+  padding-top: 96px;
+}
+
+.BrandShell--login .Logo {
+  margin-bottom: 28px;
+}
+
+.BrandShell--login .BrandLogo-image {
+  width: 132px;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+.BrandShell--login .Footer {
+  color: #5d7068;
+}
+
+.BrandShell--login .Footer:hover,
+.BrandShell--login .Footer:focus {
+  color: #456258;
+}
+
+.BrandShell--login .Footer .Powered {
+  color: #5d7068;
+}
+
+.BrandShell--login .Footer .BaseLine {
+  color: var(--brand-blue-dark);
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.BrandShell--login .IllustrationLogin {
+  background-image: url('/branding/brand-logo.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(42%, 280px);
+}
+
+.BrandShell--login .PasswordReset a,
+.BrandShell--login .CancelPasswordReset a,
+.BrandShell--login .AknLogin-link {
+  color: var(--brand-blue);
+}
+
+.BrandShell--login .PasswordReset a:hover,
+.BrandShell--login .CancelPasswordReset a:hover,
+.BrandShell--login .AknLogin-link:hover {
+  color: var(--brand-blue-dark);
+}
+
+.BrandShell--login .Form .InputText:focus {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 2px var(--brand-focus);
+}
+
+@media (max-width: 768px) {
+  .BrandShell--login .FormWrapper {
+    padding-top: 64px;
+  }
+
+  .BrandShell--login .Footer .BaseLine {
+    max-width: 296px;
+  }
+}
