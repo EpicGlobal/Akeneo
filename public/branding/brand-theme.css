@@ -437,3 +437,93 @@ textarea:focus,
     max-width: 296px;
   }
 }
+
+/* Authenticated shell hard overrides */
+body.BrandShell .AknHeader-menu,
+.AknHeader-menu {
+  border-right-color: #d9e6dc !important;
+  background:
+    linear-gradient(180deg, rgba(177, 215, 76, 0.14) 0, rgba(177, 215, 76, 0) 84px),
+    linear-gradient(180deg, #ffffff 0, #f7fbf8 100%) !important;
+}
+
+body.BrandShell .AknHeader-menuItem,
+.AknHeader-menuItem {
+  color: #5d7068 !important;
+  border-color: transparent !important;
+}
+
+body.BrandShell .AknHeader-menuItem:hover,
+body.BrandShell .AknHeader-menuItem--active,
+.AknHeader-menuItem:hover,
+.AknHeader-menuItem--active {
+  color: var(--brand-green) !important;
+  border-left-color: var(--brand-orange) !important;
+  background: linear-gradient(90deg, rgba(177, 215, 76, 0.16), rgba(177, 215, 76, 0) 88%) !important;
+}
+
+body.BrandShell .AknHeader-menuItemImage:not(:first-child),
+.AknHeader-menuItemImage:not(:first-child) {
+  filter: hue-rotate(88deg) saturate(1.55) brightness(0.82) !important;
+}
+
+body.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem,
+.AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
+  border-left-width: 0 !important;
+  padding-right: 0 !important;
+  background: linear-gradient(180deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+}
+
+body.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-logoImage,
+.AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-logoImage {
+  width: 56px !important;
+  max-width: 56px !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+
+body.BrandShell .AknVerticalList-item.active,
+body.BrandShell .AknVerticalList-item--active,
+.AknVerticalList-item.active,
+.AknVerticalList-item--active {
+  background: linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+  box-shadow: inset 3px 0 0 var(--brand-green) !important;
+}
+
+body.BrandShell .AknVerticalList-item.active a,
+body.BrandShell .AknVerticalList-item.active span,
+body.BrandShell .AknVerticalList-item--active a,
+body.BrandShell .AknVerticalList-item--active span,
+.AknVerticalList-item.active a,
+.AknVerticalList-item.active span,
+.AknVerticalList-item--active a,
+.AknVerticalList-item--active span {
+  color: var(--brand-green-dark) !important;
+}
+
+body.BrandShell .AknTitleContainer,
+body.BrandShell header.BrandShell-pageHeader,
+.AknTitleContainer,
+header.BrandShell-pageHeader {
+  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%) !important;
+  box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03) !important;
+}
+
+body.BrandShell .AknTitleContainer-title,
+body.BrandShell .BrandShell-pageHeaderTitle,
+.AknTitleContainer-title,
+.BrandShell-pageHeaderTitle {
+  color: var(--brand-green-dark) !important;
+}
+
+body.BrandShell .AknTitleContainer-breadcrumbs,
+body.BrandShell .AknTitleContainer-breadcrumbs a,
+body.BrandShell .BrandShell-pageHeaderBreadcrumb,
+body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
+.AknTitleContainer-breadcrumbs,
+.AknTitleContainer-breadcrumbs a,
+.BrandShell-pageHeaderBreadcrumb,
+.BrandShell-pageHeaderBreadcrumb a {
+  color: var(--brand-blue) !important;
+}
