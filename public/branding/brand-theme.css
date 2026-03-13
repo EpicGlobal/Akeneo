@@ -146,36 +146,56 @@ textarea:focus,
 }
 
 .BrandShell .AknHeader-menu {
-  border-right-color: #d9e6dc;
+  border-right-color: #d9e6dc !important;
   background:
     linear-gradient(180deg, rgba(177, 215, 76, 0.14) 0, rgba(177, 215, 76, 0) 84px),
-    linear-gradient(180deg, #ffffff 0, #f7fbf8 100%);
+    linear-gradient(180deg, #ffffff 0, #f7fbf8 100%) !important;
 }
 
 .BrandShell .AknHeader-menuItem {
-  border-color: var(--brand-orange) !important;
+  border-color: transparent !important;
+  color: #5d7068 !important;
 }
 
 .BrandShell .AknHeader-menuItem:hover,
 .BrandShell .AknHeader-menuItem--active {
   color: var(--brand-green) !important;
   border-left-color: var(--brand-orange) !important;
+  background: linear-gradient(90deg, rgba(177, 215, 76, 0.16), rgba(177, 215, 76, 0) 88%) !important;
 }
 
-.BrandShell .AknHeader-menuItem:hover .AknHeader-menuItemImage,
-.BrandShell .AknHeader-menuItem--active .AknHeader-menuItemImage {
-  filter: hue-rotate(110deg) saturate(1.25) !important;
+.BrandShell .AknHeader-menuItemImage:not(:first-child) {
+  filter: hue-rotate(88deg) saturate(1.55) brightness(0.82) !important;
 }
 
-.BrandShell .AknHeader-menuBlock:first-child .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
-  background: url('/branding/brand-logo.png') no-repeat center 14px / 44px auto;
+.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child {
+  flex-basis: 88px;
 }
 
-.BrandShell .AknHeader-menuBlock:first-child .AknHeader-menuItemContainer:first-child .AknHeader-logoImage {
-  opacity: 0 !important;
-  width: 44px;
-  height: 56px;
-  pointer-events: none;
+.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
+  border-left-width: 0 !important;
+  padding-right: 0 !important;
+  background: linear-gradient(180deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+}
+
+.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem:hover,
+.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem--active {
+  border-left-width: 0 !important;
+  padding-right: 0 !important;
+}
+
+.BrandShell .BrandShell-sidebarLogoImage,
+.BrandShell .AknHeader-logoImage {
+  width: 56px;
+  max-width: 56px;
+  height: auto;
+  max-height: none;
+  display: block;
+  margin: 0 auto;
+}
+
+.BrandShell .BrandShell-sidebarLogo {
+  background: linear-gradient(180deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
 }
 
 .BrandShell .AknTitleContainer {
@@ -183,8 +203,37 @@ textarea:focus,
   box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03);
 }
 
+.BrandShell .BrandShell-pageHeader {
+  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%) !important;
+  box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03) !important;
+}
+
+.BrandShell .BrandShell-pageHeaderBreadcrumb,
+.BrandShell .BrandShell-pageHeaderBreadcrumb a {
+  color: var(--brand-blue) !important;
+}
+
+.BrandShell .BrandShell-pageHeaderBreadcrumb [aria-current='page'] {
+  color: #8ea3aa !important;
+}
+
+.BrandShell .BrandShell-pageHeaderBreadcrumb [aria-hidden='true'] {
+  color: var(--brand-green) !important;
+}
+
+.BrandShell .BrandShell-pageHeaderTitle {
+  color: var(--brand-green-dark) !important;
+}
+
+.BrandShell .AknTitleContainer-title {
+  color: var(--brand-green-dark) !important;
+}
+
 .BrandShell .AknTitleContainer-backLink a,
 .BrandShell .AknTitleContainer-breadcrumbs a,
+.BrandShell .AknTitleContainer-breadcrumbs,
+.BrandShell .AknTitleContainer-meta,
+.BrandShell .AknTitleContainer-meta a,
 .BrandShell .AknSubsection-title a {
   color: var(--brand-blue);
 }
@@ -196,7 +245,9 @@ textarea:focus,
 
 .BrandShell .AknTabHeader-title,
 .BrandShell .AknSubsection-title,
-.BrandShell .AknSubsection-titleLabel {
+.BrandShell .AknSubsection-titleLabel,
+.BrandShell .AknWidget-header,
+.BrandShell .AknWidget-subTitle {
   color: var(--brand-green-dark);
 }
 
@@ -204,10 +255,48 @@ textarea:focus,
   border-bottom-color: var(--brand-border);
 }
 
+.BrandShell .AknSubsection-title--light {
+  color: var(--brand-green) !important;
+  border-bottom-color: var(--brand-border) !important;
+}
+
+.BrandShell .AknHorizontalNavtab-link {
+  color: #5d7068 !important;
+}
+
+.BrandShell .AknHorizontalNavtab-item.active .AknHorizontalNavtab-link,
+.BrandShell .AknHorizontalNavtab-item--active .AknHorizontalNavtab-link,
+.BrandShell .AknHorizontalNavtab-link--active {
+  color: var(--brand-green-dark) !important;
+  border-bottom-color: var(--brand-green) !important;
+}
+
+.BrandShell .AknHorizontalNavtab-item:not(.AknHorizontalNavtab-item--forbidden):not(.AknHorizontalNavtab-item--active) .AknHorizontalNavtab-link:not(.AknHorizontalNavtab-link--active):hover {
+  color: var(--brand-blue-dark) !important;
+}
+
+.BrandShell .AknDefault-mainContent {
+  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%);
+}
+
+.BrandShell .AknDefault-thirdColumn {
+  background: linear-gradient(180deg, #fbfdf9 0, #f4faee 100%) !important;
+  border-right-color: var(--brand-border) !important;
+}
+
+.BrandShell .AknVerticalList-item {
+  border-color: var(--brand-border) !important;
+}
+
 .BrandShell .AknVerticalList-item.active,
 .BrandShell .AknVerticalList-item--active {
   background: linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%);
   box-shadow: inset 3px 0 0 var(--brand-green);
+  color: var(--brand-green-dark) !important;
+}
+
+.BrandShell .AknVerticalList-itemLink {
+  color: #556b62 !important;
 }
 
 .BrandShell .AknVerticalList-itemLink:hover,
@@ -219,6 +308,11 @@ textarea:focus,
 
 .BrandShell .AknDropdown-menuTitle {
   color: var(--brand-green-dark);
+}
+
+.BrandShell .AknWidget-header,
+.BrandShell .AknWidget-subTitle {
+  border-bottom-color: var(--brand-border) !important;
 }
 
 .BrandShell .AknSquareList-item--selected,
