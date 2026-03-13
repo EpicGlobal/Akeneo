@@ -77,12 +77,12 @@ textarea:focus,
 }
 
 .BrandShell .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
-  background: url('/branding/logo-mark.png') no-repeat center 16px / 38px auto;
+  background: url('/branding/logo-mark.png') no-repeat center 14px / 44px auto;
 }
 
 .BrandShell .AknHeader-menuItemContainer:first-child .AknHeader-logoImage {
   opacity: 0;
-  width: 38px;
+  width: 44px;
   height: 56px;
   pointer-events: none;
 }
@@ -129,7 +129,7 @@ textarea:focus,
 }
 
 .BrandShell--login .BrandLogo-image {
-  width: 112px;
+  width: 132px;
   height: auto;
   max-width: none;
   max-height: none;
@@ -158,7 +158,7 @@ textarea:focus,
   background-image: url('/branding/logo-mark.png');
   background-repeat: no-repeat;
   background-position: center;
-  background-size: min(50%, 320px);
+  background-size: min(42%, 280px);
 }
 
 .BrandShell--login .PasswordReset a,
