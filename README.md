@@ -60,3 +60,19 @@ https://docs.akeneo.com/master/migrate_pim/index.html
 Changelog
 ---------
 You can check out the changelog files in https://github.com/akeneo/pim-community-dev.
+
+ResourceSpace Integration
+-------------------------
+
+This project includes a custom ResourceSpace integration bundle for Akeneo product and product-model edit forms.
+
+Setup notes live in [docs/resourcespace.md](docs/resourcespace.md).
+SaaS rollout notes live in [docs/saas-readiness.md](docs/saas-readiness.md).
+Coppermind platform boundary notes live in [docs/coppermind-platform.md](docs/coppermind-platform.md).
+Amazon marketplace automation notes live in [docs/amazon-marketplace.md](docs/amazon-marketplace.md).
+
+For local development:
+
+- Start the pinned ResourceSpace stack and write-back worker with `make resourcespace-up`.
+- Start the standalone marketplace orchestration service with `make marketplace-up`.
+- The PIM runs at `http://localhost:8080`, ResourceSpace runs at `http://localhost:8081`, and the marketplace orchestrator runs at `http://localhost:8090`.

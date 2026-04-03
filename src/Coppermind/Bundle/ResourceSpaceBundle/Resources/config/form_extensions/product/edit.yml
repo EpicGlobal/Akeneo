@@ -1,0 +1,15 @@
+extensions:
+    coppermind-resourcespace-product-edit-form-tab:
+        module: coppermindresourcespace/js/product-edit-form/dam-tab
+        parent: pim-product-edit-form-column-tabs
+        targetZone: container
+        aclResourceId: pim_enrich_product_edit_attributes
+        position: 115
+        config:
+            ownerType: product
+            tabCode: pim-product-edit-form-resourcespace
+            listRoute: coppermind_resourcespace_product_assets_list
+            linkRoute: coppermind_resourcespace_product_assets_link
+            unlinkRoute: coppermind_resourcespace_product_assets_unlink
+            syncRoute: coppermind_resourcespace_product_assets_sync
+            retryWritebackRoute: coppermind_resourcespace_asset_writeback_retry

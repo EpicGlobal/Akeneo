@@ -1,0 +1,42 @@
+{
+  "tenantCode": "default",
+  "product": {
+    "uuid": "fd1ac736-d82e-4169-b8db-723ed09a9b4a",
+    "identifier": "100121",
+    "family": "boots",
+    "locales": [
+      "en_US"
+    ],
+    "markets": [
+      "US"
+    ],
+    "attributes": {
+      "name": "Shardplate Trail Boot",
+      "description": "Weather-sealed trail boot with reinforced toe protection.",
+      "brand": "Coppermind",
+      "bullet_1": "Stormproof coated leather upper",
+      "bullet_2": "High-traction sole for rocky terrain",
+      "short_description": "Protective trail boot for everyday field use"
+    },
+    "assets": [
+      {
+        "ref": 6,
+        "role": "hero_image",
+        "type": "image",
+        "locale": "en_US",
+        "market": "US",
+        "isPrimary": true
+      },
+      {
+        "ref": 5,
+        "role": "detail",
+        "type": "image",
+        "locale": "en_US",
+        "market": "US"
+      }
+    ],
+    "approvals": [
+      "catalog_review"
+    ]
+  }
+}

@@ -25,6 +25,7 @@ composer.phar
 uploads_test/
 .phpspec/*.tpl
 /node_modules
+**/node_modules/
 npm-debug.log
 docker-compose.override.yml
 .web-server-pid

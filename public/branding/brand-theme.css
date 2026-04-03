@@ -527,3 +527,373 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 .BrandShell-pageHeaderBreadcrumb a {
   color: var(--brand-blue) !important;
 }
+
+.BrandGuideButton {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 108px;
+  height: 48px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--brand-green) 0%, #6dc43c 100%);
+  box-shadow: 0 18px 36px rgba(15, 31, 23, 0.22);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.BrandGuideButton:hover,
+.BrandGuideButton:focus {
+  background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green) 100%);
+  box-shadow: 0 22px 42px rgba(15, 31, 23, 0.28);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.BrandGuideButton.is-open {
+  background: linear-gradient(135deg, var(--brand-blue-dark) 0%, var(--brand-blue) 100%);
+}
+
+.BrandGuideBackdrop,
+.BrandGuideWalkthroughBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2790;
+  border: 0;
+  background: rgba(15, 31, 23, 0.42);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.BrandGuideBackdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.BrandGuidePanel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 2801;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 24px));
+  height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(20, 151, 207, 0.12), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f6fbf1 100%);
+  border-left: 1px solid rgba(15, 31, 23, 0.08);
+  box-shadow: -18px 0 38px rgba(15, 31, 23, 0.16);
+  transform: translateX(100%);
+  transition: transform 220ms ease;
+}
+
+.BrandGuidePanel.is-open {
+  transform: translateX(0);
+}
+
+.BrandGuidePanel-header,
+.BrandGuidePanel-footer {
+  padding: 22px 24px;
+}
+
+.BrandGuidePanel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid rgba(15, 31, 23, 0.08);
+}
+
+.BrandGuidePanel-heading {
+  min-width: 0;
+}
+
+.BrandGuidePanel-eyebrow {
+  margin-bottom: 6px;
+  color: var(--brand-blue-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.BrandGuidePanel-title {
+  margin: 0;
+  color: var(--brand-green-dark);
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.BrandGuidePanel-close {
+  border: 0;
+  background: transparent;
+  color: var(--brand-blue-dark);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.BrandGuidePanel-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.BrandGuidePanel-footer {
+  border-top: 1px solid rgba(15, 31, 23, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.BrandGuidePanel-note {
+  margin: 0;
+  color: #5c6d66;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.BrandGuideSection {
+  margin-bottom: 22px;
+}
+
+.BrandGuideSection:last-child {
+  margin-bottom: 0;
+}
+
+.BrandGuideSection-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(20, 151, 207, 0.12);
+  color: var(--brand-blue-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.BrandGuideSection-title {
+  margin: 12px 0 10px;
+  color: var(--brand-ink);
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.BrandGuideSection-heading {
+  margin: 0 0 10px;
+  color: var(--brand-green-dark);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.BrandGuideSection-copy,
+.BrandGuideSection-callout {
+  margin: 0;
+  color: #405149;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.BrandGuideSection-callout {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue-dark);
+}
+
+.BrandGuideList {
+  margin: 0;
+  padding-left: 20px;
+  color: #24332d;
+}
+
+.BrandGuideList-item {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.BrandGuideList-item:last-child {
+  margin-bottom: 0;
+}
+
+.BrandGuideActions,
+.BrandGuideWalkthroughCard-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.BrandGuideActionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.BrandGuideActionButton:hover,
+.BrandGuideActionButton:focus {
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.BrandGuideActionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+.BrandGuideActionButton--primary {
+  background: var(--brand-green);
+  box-shadow: 0 12px 24px rgba(84, 175, 49, 0.22);
+  color: #fff;
+}
+
+.BrandGuideActionButton--primary:hover,
+.BrandGuideActionButton--primary:focus {
+  background: var(--brand-green-dark);
+}
+
+.BrandGuideActionButton--ghost {
+  background: #fff;
+  border-color: rgba(20, 151, 207, 0.22);
+  color: var(--brand-blue-dark);
+}
+
+.BrandGuideActionButton--ghost:hover,
+.BrandGuideActionButton--ghost:focus {
+  background: var(--brand-blue-soft);
+}
+
+.BrandGuideActionButton--text {
+  background: transparent;
+  color: #5b6d66;
+}
+
+.BrandGuideWalkthroughBackdrop {
+  z-index: 2890;
+  background: rgba(15, 31, 23, 0.56);
+}
+
+.BrandGuideWalkthroughBackdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.BrandGuideWalkthroughRing {
+  position: fixed;
+  z-index: 2891;
+  border: 3px solid var(--brand-orange);
+  border-radius: 18px;
+  box-shadow: 0 0 0 9999px rgba(15, 31, 23, 0.18), 0 18px 28px rgba(15, 31, 23, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, top 180ms ease, left 180ms ease, width 180ms ease, height 180ms ease;
+}
+
+.BrandGuideWalkthroughRing.is-open {
+  opacity: 1;
+}
+
+.BrandGuideWalkthroughCard {
+  position: fixed;
+  z-index: 2892;
+  width: min(360px, calc(100vw - 32px));
+  padding: 18px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 22px 44px rgba(15, 31, 23, 0.24);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.BrandGuideWalkthroughCard.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.BrandGuideWalkthroughCard-status {
+  margin-bottom: 8px;
+  color: var(--brand-blue-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.BrandGuideWalkthroughCard-title {
+  margin: 0 0 10px;
+  color: var(--brand-green-dark);
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.BrandGuideWalkthroughCard-copy {
+  margin: 0 0 16px;
+  color: #43544d;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.BrandGuide-highlightTarget {
+  position: relative;
+  z-index: 2893 !important;
+}
+
+@media (max-width: 900px) {
+  .BrandGuidePanel {
+    width: min(100vw, 100%);
+  }
+}
+
+@media (max-width: 640px) {
+  .BrandGuideButton {
+    right: 16px;
+    bottom: 16px;
+    min-width: 92px;
+    height: 44px;
+    padding: 0 16px;
+  }
+
+  .BrandGuidePanel-header,
+  .BrandGuidePanel-content,
+  .BrandGuidePanel-footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .BrandGuidePanel-title {
+    font-size: 24px;
+  }
+
+  .BrandGuideSection-title {
+    font-size: 21px;
+  }
+
+  .BrandGuideWalkthroughCard {
+    width: calc(100vw - 24px);
+  }
+}

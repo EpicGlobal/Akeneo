@@ -1,0 +1,3 @@
+config:
+    paths:
+        coppermindresourcespace/js/product-edit-form/dam-tab: coppermindresourcespace/js/product-edit-form/dam-tab

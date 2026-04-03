@@ -1,0 +1,27 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: false
+        public: false
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\TestConnectionCommand:
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:test-connection' }
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\ProcessWritebackJobsCommand:
+        bind:
+            $lockFactory: '@pim_framework.lock.factory'
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:writeback:process' }
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\SmokeTestCommand:
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:smoke-test' }
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\ListTenantConfigurationsCommand:
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:tenant:list' }
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\ConfigureTenantCommand:
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:tenant:configure' }

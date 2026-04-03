@@ -1,0 +1,54 @@
+coppermind_resourcespace_product_assets_list:
+    path: /rest/resourcespace/product/{uuid}/assets
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::listProductAction
+    methods: [GET]
+
+coppermind_resourcespace_product_assets_link:
+    path: /rest/resourcespace/product/{uuid}/assets
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::linkProductAction
+    methods: [POST]
+
+coppermind_resourcespace_product_assets_unlink:
+    path: /rest/resourcespace/product/{uuid}/assets/{resourceRef}
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::unlinkProductAction
+    methods: [DELETE]
+    requirements:
+        resourceRef: '\d+'
+
+coppermind_resourcespace_product_assets_sync:
+    path: /rest/resourcespace/product/{uuid}/assets/{resourceRef}/sync
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::syncProductAction
+    methods: [POST]
+    requirements:
+        resourceRef: '\d+'
+
+coppermind_resourcespace_asset_writeback_retry:
+    path: /rest/resourcespace/assets/{resourceRef}/writeback
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::retryWritebackAction
+    methods: [POST]
+    requirements:
+        resourceRef: '\d+'
+
+coppermind_resourcespace_product_model_assets_list:
+    path: /rest/resourcespace/product-model/{code}/assets
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::listProductModelAction
+    methods: [GET]
+
+coppermind_resourcespace_product_model_assets_link:
+    path: /rest/resourcespace/product-model/{code}/assets
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::linkProductModelAction
+    methods: [POST]
+
+coppermind_resourcespace_product_model_assets_unlink:
+    path: /rest/resourcespace/product-model/{code}/assets/{resourceRef}
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::unlinkProductModelAction
+    methods: [DELETE]
+    requirements:
+        resourceRef: '\d+'
+
+coppermind_resourcespace_product_model_assets_sync:
+    path: /rest/resourcespace/product-model/{code}/assets/{resourceRef}/sync
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::syncProductModelAction
+    methods: [POST]
+    requirements:
+        resourceRef: '\d+'

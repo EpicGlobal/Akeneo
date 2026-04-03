@@ -5,6 +5,8 @@
 CMD_ON_PROJECT = docker compose run -u www-data --rm php
 PHP_RUN = $(CMD_ON_PROJECT) php
 YARN_RUN = docker compose run -u node --rm -e YARN_REGISTRY -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD node yarn
+RESOURCE_SPACE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.resourcespace.yml
+MARKETPLACE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.marketplace.yml
 
 ifdef NO_DOCKER
   CMD_ON_PROJECT =
@@ -109,6 +111,32 @@ endif
 .PHONY: up
 up:
 	docker compose up -d --remove-orphans
+
+.PHONY: resourcespace-up
+resourcespace-up:
+	$(RESOURCE_SPACE_COMPOSE) up -d --build resourcespace mariadb resourcespace-writeback-worker
+
+.PHONY: resourcespace-logs
+resourcespace-logs:
+	$(RESOURCE_SPACE_COMPOSE) logs -f resourcespace mariadb resourcespace-writeback-worker
+
+.PHONY: resourcespace-down
+resourcespace-down:
+	$(RESOURCE_SPACE_COMPOSE) stop resourcespace mariadb resourcespace-writeback-worker
+	$(RESOURCE_SPACE_COMPOSE) rm -sf resourcespace mariadb resourcespace-writeback-worker
+
+.PHONY: marketplace-up
+marketplace-up:
+	$(MARKETPLACE_COMPOSE) up -d marketplace-orchestrator marketplace-orchestrator-worker
+
+.PHONY: marketplace-logs
+marketplace-logs:
+	$(MARKETPLACE_COMPOSE) logs -f marketplace-orchestrator marketplace-orchestrator-worker
+
+.PHONY: marketplace-down
+marketplace-down:
+	$(MARKETPLACE_COMPOSE) stop marketplace-orchestrator marketplace-orchestrator-worker
+	$(MARKETPLACE_COMPOSE) rm -sf marketplace-orchestrator marketplace-orchestrator-worker
 
 .PHONY: down
 down:

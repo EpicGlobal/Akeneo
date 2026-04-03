@@ -1,0 +1,14 @@
+{
+  "name": "@coppermind/marketplace-orchestrator",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Standalone tenant-aware marketplace orchestration service for Coppermind",
+  "type": "commonjs",
+  "dependencies": {
+    "mysql2": "^3.15.2"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "worker": "node worker.js"
+  }
+}

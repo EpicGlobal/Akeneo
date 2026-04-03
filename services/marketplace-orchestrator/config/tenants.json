@@ -1,0 +1,175 @@
+{
+  "tenants": [
+    {
+      "code": "default",
+      "label": "Default Tenant",
+      "governance": {
+        "approvalStages": [
+          "catalog_review",
+          "brand_review",
+          "compliance_review"
+        ],
+        "publishBlockers": [
+          "missing_required_attributes",
+          "missing_required_assets",
+          "pending_approval"
+        ]
+      },
+      "amazon": {
+        "envPrefix": "MARKETPLACE_DEFAULT_AMAZON",
+        "enabled": true,
+        "mode": "mock",
+        "region": "na",
+        "sellerId": "A1MOCKSELLER123",
+        "marketplaceId": "ATVPDKIKX0DER",
+        "notifications": {
+          "destinationId": "mock-eventbridge-destination",
+          "types": [
+            "LISTINGS_ITEM_STATUS_CHANGE",
+            "LISTINGS_ITEM_ISSUES_CHANGE",
+            "ITEM_PRODUCT_TYPE_CHANGE",
+            "PRODUCT_TYPE_DEFINITIONS_CHANGE",
+            "ACCOUNT_STATUS_CHANGED"
+          ]
+        },
+        "watchers": {
+          "notificationBootstrapIntervalMinutes": 1440,
+          "schemaIntervalMinutes": 720,
+          "brandSourceIntervalMinutes": 360,
+          "listingHealthIntervalMinutes": 15,
+          "accountHealthIntervalMinutes": 60
+        },
+        "alerts": {
+          "email": {
+            "enabled": true,
+            "to": [
+              "ops@example.com"
+            ]
+          },
+          "sellerCentral": {
+            "enabled": false,
+            "marketplaceId": "ATVPDKIKX0DER",
+            "notificationType": "WARNING"
+          }
+        },
+        "brandSources": [
+          {
+            "code": "brand_site_boot_100121",
+            "label": "Coppermind Brand Site",
+            "marketplaceCode": "amazon_us",
+            "sku": "100121",
+            "fixturePath": "fixtures/brand-source-default.html",
+            "intervalMinutes": 120
+          }
+        ]
+      },
+      "ai": {
+        "listingWriter": {
+          "enabled": true,
+          "envPrefix": "MARKETPLACE_DEFAULT_EPIC_AI",
+          "baseUrl": "http://host.docker.internal:3005",
+          "timeoutMs": 180000,
+          "providerIds": [
+            "openai",
+            "xai",
+            "anthropic",
+            "gemini"
+          ]
+        }
+      },
+      "marketplaces": [
+        {
+          "code": "amazon_us",
+          "label": "Amazon US",
+          "channel": "amazon",
+          "locale": "en_US",
+          "market": "US",
+          "requiredAttributes": [
+            "name",
+            "description",
+            "brand",
+            "bullet_1",
+            "bullet_2",
+            "bullet_3"
+          ],
+          "requiredAssetRoles": [
+            "hero_image",
+            "angle_left",
+            "angle_right",
+            "detail"
+          ],
+          "minimumImageCount": 4,
+          "automation": [
+            "map_taxonomy",
+            "generate_title",
+            "generate_bullets",
+            "validate_assets",
+            "build_listing_payload"
+          ],
+          "requiredApprovals": [
+            "catalog_review",
+            "brand_review"
+          ],
+          "amazon": {
+            "marketplaceId": "ATVPDKIKX0DER",
+            "productType": "SHOES",
+            "requirements": "LISTING",
+            "issueLocale": "en_US",
+            "languageTag": "en_US",
+            "submissionMode": "patch"
+          }
+        },
+        {
+          "code": "walmart_us",
+          "label": "Walmart US",
+          "channel": "walmart",
+          "locale": "en_US",
+          "market": "US",
+          "requiredAttributes": [
+            "name",
+            "description",
+            "brand",
+            "short_description"
+          ],
+          "requiredAssetRoles": [
+            "hero_image",
+            "detail"
+          ],
+          "minimumImageCount": 2,
+          "automation": [
+            "map_taxonomy",
+            "validate_assets",
+            "build_listing_payload"
+          ],
+          "requiredApprovals": [
+            "catalog_review"
+          ]
+        },
+        {
+          "code": "shopify_b2c",
+          "label": "Shopify B2C",
+          "channel": "shopify",
+          "locale": "en_US",
+          "market": "US",
+          "requiredAttributes": [
+            "name",
+            "description",
+            "brand"
+          ],
+          "requiredAssetRoles": [
+            "hero_image"
+          ],
+          "minimumImageCount": 1,
+          "automation": [
+            "generate_title",
+            "build_listing_payload",
+            "stage_publish"
+          ],
+          "requiredApprovals": [
+            "catalog_review"
+          ]
+        }
+      ]
+    }
+  ]
+}

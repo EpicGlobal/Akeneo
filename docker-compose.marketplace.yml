@@ -1,0 +1,43 @@
+services:
+  marketplace-orchestrator:
+    image: 'node:18-alpine'
+    restart: unless-stopped
+    depends_on:
+      - 'mysql'
+    working_dir: '/srv/pim/services/marketplace-orchestrator'
+    environment:
+      MARKETPLACE_ORCHESTRATOR_PORT: '${MARKETPLACE_ORCHESTRATOR_PORT:-8090}'
+      MARKETPLACE_ORCHESTRATOR_DATA_DIR: '/srv/pim/var/marketplace-orchestrator'
+      MARKETPLACE_ORCHESTRATOR_CONFIG_FILE: '/srv/pim/services/marketplace-orchestrator/config/tenants.json'
+    command: 'node server.js'
+    volumes:
+      - './:/srv/pim'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${DOCKER_PORT_MARKETPLACE_ORCHESTRATOR:-8090}:8090'
+    networks:
+      - 'pim'
+
+  marketplace-orchestrator-worker:
+    image: 'node:18-alpine'
+    restart: unless-stopped
+    depends_on:
+      - 'marketplace-orchestrator'
+      - 'mysql'
+    working_dir: '/srv/pim/services/marketplace-orchestrator'
+    environment:
+      MARKETPLACE_ORCHESTRATOR_DATA_DIR: '/srv/pim/var/marketplace-orchestrator'
+      MARKETPLACE_ORCHESTRATOR_CONFIG_FILE: '/srv/pim/services/marketplace-orchestrator/config/tenants.json'
+      MARKETPLACE_WORKER_POLL_MS: '${MARKETPLACE_WORKER_POLL_MS:-5000}'
+      MARKETPLACE_WORKER_BATCH_SIZE: '${MARKETPLACE_WORKER_BATCH_SIZE:-10}'
+    command: 'node worker.js'
+    volumes:
+      - './:/srv/pim'
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    networks:
+      - 'pim'
+
+networks:
+  pim:

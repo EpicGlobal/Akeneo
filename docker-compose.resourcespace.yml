@@ -1,0 +1,76 @@
+services:
+  resourcespace:
+    build:
+      context: './docker/resourcespace'
+      args:
+        RESOURCE_SPACE_VERSION: '10.7'
+    restart: unless-stopped
+    depends_on:
+      - 'mariadb'
+    environment:
+      RESOURCE_SPACE_DB_HOST: 'mariadb'
+      RESOURCE_SPACE_DB_PORT: '3306'
+      RESOURCE_SPACE_DB_NAME: '${RESOURCE_SPACE_DB_NAME:-resourcespace}'
+      RESOURCE_SPACE_DB_USER: '${RESOURCE_SPACE_DB_USER:-resourcespace_rw}'
+      RESOURCE_SPACE_DB_PASSWORD: '${RESOURCE_SPACE_DB_PASSWORD:-change-me}'
+      RESOURCE_SPACE_BASE_URL: '${RESOURCE_SPACE_BASE_URI:-http://localhost:8081}'
+      RESOURCE_SPACE_APPLICATION_NAME: '${RESOURCE_SPACE_APPLICATION_NAME:-Coppermind DAM}'
+      RESOURCE_SPACE_EMAIL_FROM: '${RESOURCE_SPACE_EMAIL_FROM:-no-reply@example.com}'
+      RESOURCE_SPACE_EMAIL_NOTIFY: '${RESOURCE_SPACE_EMAIL_NOTIFY:-admin@example.com}'
+      RESOURCE_SPACE_ADMIN_FULLNAME: '${RESOURCE_SPACE_ADMIN_FULLNAME:-Coppermind Admin}'
+      RESOURCE_SPACE_ADMIN_EMAIL: '${RESOURCE_SPACE_ADMIN_EMAIL:-admin@example.com}'
+      RESOURCE_SPACE_ADMIN_USERNAME: '${RESOURCE_SPACE_ADMIN_USERNAME:-admin}'
+      RESOURCE_SPACE_ADMIN_PASSWORD: '${RESOURCE_SPACE_ADMIN_PASSWORD:-ShardplatePower13}'
+      RESOURCE_SPACE_SCRAMBLE_KEY: '${RESOURCE_SPACE_SCRAMBLE_KEY:-coppermind-local-rs-scramble-key-2026}'
+      RESOURCE_SPACE_API_SCRAMBLE_KEY: '${RESOURCE_SPACE_API_SCRAMBLE_KEY:-coppermind-local-rs-api-scramble-key-2026}'
+    volumes:
+      - './docker/resourcespace/config.php:/var/www/html/include/config.php'
+      - 'resourcespace-filestore:/var/www/html/filestore'
+    ports:
+      - '${DOCKER_PORT_RESOURCESPACE:-8081}:80'
+    networks:
+      - 'pim'
+
+  resourcespace-writeback-worker:
+    image: 'akeneo/pim-php-dev:8.1'
+    environment:
+      APP_ENV: '${APP_ENV:-prod}'
+      PHP_IDE_CONFIG: 'serverName=pim-docker-resourcespace-worker'
+      XDEBUG_MODE: '${XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: 'client_host=172.17.0.1'
+    depends_on:
+      - 'mysql'
+      - 'resourcespace'
+    volumes:
+      - './:/srv/pim'
+    working_dir: '/srv/pim'
+    command: >-
+      sh -lc "while true; do
+      php bin/console coppermind:resourcespace:writeback:process --env=${APP_ENV:-prod} --retry-failed --quiet-when-idle --limit=${RESOURCE_SPACE_WRITEBACK_WORKER_LIMIT:-25} || true;
+      sleep ${RESOURCE_SPACE_WRITEBACK_WORKER_INTERVAL_SECONDS:-30};
+      done"
+    user: 'www-data'
+    init: true
+    restart: unless-stopped
+    networks:
+      - 'pim'
+
+  mariadb:
+    image: 'mariadb'
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: '${RESOURCE_SPACE_DB_NAME:-resourcespace}'
+      MYSQL_USER: '${RESOURCE_SPACE_DB_USER:-resourcespace_rw}'
+      MYSQL_PASSWORD: '${RESOURCE_SPACE_DB_PASSWORD:-change-me}'
+      MYSQL_ROOT_PASSWORD: '${RESOURCE_SPACE_DB_ROOT_PASSWORD:-change-me}'
+    volumes:
+      - 'resourcespace-mariadb:/var/lib/mysql'
+    networks:
+      - 'pim'
+
+networks:
+  pim:
+
+volumes:
+  resourcespace-filestore:
+  resourcespace-mariadb:

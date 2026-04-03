@@ -1,0 +1,78 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    GuzzleHttp\Client:
+        arguments:
+            -
+                http_errors: false
+
+    GuzzleHttp\ClientInterface: '@GuzzleHttp\Client'
+
+    Coppermind\Bundle\ResourceSpaceBundle\:
+        resource: '%kernel.project_dir%/src/Coppermind/Bundle/ResourceSpaceBundle/*'
+        exclude:
+            - '%kernel.project_dir%/src/Coppermind/Bundle/ResourceSpaceBundle/Command/'
+            - '%kernel.project_dir%/src/Coppermind/Bundle/ResourceSpaceBundle/Controller/'
+            - '%kernel.project_dir%/src/Coppermind/Bundle/ResourceSpaceBundle/DependencyInjection/'
+            - '%kernel.project_dir%/src/Coppermind/Bundle/ResourceSpaceBundle/Resources/'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Controller\:
+        resource: '%kernel.project_dir%/src/Coppermind/Bundle/ResourceSpaceBundle/Controller/'
+        public: true
+        tags: ['controller.service_arguments']
+
+    Coppermind\Bundle\ResourceSpaceBundle\Domain\ResourceSpaceConfiguration:
+        arguments:
+            $baseUri: '%coppermind_resourcespace.base_uri%'
+            $internalBaseUri: '%coppermind_resourcespace.internal_base_uri%'
+            $apiUser: '%coppermind_resourcespace.api_user%'
+            $apiKey: '%coppermind_resourcespace.api_key%'
+            $searchTemplate: '%coppermind_resourcespace.search_template%'
+            $defaultAttributeCode: '%coppermind_resourcespace.default_attribute_code%'
+            $searchLimit: '%coppermind_resourcespace.search_limit%'
+            $timeoutSeconds: '%coppermind_resourcespace.timeout_seconds%'
+            $writebackEnabled: '%coppermind_resourcespace.writeback_enabled%'
+            $writebackIdentifierField: '%coppermind_resourcespace.writeback_identifier_field%'
+            $writebackUuidField: '%coppermind_resourcespace.writeback_uuid_field%'
+            $writebackOwnerTypeField: '%coppermind_resourcespace.writeback_owner_type_field%'
+            $writebackLinksField: '%coppermind_resourcespace.writeback_links_field%'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Application\TenantContext:
+        arguments:
+            $defaultTenantCode: '%coppermind_resourcespace.default_tenant_code%'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Application\TenantAwareResourceSpaceConfigurationProvider:
+        arguments:
+            $defaultTenantCode: '%coppermind_resourcespace.default_tenant_code%'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceApiClient:
+        arguments:
+            $httpClient: '@GuzzleHttp\ClientInterface'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceAssetSyncService:
+        arguments:
+            $productRepository: '@pim_catalog.repository.product'
+            $productModelRepository: '@pim_catalog.repository.product_model'
+            $attributeRepository: '@pim_catalog.repository.attribute'
+            $productUpdater: '@pim_catalog.updater.product'
+            $productSaver: '@pim_catalog.saver.product'
+            $productModelUpdater: '@pim_catalog.updater.product_model'
+            $productModelSaver: '@pim_catalog.saver.product_model'
+            $fileInfoSaver: '@akeneo_file_storage.saver.file'
+            $fileStorer: '@akeneo_file_storage.file_storage.file.file_storer'
+            $fileRemover: '@akeneo_file_storage.remover.file'
+            $validator: '@validator'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceOwnerResolver:
+        arguments:
+            $productRepository: '@pim_catalog.repository.product'
+            $productModelRepository: '@pim_catalog.repository.product_model'
+            $findIdentifier: '@Akeneo\Pim\Enrichment\Component\Product\Query\FindIdentifier'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController:
+        arguments:
+            $securityFacade: '@oro_security.security_facade'
+            $userContext: '@pim_user.context.user'
