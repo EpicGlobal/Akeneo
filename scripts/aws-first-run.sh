@@ -22,14 +22,24 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$PROJECT_ROOT/.env"
 APP_SECRET_VALUE="${APP_SECRET_VALUE:-$(openssl rand -hex 32)}"
 
+dotenv_escape() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  printf '"%s"' "$value"
+}
+
 set_env_value() {
   local key="$1"
   local value="$2"
+  local escaped_value
+
+  escaped_value="$(dotenv_escape "$value")"
 
   if grep -q "^${key}=" "$ENV_FILE"; then
-    sed -i "s|^${key}=.*|${key}=${value}|" "$ENV_FILE"
+    sed -i "s|^${key}=.*|${key}=${escaped_value}|" "$ENV_FILE"
   else
-    printf '\n%s=%s\n' "$key" "$value" >> "$ENV_FILE"
+    printf '\n%s=%s\n' "$key" "$escaped_value" >> "$ENV_FILE"
   fi
 }
 
