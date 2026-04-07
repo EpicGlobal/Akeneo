@@ -32,7 +32,7 @@ bash scripts/aws-ec2-bootstrap.sh <public-ip-or-url>
 - replays the Coppermind migrations that Akeneo's installer marks as executed during a fresh catalog install
 - runs Doctrine migrations
 - starts ResourceSpace plus background workers
-- starts the marketplace orchestrator plus worker
+- starts the marketplace orchestrator plus worker and self-installs the Node service dependencies on first boot
 - configures the default tenant-scoped ResourceSpace connection
 - stops non-runtime Akeneo helper containers after the build completes
 
