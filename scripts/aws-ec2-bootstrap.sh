@@ -14,9 +14,10 @@ fi
 TARGET="$1"
 PROJECT_DIR="${PROJECT_DIR:-$HOME/akeneo-pim}"
 REPO_URL="${REPO_URL:-https://github.com/EpicGlobal/Akeneo.git}"
+BOOTSTRAP_SCRIPT="${BOOTSTRAP_SCRIPT:-scripts/aws-first-run.sh}"
 
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl git make
+sudo apt-get install -y awscli ca-certificates curl git make
 
 if ! command -v docker >/dev/null 2>&1; then
   sudo install -m 0755 -d /etc/apt/keyrings
@@ -43,4 +44,5 @@ git -C "$PROJECT_DIR" fetch origin master
 git -C "$PROJECT_DIR" checkout master
 git -C "$PROJECT_DIR" pull --ff-only origin master
 
-sg docker -c "cd '$PROJECT_DIR' && bash scripts/aws-first-run.sh '$TARGET'"
+cd "$PROJECT_DIR"
+bash "$BOOTSTRAP_SCRIPT" "$TARGET"
