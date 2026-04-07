@@ -92,6 +92,9 @@ if [[ -n "$DEPLOY_PARAMETER_PREFIX" ]]; then
   RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE="$(get_parameter "$DEPLOY_PARAMETER_PREFIX/resource_space_api_scramble_key")"
 fi
 
+RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE="${RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE:-coppermind-local-rs-api-scramble-key-2026}"
+RESOURCE_SPACE_PRIVATE_API_KEY_VALUE="${RESOURCE_SPACE_API_KEY_VALUE:-$(printf '%s' "${RESOURCE_SPACE_ADMIN_USERNAME_VALUE}${RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE}" | sha256sum | awk '{print $1}')}"
+
 set_env_value "APP_DATABASE_PASSWORD" "${APP_DATABASE_PASSWORD_VALUE:-akeneo_pim}"
 set_env_value "APP_DATABASE_ROOT_PASSWORD" "${APP_DATABASE_ROOT_PASSWORD_VALUE:-root}"
 set_env_value "OBJECT_STORAGE_ACCESS_KEY" "${OBJECT_STORAGE_ACCESS_KEY_VALUE:-AKENEO_OBJECT_STORAGE_ACCESS_KEY}"
@@ -109,9 +112,9 @@ set_env_value "RESOURCE_SPACE_BASE_URI" "$RESOURCE_SPACE_BASE_URI_VALUE"
 set_env_value "RESOURCE_SPACE_INTERNAL_BASE_URI" "$RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE"
 set_env_value "RESOURCE_SPACE_SEARCH_TEMPLATE" "$RESOURCE_SPACE_SEARCH_TEMPLATE_VALUE"
 set_env_value "RESOURCE_SPACE_SCRAMBLE_KEY" "${RESOURCE_SPACE_SCRAMBLE_KEY_VALUE:-coppermind-local-rs-scramble-key-2026}"
-set_env_value "RESOURCE_SPACE_API_SCRAMBLE_KEY" "${RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE:-coppermind-local-rs-api-scramble-key-2026}"
+set_env_value "RESOURCE_SPACE_API_SCRAMBLE_KEY" "$RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE"
 set_env_value "RESOURCE_SPACE_API_USER" "$RESOURCE_SPACE_ADMIN_USERNAME_VALUE"
-set_env_value "RESOURCE_SPACE_API_KEY" "${RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE:-coppermind-local-rs-api-scramble-key-2026}"
+set_env_value "RESOURCE_SPACE_API_KEY" "$RESOURCE_SPACE_PRIVATE_API_KEY_VALUE"
 set_env_value "RESOURCE_SPACE_SEARCH_LIMIT" "$RESOURCE_SPACE_SEARCH_LIMIT_VALUE"
 set_env_value "RESOURCE_SPACE_TIMEOUT_SECONDS" "$RESOURCE_SPACE_TIMEOUT_SECONDS_VALUE"
 set_env_value "RESOURCE_SPACE_WRITEBACK_ENABLED" "1"
@@ -142,7 +145,7 @@ sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php 
 sg docker -c "cd '$PROJECT_ROOT' && make resourcespace-up"
 sg docker -c "cd '$PROJECT_ROOT' && make marketplace-up"
 
-sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console coppermind:resourcespace:tenant:configure --env=prod --no-interaction --tenant='$RESOURCE_SPACE_TENANT_CODE' --label='Epic Global Default Tenant' --status='active' --enabled=true --base-uri='$RESOURCE_SPACE_BASE_URI_VALUE' --internal-base-uri='$RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE' --api-user='$RESOURCE_SPACE_ADMIN_USERNAME_VALUE' --api-key='${RESOURCE_SPACE_API_SCRAMBLE_KEY_VALUE:-coppermind-local-rs-api-scramble-key-2026}' --default-attribute='${RESOURCE_SPACE_DEFAULT_ATTRIBUTE_CODE_VALUE:-}' --writeback-enabled=true --writeback-identifier-field='akeneo_identifier' --writeback-uuid-field='akeneo_product_uuid' --writeback-owner-type-field='akeneo_owner_type' --writeback-links-field='akeneo_links'"
+sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console coppermind:resourcespace:tenant:configure --env=prod --no-interaction --tenant='$RESOURCE_SPACE_TENANT_CODE' --label='Epic Global Default Tenant' --status='active' --enabled=true --base-uri='$RESOURCE_SPACE_BASE_URI_VALUE' --internal-base-uri='$RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE' --api-user='$RESOURCE_SPACE_ADMIN_USERNAME_VALUE' --api-key='$RESOURCE_SPACE_PRIVATE_API_KEY_VALUE' --default-attribute='${RESOURCE_SPACE_DEFAULT_ATTRIBUTE_CODE_VALUE:-}' --writeback-enabled=true --writeback-identifier-field='akeneo_identifier' --writeback-uuid-field='akeneo_product_uuid' --writeback-owner-type-field='akeneo_owner_type' --writeback-links-field='akeneo_links'"
 
 sg docker -c "cd '$PROJECT_ROOT' && docker compose stop php node selenium blackfire pubsub-emulator || true"
 
