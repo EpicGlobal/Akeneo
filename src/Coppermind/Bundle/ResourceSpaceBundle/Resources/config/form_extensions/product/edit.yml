@@ -13,3 +13,4 @@ extensions:
             unlinkRoute: coppermind_resourcespace_product_assets_unlink
             syncRoute: coppermind_resourcespace_product_assets_sync
             retryWritebackRoute: coppermind_resourcespace_asset_writeback_retry
+            workflowRoute: coppermind_resourcespace_product_workflow_update

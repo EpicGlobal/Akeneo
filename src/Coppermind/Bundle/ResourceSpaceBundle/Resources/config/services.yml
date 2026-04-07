@@ -72,6 +72,12 @@ services:
             $productModelRepository: '@pim_catalog.repository.product_model'
             $findIdentifier: '@Akeneo\Pim\Enrichment\Component\Product\Query\FindIdentifier'
 
+    Coppermind\Bundle\ResourceSpaceBundle\Application\GovernanceWorkflowService:
+        arguments:
+            $productRepository: '@pim_catalog.repository.product'
+            $productModelRepository: '@pim_catalog.repository.product_model'
+            $findIdentifier: '@Akeneo\Pim\Enrichment\Component\Product\Query\FindIdentifier'
+
     Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController:
         arguments:
             $securityFacade: '@oro_security.security_facade'

@@ -28,15 +28,15 @@ The API is exposed at `http://localhost:8090`.
 
 ## Data model
 
-The worker stores state under `var/marketplace-orchestrator/`:
+The worker persists state in MySQL-backed `coppermind_marketplace_*` tables:
 
-- `catalog/`
-- `jobs/`
-- `alerts/`
-- `proposals/`
-- `notifications/`
-- `snapshots/`
-- `outbox/email/`
+- catalog
+- jobs
+- alerts
+- proposals
+- notifications
+- snapshots
+- mail outbox
 
 ## Configuration
 
@@ -53,9 +53,13 @@ Switch to `live` mode when you provide:
 - notification destination configuration,
 - alert routing configuration.
 
+If you want a controlled cutover, set `pilotFamilyCodes` in tenant Amazon config or `MARKETPLACE_DEFAULT_AMAZON_PILOT_FAMILY_CODES` in env so only one SKU family uses live execution.
+
 ## Endpoints
 
 - `GET /health`
+- `GET /dashboard`
+- `GET /v1/dashboard`
 - `GET /v1/tenants`
 - `GET /v1/tenants/{tenantCode}/marketplaces`
 - `GET /v1/tenants/{tenantCode}/amazon-config`
@@ -66,6 +70,8 @@ Switch to `live` mode when you provide:
 - `GET /v1/notifications`
 - `GET /v1/snapshots`
 - `GET /v1/catalog/{tenantCode}/products/{sku}`
+- `POST /v1/alerts/{alertId}/acknowledge`
+- `POST /v1/alerts/{alertId}/resolve`
 - `POST /v1/tenants/{tenantCode}/workflows/{marketplaceCode}/preview`
 - `POST /v1/events/product-changed`
 - `POST /v1/tenants/{tenantCode}/amazon`

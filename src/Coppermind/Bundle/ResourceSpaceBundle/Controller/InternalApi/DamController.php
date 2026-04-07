@@ -6,13 +6,18 @@ namespace Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi;
 
 use Akeneo\UserManagement\Bundle\Context\UserContext;
 use Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceApiClient;
-use Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceAssetSyncService;
+use Coppermind\Bundle\ResourceSpaceBundle\Application\GovernanceWorkflowService;
+use Coppermind\Bundle\ResourceSpaceBundle\Application\ProductLifecycleService;
+use Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceMediaIngestService;
 use Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceMetadataWritebackService;
 use Coppermind\Bundle\ResourceSpaceBundle\Application\ResourceSpaceOwnerResolver;
 use Coppermind\Bundle\ResourceSpaceBundle\Application\TenantAwareResourceSpaceConfigurationProvider;
 use Coppermind\Bundle\ResourceSpaceBundle\Application\TenantContext;
 use Coppermind\Bundle\ResourceSpaceBundle\Domain\OwnerType;
 use Coppermind\Bundle\ResourceSpaceBundle\Infrastructure\Persistence\AssetLinkRepository;
+use Coppermind\Bundle\ResourceSpaceBundle\Infrastructure\Persistence\AssetMetadataRepository;
+use Coppermind\Bundle\ResourceSpaceBundle\Infrastructure\Persistence\AuditLogRepository;
+use Coppermind\Bundle\ResourceSpaceBundle\Infrastructure\Persistence\OutboxEventRepository;
 use Oro\Bundle\SecurityBundle\SecurityFacade;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,9 +33,14 @@ final class DamController
         private readonly TenantAwareResourceSpaceConfigurationProvider $configurationProvider,
         private readonly TenantContext $tenantContext,
         private readonly ResourceSpaceApiClient $apiClient,
-        private readonly ResourceSpaceAssetSyncService $assetSyncService,
+        private readonly ResourceSpaceMediaIngestService $mediaIngestService,
         private readonly ResourceSpaceMetadataWritebackService $metadataWritebackService,
         private readonly AssetLinkRepository $assetLinkRepository,
+        private readonly AssetMetadataRepository $assetMetadataRepository,
+        private readonly GovernanceWorkflowService $governanceWorkflowService,
+        private readonly ProductLifecycleService $productLifecycleService,
+        private readonly AuditLogRepository $auditLogRepository,
+        private readonly OutboxEventRepository $outboxEventRepository,
         private readonly ResourceSpaceOwnerResolver $ownerResolver,
         private readonly SecurityFacade $securityFacade,
         private readonly UserContext $userContext,
@@ -175,6 +185,38 @@ final class DamController
         );
     }
 
+    public function workflowProductAction(Request $request, string $uuid): JsonResponse
+    {
+        $this->assertGranted('pim_enrich_product_edit_attributes');
+
+        try {
+            return $this->updateWorkflow(
+                OwnerType::PRODUCT,
+                $uuid,
+                $this->parsePayload($request),
+                $this->tenantContext->currentTenantCode()
+            );
+        } catch (\RuntimeException $exception) {
+            return $this->createErrorResponse($exception, Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    public function workflowProductModelAction(Request $request, string $code): JsonResponse
+    {
+        $this->assertGranted('pim_enrich_product_model_edit_attributes');
+
+        try {
+            return $this->updateWorkflow(
+                OwnerType::PRODUCT_MODEL,
+                $code,
+                $this->parsePayload($request),
+                $this->tenantContext->currentTenantCode()
+            );
+        } catch (\RuntimeException $exception) {
+            return $this->createErrorResponse($exception, Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -184,6 +226,9 @@ final class DamController
         $configuration = $this->configurationProvider->get($tenantCode);
         $owner = $this->resolveOwner($ownerType, $ownerId);
         $links = $this->assetLinkRepository->findByOwner($ownerType, (string) $owner['owner_id'], $tenantCode);
+        $resourceRefs = $this->collectResourceRefs($links);
+        $workflow = $this->governanceWorkflowService->evaluateOwner($ownerType, (string) $owner['owner_id'], $tenantCode);
+        $audit = $this->auditLogRepository->findBySubject($ownerType, (string) $owner['owner_id'], 12, $tenantCode);
 
         if ('' === $query) {
             $query = $configuration->buildSearchQuery((string) $owner['search_seed']);
@@ -194,14 +239,22 @@ final class DamController
             $results = $this->apiClient->searchAssets($query, null, $tenantCode);
         }
 
-        $statusMap = $this->metadataWritebackService->getStatusMap(
-            $this->collectResourceRefs(array_merge($links, $results)),
+        $combinedResourceRefs = $this->collectResourceRefs(array_merge($links, $results));
+        $statusMap = $this->metadataWritebackService->getStatusMap($combinedResourceRefs, $tenantCode);
+        $ingestStatusMap = $this->mediaIngestService->getStatusMap(
+            $ownerType,
+            (string) $owner['owner_id'],
+            $combinedResourceRefs,
             $tenantCode
         );
+        $assetMetadata = $this->assetMetadataRepository->findByResourceRefs($combinedResourceRefs, $tenantCode);
+        $whereUsed = $this->assetLinkRepository->getWhereUsedMap($combinedResourceRefs, $tenantCode);
 
         $linkedResources = [];
-        $links = array_map(function (array $link) use (&$linkedResources, $statusMap): array {
+        $links = array_map(function (array $link) use (&$linkedResources, $statusMap, $ingestStatusMap, $assetMetadata, $whereUsed): array {
             $link = $this->attachWritebackStatus($link, $statusMap);
+            $link = $this->attachIngestStatus($link, $ingestStatusMap);
+            $link = $this->attachAssetMetadata($link, $assetMetadata, $whereUsed);
             $linkedResources[(int) $link['resource_ref']] = $link;
 
             return $link;
@@ -216,6 +269,21 @@ final class DamController
             ],
             'owner' => $owner,
             'query' => $query,
+            'workflow' => $workflow,
+            'audit' => $audit,
+            'operations' => [
+                'pending_outbox_events' => $this->outboxEventRepository->countPendingByOwner(
+                    $ownerType,
+                    (string) $owner['owner_id'],
+                    $tenantCode
+                ),
+                'active_ingest_jobs' => $this->mediaIngestService->countActiveJobs(
+                    $ownerType,
+                    (string) $owner['owner_id'],
+                    $tenantCode
+                ),
+                'linked_asset_count' => count($resourceRefs),
+            ],
             'links' => $links,
             'results' => [],
         ];
@@ -228,19 +296,26 @@ final class DamController
             return $response;
         }
 
-        $response['results'] = array_map(function (array $result) use ($linkedResources, $statusMap): array {
+        $response['results'] = array_map(function (array $result) use ($linkedResources, $statusMap, $ingestStatusMap, $assetMetadata, $whereUsed): array {
             $resourceRef = (int) $result['resource_ref'];
             $linked = $linkedResources[$resourceRef] ?? null;
 
             if (null === $linked) {
-                return $this->attachWritebackStatus($result, $statusMap);
+                $result = $this->attachWritebackStatus($result, $statusMap);
+                $result = $this->attachIngestStatus($result, $ingestStatusMap);
+
+                return $this->attachAssetMetadata($result, $assetMetadata, $whereUsed);
             }
 
-            return $this->attachWritebackStatus(array_replace($result, [
+            $result = $this->attachWritebackStatus(array_replace($result, [
                 'is_linked' => true,
                 'is_primary' => (bool) $linked['is_primary'],
                 'synced_attribute' => $linked['synced_attribute'],
+                'asset_role' => $linked['asset_role'] ?? null,
             ]), $statusMap);
+            $result = $this->attachIngestStatus($result, $ingestStatusMap);
+
+            return $this->attachAssetMetadata($result, $assetMetadata, $whereUsed);
         }, $results);
 
         return $response;
@@ -264,6 +339,7 @@ final class DamController
         $resourceRef = $this->getRequiredResourceRef($payload);
         $setPrimary = (bool) ($payload['setPrimary'] ?? false);
         $shouldSync = (bool) ($payload['syncToAkeneo'] ?? false);
+        $assetRole = isset($payload['assetRole']) ? (string) $payload['assetRole'] : null;
 
         $asset = $this->apiClient->getAsset($resourceRef, $tenantCode);
         $this->assetLinkRepository->upsertLink(
@@ -272,9 +348,24 @@ final class DamController
             $asset,
             $this->userContext->getUser()?->getId(),
             $setPrimary,
+            $assetRole,
             $tenantCode
         );
+        $this->assetMetadataRepository->upsertFromPayload($resourceRef, $payload, $tenantCode);
         $warning = $this->processWriteback($resourceRef, $tenantCode);
+        $this->productLifecycleService->syncOwnerStateAndQueueEvent(
+            $ownerType,
+            (string) $owner['owner_id'],
+            'asset.linked',
+            [
+                'resource_ref' => $resourceRef,
+                'set_primary' => $setPrimary,
+                'asset_role' => $assetRole,
+            ],
+            $this->userContext->getUser()?->getId(),
+            null,
+            $tenantCode
+        );
 
         if ($shouldSync) {
             try {
@@ -286,6 +377,7 @@ final class DamController
                         'attributeCode' => $payload['attributeCode'] ?? $configuration->defaultAttributeCode(),
                         'locale' => $payload['locale'] ?? null,
                         'scope' => $payload['scope'] ?? null,
+                        'assetRole' => $assetRole,
                     ],
                     $tenantCode,
                     false,
@@ -314,6 +406,15 @@ final class DamController
         $owner = $this->resolveOwner($ownerType, $ownerId);
         $this->assetLinkRepository->removeLink($ownerType, (string) $owner['owner_id'], $resourceRef, $tenantCode);
         $warning = $this->processWriteback($resourceRef, $tenantCode);
+        $this->productLifecycleService->syncOwnerStateAndQueueEvent(
+            $ownerType,
+            (string) $owner['owner_id'],
+            'asset.unlinked',
+            ['resource_ref' => $resourceRef],
+            $this->userContext->getUser()?->getId(),
+            null,
+            $tenantCode
+        );
 
         return $this->createSuccessResponse(['unlinked' => true], $warning);
     }
@@ -353,45 +454,77 @@ final class DamController
                 $asset,
                 $this->userContext->getUser()?->getId(),
                 false,
+                isset($payload['assetRole']) ? (string) $payload['assetRole'] : null,
                 $tenantCode
             );
+            $this->assetMetadataRepository->upsertFromPayload($resourceRef, $payload, $tenantCode);
             $warning = $this->combineWarnings($warning, $this->processWriteback($resourceRef, $tenantCode));
         }
 
         $locale = isset($payload['locale']) ? trim((string) $payload['locale']) : null;
         $scope = isset($payload['scope']) ? trim((string) $payload['scope']) : null;
-
-        $result = OwnerType::PRODUCT === $ownerType
-            ? $this->assetSyncService->syncProductAsset(
-                (string) $owner['owner_id'],
-                $resourceRef,
-                $attributeCode,
-                $locale,
-                $scope,
-                $tenantCode
-            )
-            : $this->assetSyncService->syncProductModelAsset(
-                (string) $owner['owner_id'],
-                $resourceRef,
-                $attributeCode,
-                $locale,
-                $scope,
-                $tenantCode
-            );
-
-        $this->assetLinkRepository->markSynced(
+        $job = $this->mediaIngestService->schedule(
             $ownerType,
             (string) $owner['owner_id'],
             $resourceRef,
-            $result['attribute_code'],
+            $attributeCode,
+            $locale,
+            $scope,
+            $this->userContext->getUser()?->getId(),
+            $tenantCode
+        );
+        $this->productLifecycleService->syncOwnerStateAndQueueEvent(
+            $ownerType,
+            (string) $owner['owner_id'],
+            'asset.sync.requested',
+            [
+                'resource_ref' => $resourceRef,
+                'attribute_code' => $attributeCode,
+                'locale' => $locale,
+                'scope' => $scope,
+                'job_id' => $job['id'] ?? null,
+            ],
+            $this->userContext->getUser()?->getId(),
+            null,
             $tenantCode
         );
 
         return $this->createSuccessResponse([
-            'synced' => true,
-            'attribute_code' => $result['attribute_code'],
-            'file_key' => $result['file_key'],
+            'queued' => true,
+            'attribute_code' => $attributeCode,
+            'job_id' => $job['id'] ?? null,
         ], $warning);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function updateWorkflow(string $ownerType, string $ownerId, array $payload, string $tenantCode): JsonResponse
+    {
+        $tenantCode = $this->configurationProvider->resolveTenantCode($tenantCode);
+        $owner = $this->resolveOwner($ownerType, $ownerId);
+        $action = trim((string) ($payload['action'] ?? ''));
+        $stageCode = trim((string) ($payload['stageCode'] ?? $payload['stage_code'] ?? ''));
+        if ('' === $action || '' === $stageCode) {
+            throw new UnprocessableEntityHttpException('A workflow action and stage code are required.');
+        }
+
+        $workflow = $this->productLifecycleService->updateApproval(
+            $ownerType,
+            (string) $owner['owner_id'],
+            $stageCode,
+            $action,
+            isset($payload['comment']) ? (string) $payload['comment'] : null,
+            $this->userContext->getUser()?->getId(),
+            null,
+            [],
+            $tenantCode
+        );
+
+        return new JsonResponse([
+            'updated' => true,
+            'workflow' => $workflow,
+        ]);
     }
 
     private function assertGranted(string $acl): void
@@ -498,6 +631,51 @@ final class DamController
             'writeback_requested_at' => $status['requested_at'] ?? null,
             'writeback_attempted_at' => $status['attempted_at'] ?? null,
             'writeback_processed_at' => $status['processed_at'] ?? null,
+        ]);
+    }
+
+    /**
+     * @param array<string, mixed> $asset
+     * @param array<int, array<string, mixed>> $statusMap
+     *
+     * @return array<string, mixed>
+     */
+    private function attachIngestStatus(array $asset, array $statusMap): array
+    {
+        $status = $statusMap[(int) ($asset['resource_ref'] ?? 0)] ?? null;
+
+        return array_replace($asset, [
+            'ingest_status' => $status['status'] ?? null,
+            'ingest_error' => $status['error'] ?? null,
+            'ingest_attempt_count' => $status['attempt_count'] ?? 0,
+            'ingest_requested_at' => $status['requested_at'] ?? null,
+            'ingest_attempted_at' => $status['attempted_at'] ?? null,
+            'ingest_processed_at' => $status['processed_at'] ?? null,
+            'ingest_job_id' => $status['id'] ?? null,
+            'ingest_attribute_code' => $status['attribute_code'] ?? null,
+            'ingest_file_key' => $status['file_key'] ?? null,
+        ]);
+    }
+
+    /**
+     * @param array<string, mixed> $asset
+     * @param array<int, array<string, mixed>> $metadataMap
+     * @param array<int, int> $whereUsed
+     *
+     * @return array<string, mixed>
+     */
+    private function attachAssetMetadata(array $asset, array $metadataMap, array $whereUsed): array
+    {
+        $resourceRef = (int) ($asset['resource_ref'] ?? 0);
+        $metadata = $metadataMap[$resourceRef] ?? null;
+
+        return array_replace($asset, [
+            'rights_status' => $metadata['rights_status'] ?? null,
+            'license_code' => $metadata['license_code'] ?? null,
+            'license_expires_at' => $metadata['expires_at'] ?? null,
+            'rendition_key' => $metadata['rendition_key'] ?? null,
+            'derivative_of_resource_ref' => $metadata['derivative_of_resource_ref'] ?? null,
+            'where_used_count' => $whereUsed[$resourceRef] ?? 0,
         ]);
     }
 

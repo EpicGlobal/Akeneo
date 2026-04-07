@@ -7,8 +7,10 @@ This project now includes a first-party integration bundle that adds a `Resource
 - Searches ResourceSpace from inside the Akeneo editor.
 - Persists linked DAM assets per product or product model.
 - Lets a user mark a linked ResourceSpace asset as primary.
-- Can pull a ResourceSpace file into an Akeneo media attribute in one click.
+- Queues a ResourceSpace file into an Akeneo media attribute in one click.
 - Writes Akeneo linkage metadata back into ResourceSpace on link, unlink, and sync.
+- Evaluates product workflow readiness with required attributes, required asset roles, approval stages, and publish blockers.
+- Emits auditable product-change events into the marketplace orchestrator.
 
 ## Configure ResourceSpace
 
@@ -109,15 +111,16 @@ That lets the browser load ResourceSpace on `localhost:8081` while Akeneo's PHP 
 
 - Asset linking is stored in Akeneo in `coppermind_resourcespace_asset_link`.
 - Unlinking an asset removes the DAM link, but it does not clear any Akeneo media value that was already synced.
-- The sync flow downloads the DAM asset into Akeneo storage immediately. For very large binaries or bulk workflows, a queued import job would be the next step.
+- The sync flow now queues binary ingest in `coppermind_resourcespace_media_ingest_job` and processes it in the background.
 - Write-back is attempted immediately after every link change. If ResourceSpace is unavailable, Akeneo keeps the local link change and queues the metadata update for retry in `coppermind_resourcespace_writeback_job`.
+- Governance state, approvals, audit records, and marketplace outbox events are now persisted in Akeneo-side Coppermind tables.
 
 ## Write-back reliability
 
 - The DAM tab now surfaces queued and failed write-back state on linked assets.
 - Akeneo link and unlink actions no longer depend on ResourceSpace being healthy in the same request.
 - Failed or pending write-back records can be retried directly from the DAM tab with the `Retry write-back` action.
-- The local ResourceSpace stack now starts a dedicated `resourcespace-writeback-worker` container, so queued write-back jobs self-heal automatically in the background.
+- The local ResourceSpace stack now starts dedicated `resourcespace-writeback-worker`, `resourcespace-media-ingest-worker`, and `resourcespace-outbox-worker` containers, so write-back, binary ingest, and marketplace event publishing self-heal automatically in the background.
 
 ## Smoke test
 

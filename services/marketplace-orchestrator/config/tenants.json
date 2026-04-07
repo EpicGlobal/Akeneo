@@ -19,6 +19,9 @@
         "envPrefix": "MARKETPLACE_DEFAULT_AMAZON",
         "enabled": true,
         "mode": "mock",
+        "pilotFamilyCodes": [
+          "shoes"
+        ],
         "region": "na",
         "sellerId": "A1MOCKSELLER123",
         "marketplaceId": "ATVPDKIKX0DER",

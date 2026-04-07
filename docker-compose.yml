@@ -1,6 +1,7 @@
 services:
   php:
     image: 'akeneo/pim-php-dev:8.1'
+    restart: unless-stopped
     environment:
       APP_ENV: '${APP_ENV:-prod}'
       COMPOSER_HOME: '/var/www/.composer'
@@ -22,6 +23,7 @@ services:
 
   fpm:
     image: 'akeneo/pim-php-dev:8.1'
+    restart: unless-stopped
     environment:
       APP_ENV: '${APP_ENV:-prod}'
       BEHAT_TMPDIR: '/srv/pim/var/cache/tmp'
@@ -40,6 +42,7 @@ services:
 
   node:
     image: 'akeneo/node:18'
+    restart: unless-stopped
     environment:
       YARN_CACHE_FOLDER: '/home/node/.yarn'
       CYPRESS_CACHE_FOLDER: '/home/node/.cypress'
@@ -53,6 +56,7 @@ services:
 
   selenium:
     image: 'selenium/standalone-chrome-debug:3.141.59'
+    restart: unless-stopped
     volumes:
       - './:/srv/pim:ro'
       - '/dev/shm:/dev/shm'
@@ -63,6 +67,7 @@ services:
 
   httpd:
     image: 'httpd:2.4'
+    restart: unless-stopped
     environment:
       APP_ENV: '${APP_ENV:-prod}'
     depends_on:
@@ -78,9 +83,10 @@ services:
 
   mysql:
     image: 'mysql:8.0.30'
+    restart: unless-stopped
     command: '--default-authentication-plugin=mysql_native_password --log_bin_trust_function_creators=1'
     environment:
-      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ROOT_PASSWORD: '${APP_DATABASE_ROOT_PASSWORD:-root}'
       MYSQL_USER: '${APP_DATABASE_USER}'
       MYSQL_DATABASE: '${APP_DATABASE_NAME}'
       MYSQL_PASSWORD: '${APP_DATABASE_PASSWORD}'
@@ -93,6 +99,7 @@ services:
 
   elasticsearch:
     image: 'elastic/elasticsearch:8.4.2'
+    restart: unless-stopped
     environment:
       ES_JAVA_OPTS: '${ES_JAVA_OPTS:--Xms1g -Xmx1g}'
       discovery.type: 'single-node'
@@ -105,10 +112,11 @@ services:
 
   object-storage:
     image: 'minio/minio:RELEASE.2021-09-15T04-54-25Z'
+    restart: unless-stopped
     entrypoint: '/bin/sh -c "mkdir -p /data/archive /data/catalog /data/jobs /data/category /data/catalogs_mapping && minio server --console-address :9091 /data"'
     environment:
-      MINIO_ACCESS_KEY: 'AKENEO_OBJECT_STORAGE_ACCESS_KEY'
-      MINIO_SECRET_KEY: 'AKENEO_OBJECT_STORAGE_SECRET_KEY'
+      MINIO_ACCESS_KEY: '${OBJECT_STORAGE_ACCESS_KEY:-AKENEO_OBJECT_STORAGE_ACCESS_KEY}'
+      MINIO_SECRET_KEY: '${OBJECT_STORAGE_SECRET_KEY:-AKENEO_OBJECT_STORAGE_SECRET_KEY}'
     ports:
       - '${DOCKER_PORT_OBJECT_STORAGE:-9090}:9000'
       - '${DOCKER_PORT_OBJECT_STORAGE_CONSOLE:-9091}:9091'
@@ -117,6 +125,7 @@ services:
 
   blackfire:
     image: 'blackfire/blackfire:2'
+    restart: unless-stopped
     environment:
       BLACKFIRE_SERVER_ID: '${BLACKFIRE_SERVER_ID:-server_id}'
       BLACKFIRE_SERVER_TOKEN: '${BLACKFIRE_SERVER_TOKEN:-server_token}'
@@ -125,6 +134,7 @@ services:
 
   pubsub-emulator:
     image: 'google/cloud-sdk:375.0.0-emulators'
+    restart: unless-stopped
     command: 'gcloud --user-output-enabled --log-http beta emulators pubsub start --host-port=0.0.0.0:8085'
     networks:
       - 'pim'

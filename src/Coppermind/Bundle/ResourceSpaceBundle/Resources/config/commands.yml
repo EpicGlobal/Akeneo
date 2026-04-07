@@ -14,6 +14,18 @@ services:
         tags:
             - { name: console.command, command: 'coppermind:resourcespace:writeback:process' }
 
+    Coppermind\Bundle\ResourceSpaceBundle\Command\ProcessMediaIngestJobsCommand:
+        bind:
+            $lockFactory: '@pim_framework.lock.factory'
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:media-ingest:process' }
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\PublishOutboxEventsCommand:
+        bind:
+            $lockFactory: '@pim_framework.lock.factory'
+        tags:
+            - { name: console.command, command: 'coppermind:marketplace:outbox:publish' }
+
     Coppermind\Bundle\ResourceSpaceBundle\Command\SmokeTestCommand:
         tags:
             - { name: console.command, command: 'coppermind:resourcespace:smoke-test' }

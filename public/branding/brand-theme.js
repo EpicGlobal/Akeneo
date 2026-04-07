@@ -2,10 +2,10 @@
   var scheduled = false;
   var brandLogoUrl = "/branding/brand-logo.png?v=20260313c";
   var colors = {
-    green: "#54af31",
-    greenDark: "#3f9722",
-    blue: "#1497cf",
-    surface: "linear-gradient(180deg, #ffffff 0, #fbfdf9 100%)"
+    green: "#7cb342",
+    greenDark: "#558b2f",
+    blue: "#1ca7d8",
+    surface: "linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 42px), linear-gradient(180deg, #ffffff 0, #f8fbf2 100%)"
   };
   var guideSeenKey = "coppermind.brandGuide.seen.v1";
   var guideState = {

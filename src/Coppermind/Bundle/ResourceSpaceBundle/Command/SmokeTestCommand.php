@@ -136,6 +136,7 @@ final class SmokeTestCommand extends Command
             $primaryAsset,
             null,
             false,
+            null,
             $tenantCode
         );
         $this->metadataWritebackService->processResource($primaryRef, $tenantCode);
@@ -146,6 +147,7 @@ final class SmokeTestCommand extends Command
             $secondaryAsset,
             null,
             true,
+            null,
             $tenantCode
         );
         $this->metadataWritebackService->processResource($secondaryRef, $tenantCode);

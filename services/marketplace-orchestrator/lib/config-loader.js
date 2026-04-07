@@ -91,6 +91,7 @@ function resolveAmazonConfig(tenant) {
     ...tenant.amazon,
     enabled: envBoolean(`${prefix}_ENABLED`) ?? tenant.amazon.enabled !== false,
     mode: envValue(`${prefix}_MODE`) || tenant.amazon.mode || 'mock',
+    pilotFamilyCodes: envList(`${prefix}_PILOT_FAMILY_CODES`) || tenant.amazon.pilotFamilyCodes || [],
     region: envValue(`${prefix}_REGION`) || tenant.amazon.region || 'na',
     baseUri: envValue(`${prefix}_BASE_URI`) || tenant.amazon.baseUri || null,
     awsRegion: envValue(`${prefix}_AWS_REGION`) || tenant.amazon.awsRegion || null,
@@ -215,6 +216,7 @@ function amazonCredentialStatus(amazonConfig) {
     hasAwsSecretAccessKey: Boolean(amazonConfig.awsSecretAccessKey),
     hasSellerId: Boolean(amazonConfig.sellerId),
     hasMarketplaceId: Boolean(amazonConfig.marketplaceId),
+    hasPilotFamilyCodes: (amazonConfig.pilotFamilyCodes || []).length > 0,
     hasNotificationDestination: Boolean(
       amazonConfig.notifications?.destinationId || amazonConfig.notifications?.destinationPayload
     ),

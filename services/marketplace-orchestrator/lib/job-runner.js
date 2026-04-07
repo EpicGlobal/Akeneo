@@ -84,6 +84,33 @@ function currentDraftFromProduct(product = {}) {
   };
 }
 
+function normalizeFamilyCode(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+function resolveAmazonExecutionMode(tenantCode, marketplace, product = {}) {
+  const tenant = findTenant(tenantCode);
+  const configuredMode = String(tenant?.amazon?.mode || 'mock').toLowerCase();
+  const pilotFamilyCodes = [
+    ...((tenant?.amazon?.pilotFamilyCodes || [])),
+    ...((marketplace?.amazon?.pilotFamilyCodes || [])),
+  ]
+    .map(normalizeFamilyCode)
+    .filter(Boolean);
+  const familyCode = normalizeFamilyCode(product.familyCode || product.family_code || product.family || '');
+  const requiresPilotFamily = pilotFamilyCodes.length > 0;
+  const liveEligible = configuredMode === 'live' && (!requiresPilotFamily || pilotFamilyCodes.includes(familyCode));
+
+  return {
+    configuredMode,
+    executionMode: liveEligible ? 'live' : 'mock',
+    liveEligible,
+    familyCode,
+    pilotFamilyCodes,
+    gatedByPilotFamily: configuredMode === 'live' && requiresPilotFamily && !liveEligible,
+  };
+}
+
 function dedupeProposals(proposals) {
   const seen = new Set();
 
@@ -477,7 +504,6 @@ async function processValidationPreview(job) {
     };
   }
 
-  const client = createAmazonClient(job.tenantCode, marketplace.code);
   const sku = inferSku(job.payload);
   const catalogRecord = await getCatalogProduct(job.tenantCode, sku);
   if (!catalogRecord) {
@@ -487,6 +513,10 @@ async function processValidationPreview(job) {
     };
   }
 
+  const execution = resolveAmazonExecutionMode(job.tenantCode, marketplace, catalogRecord.product);
+  const client = createAmazonClient(job.tenantCode, marketplace.code, {
+    mode: execution.executionMode,
+  });
   const validation = await client.validateListing({
     marketplace,
     product: catalogRecord.product,
@@ -504,7 +534,14 @@ async function processValidationPreview(job) {
     source: 'amazon_validation_preview',
   });
 
-  return validation;
+  return {
+    ...validation,
+    configuredMode: execution.configuredMode,
+    executionMode: execution.executionMode,
+    familyCode: execution.familyCode || null,
+    gatedByPilotFamily: execution.gatedByPilotFamily,
+    pilotFamilyCodes: execution.pilotFamilyCodes,
+  };
 }
 
 async function processPublishExecution(job) {
@@ -517,7 +554,6 @@ async function processPublishExecution(job) {
     };
   }
 
-  const client = createAmazonClient(job.tenantCode, marketplace.code);
   const sku = inferSku(job.payload);
   const catalogRecord = await getCatalogProduct(job.tenantCode, sku);
   if (!catalogRecord) {
@@ -526,6 +562,10 @@ async function processPublishExecution(job) {
       reason: `No catalog product exists for SKU ${sku}.`,
     };
   }
+  const execution = resolveAmazonExecutionMode(job.tenantCode, marketplace, catalogRecord.product);
+  const client = createAmazonClient(job.tenantCode, marketplace.code, {
+    mode: execution.executionMode,
+  });
 
   const openProposals = await listProposals({
     tenantCode: job.tenantCode,
@@ -604,6 +644,31 @@ async function processPublishExecution(job) {
     };
   }
 
+  if (execution.gatedByPilotFamily) {
+    await createAndDispatchAlert({
+      tenantCode: job.tenantCode,
+      marketplaceCode: marketplace.code,
+      severity: 'info',
+      title: `Amazon live cutover gated for ${sku}`,
+      message: `SKU ${sku} belongs to family ${execution.familyCode || 'unknown'}, which is outside the configured Amazon live pilot families.`,
+      source: 'amazon_publish_execution',
+      payload: {
+        familyCode: execution.familyCode,
+        pilotFamilyCodes: execution.pilotFamilyCodes,
+      },
+    });
+
+    return {
+      sku,
+      validation,
+      published: false,
+      configuredMode: execution.configuredMode,
+      executionMode: execution.executionMode,
+      gatedByPilotFamily: true,
+      pilotFamilyCodes: execution.pilotFamilyCodes,
+    };
+  }
+
   const submission = await client.submitListing({
     marketplace,
     product: updatedProduct,
@@ -625,6 +690,8 @@ async function processPublishExecution(job) {
     sku,
     validation,
     submission,
+    configuredMode: execution.configuredMode,
+    executionMode: execution.executionMode,
     published: true,
   };
 }

@@ -1,18 +1,23 @@
 :root {
-  --brand-lime: #b1d74c;
-  --brand-green: #54af31;
-  --brand-green-dark: #3f9722;
-  --brand-green-soft: #98cf80;
-  --brand-orange: #f28b33;
-  --brand-orange-soft: #fff1e4;
-  --brand-blue: #1497cf;
-  --brand-blue-dark: #0e74b9;
-  --brand-blue-soft: #eaf7fd;
-  --brand-ink: #0f1f17;
-  --brand-surface: #f5fbef;
-  --brand-surface-alt: #eef7fe;
-  --brand-border: #dbe9dd;
-  --brand-focus: rgba(20, 151, 207, 0.2);
+  --brand-lime: #8bc34a;
+  --brand-green: #7cb342;
+  --brand-green-dark: #558b2f;
+  --brand-green-soft: #a3d977;
+  --brand-orange: #ff8c42;
+  --brand-orange-soft: #fff3e8;
+  --brand-blue: #1ca7d8;
+  --brand-blue-dark: #148cb8;
+  --brand-blue-soft: #e9f8fd;
+  --brand-ink: #1a1a1a;
+  --brand-muted: #6b6b6b;
+  --brand-surface: #ffffff;
+  --brand-surface-alt: #f1f8e9;
+  --brand-surface-shell: #f8fbf2;
+  --brand-border: rgba(0, 0, 0, 0.1);
+  --brand-focus: rgba(124, 179, 66, 0.22);
+  --brand-card-shadow: 0 18px 40px rgba(26, 26, 26, 0.08);
+  --brand-glow-soft: 0 0 10px rgba(124, 179, 66, 0.22), 0 0 26px rgba(124, 179, 66, 0.12);
+  --brand-stripe: linear-gradient(90deg, #7cb342 0%, #8bc34a 50%, #7cb342 100%);
 }
 
 body {
@@ -20,8 +25,15 @@ body {
   color: var(--brand-ink);
 }
 
+body.BrandShell {
+  background:
+    radial-gradient(circle at 8% 2%, rgba(163, 217, 119, 0.18), transparent 18%),
+    radial-gradient(circle at 92% 0%, rgba(28, 167, 216, 0.12), transparent 16%),
+    linear-gradient(180deg, #ffffff 0, var(--brand-surface-shell) 100%);
+}
+
 ::selection {
-  background: rgba(20, 151, 207, 0.18);
+  background: rgba(124, 179, 66, 0.2);
 }
 
 a {
@@ -47,20 +59,21 @@ select:focus,
 textarea:focus,
 .select2-container-active .select2-choice,
 .select2-container-active .select2-choices {
-  border-color: var(--brand-blue) !important;
+  border-color: var(--brand-green) !important;
   box-shadow: 0 0 0 2px var(--brand-focus) !important;
   outline: none;
 }
 
 .AknButton--apply {
-  background-color: var(--brand-green) !important;
+  background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-lime) 100%) !important;
   border-color: var(--brand-green) !important;
+  box-shadow: 0 12px 24px rgba(124, 179, 66, 0.24) !important;
   color: #fff !important;
 }
 
 .AknButton--apply:hover,
 .AknButton--apply.AknButton--active {
-  background-color: var(--brand-green-dark) !important;
+  background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green) 100%) !important;
   border-color: var(--brand-green-dark) !important;
   color: #fff !important;
 }
@@ -73,27 +86,29 @@ textarea:focus,
 }
 
 .AknButton--important {
-  background-color: var(--brand-orange) !important;
+  background: linear-gradient(135deg, var(--brand-orange) 0%, #ffb067 100%) !important;
   border-color: var(--brand-orange) !important;
+  box-shadow: 0 12px 24px rgba(255, 140, 66, 0.2) !important;
   color: #fff !important;
 }
 
 .AknButton--important:hover,
 .AknButton--important.AknButton--active {
-  background-color: #d97622 !important;
-  border-color: #d97622 !important;
+  background: linear-gradient(135deg, #eb7c36 0%, var(--brand-orange) 100%) !important;
+  border-color: #eb7c36 !important;
   color: #fff !important;
 }
 
 .AknButton--action {
-  background-color: var(--brand-blue) !important;
+  background: linear-gradient(135deg, var(--brand-blue) 0%, #5cc4e7 100%) !important;
   border-color: var(--brand-blue) !important;
+  box-shadow: 0 12px 24px rgba(28, 167, 216, 0.18) !important;
   color: #fff !important;
 }
 
 .AknButton--action:hover,
 .AknButton--action.AknButton--active {
-  background-color: var(--brand-blue-dark) !important;
+  background: linear-gradient(135deg, var(--brand-blue-dark) 0%, var(--brand-blue) 100%) !important;
   border-color: var(--brand-blue-dark) !important;
   color: #fff !important;
 }
@@ -101,17 +116,17 @@ textarea:focus,
 .AknButton--grey,
 .AknButton--greyLight,
 .AknButton--ghost {
-  background-color: var(--brand-blue-soft) !important;
-  border-color: #c9e7f6 !important;
-  color: var(--brand-blue-dark) !important;
+  background: linear-gradient(180deg, #ffffff 0, #f8fbf2 100%) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  color: var(--brand-green-dark) !important;
 }
 
 .AknButton--grey:hover,
 .AknButton--greyLight:hover,
 .AknButton--ghost:hover {
-  background-color: #d9f0fb !important;
-  border-color: #abd8ef !important;
-  color: var(--brand-blue-dark) !important;
+  background: linear-gradient(180deg, #ffffff 0, #f1f8e9 100%) !important;
+  border-color: rgba(124, 179, 66, 0.24) !important;
+  color: var(--brand-green-dark) !important;
 }
 
 .AknDropdownButton--apply .AknDropdownButton-button,
@@ -148,8 +163,9 @@ textarea:focus,
 .BrandShell .AknHeader-menu {
   border-right-color: #d9e6dc !important;
   background:
-    linear-gradient(180deg, rgba(177, 215, 76, 0.14) 0, rgba(177, 215, 76, 0) 84px),
-    linear-gradient(180deg, #ffffff 0, #f7fbf8 100%) !important;
+    radial-gradient(circle at top, rgba(163, 217, 119, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(124, 179, 66, 0.18) 0, rgba(124, 179, 66, 0) 72px),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%) !important;
 }
 
 .BrandShell .AknHeader-menuItem {
@@ -161,7 +177,7 @@ textarea:focus,
 .BrandShell .AknHeader-menuItem--active {
   color: var(--brand-green) !important;
   border-left-color: var(--brand-orange) !important;
-  background: linear-gradient(90deg, rgba(177, 215, 76, 0.16), rgba(177, 215, 76, 0) 88%) !important;
+  background: linear-gradient(90deg, rgba(124, 179, 66, 0.18), rgba(124, 179, 66, 0) 88%) !important;
 }
 
 .BrandShell .AknHeader-menuItemImage:not(:first-child) {
@@ -175,7 +191,9 @@ textarea:focus,
 .BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
   border-left-width: 0 !important;
   padding-right: 0 !important;
-  background: linear-gradient(180deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+  background:
+    radial-gradient(circle at top center, rgba(163, 217, 119, 0.22), transparent 52%),
+    linear-gradient(180deg, rgba(124, 179, 66, 0.16), rgba(124, 179, 66, 0) 72%) !important;
 }
 
 .BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem:hover,
@@ -195,17 +213,23 @@ textarea:focus,
 }
 
 .BrandShell .BrandShell-sidebarLogo {
-  background: linear-gradient(180deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+  background:
+    radial-gradient(circle at top center, rgba(163, 217, 119, 0.26), transparent 52%),
+    linear-gradient(180deg, rgba(124, 179, 66, 0.14), rgba(124, 179, 66, 0) 72%) !important;
 }
 
 .BrandShell .AknTitleContainer {
-  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%);
-  box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03);
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 42px),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%);
+  box-shadow: 0 1px 0 rgba(124, 179, 66, 0.08), 0 16px 34px rgba(26, 26, 26, 0.05);
 }
 
 .BrandShell .BrandShell-pageHeader {
-  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%) !important;
-  box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03) !important;
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 42px),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%) !important;
+  box-shadow: 0 1px 0 rgba(124, 179, 66, 0.08), 0 16px 34px rgba(26, 26, 26, 0.05) !important;
 }
 
 .BrandShell .BrandShell-pageHeaderBreadcrumb,
@@ -239,8 +263,10 @@ textarea:focus,
 }
 
 .BrandShell .AknTabHeader {
-  border-bottom-color: var(--brand-blue-dark);
-  background: linear-gradient(180deg, #ffffff 0, #f8fbf9 100%);
+  border-bottom-color: var(--brand-green);
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.06) 0, rgba(124, 179, 66, 0) 36px),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%);
 }
 
 .BrandShell .AknTabHeader-title,
@@ -276,11 +302,16 @@ textarea:focus,
 }
 
 .BrandShell .AknDefault-mainContent {
-  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(28, 167, 216, 0.08), transparent 18%),
+    radial-gradient(circle at 14% 4%, rgba(163, 217, 119, 0.12), transparent 16%),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%);
 }
 
 .BrandShell .AknDefault-thirdColumn {
-  background: linear-gradient(180deg, #fbfdf9 0, #f4faee 100%) !important;
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 64px),
+    linear-gradient(180deg, #f8fbf2 0, #eef7fe 100%) !important;
   border-right-color: var(--brand-border) !important;
 }
 
@@ -290,7 +321,7 @@ textarea:focus,
 
 .BrandShell .AknVerticalList-item.active,
 .BrandShell .AknVerticalList-item--active {
-  background: linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%);
+  background: linear-gradient(90deg, rgba(124, 179, 66, 0.2), rgba(124, 179, 66, 0) 72%);
   box-shadow: inset 3px 0 0 var(--brand-green);
   color: var(--brand-green-dark) !important;
 }
@@ -359,19 +390,44 @@ textarea:focus,
 
 .BrandShell--login .LeftWrapper {
   background:
-    radial-gradient(circle at top left, rgba(177, 215, 76, 0.16), transparent 26%),
+    linear-gradient(180deg, rgba(124, 179, 66, 0.1) 0, rgba(124, 179, 66, 0) 52px),
     linear-gradient(180deg, #ffffff 0, #f8fbf2 100%);
 }
 
 .BrandShell--login .RightWrapper {
+  position: relative;
+  overflow: hidden;
   background:
-    radial-gradient(circle at 74% 22%, rgba(20, 151, 207, 0.16), transparent 17%),
-    radial-gradient(circle at 56% 14%, rgba(242, 139, 51, 0.16), transparent 14%),
-    linear-gradient(160deg, var(--brand-surface) 0, #ffffff 46%, var(--brand-surface-alt) 100%);
+    radial-gradient(circle at 18% 20%, rgba(163, 217, 119, 0.26), transparent 18%),
+    radial-gradient(circle at 72% 24%, rgba(255, 140, 66, 0.18), transparent 16%),
+    radial-gradient(circle at 62% 74%, rgba(28, 167, 216, 0.14), transparent 18%),
+    linear-gradient(180deg, #f4faed 0, #ffffff 52%, #eef8fc 100%);
+}
+
+.BrandShell--login .RightWrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.36;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.9) 1px, transparent 1.2px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.7) 1px, transparent 1.2px);
+  background-size: 24px 24px, 42px 42px;
+  background-position: 0 0, 12px 12px;
 }
 
 .BrandShell--login .FormWrapper {
-  padding-top: 96px;
+  margin-top: 48px;
+  margin-bottom: 48px;
+  padding: 72px 48px 40px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.06) 0, rgba(124, 179, 66, 0) 48px),
+    rgba(255, 255, 255, 0.92);
+  box-shadow: var(--brand-card-shadow);
+  backdrop-filter: blur(12px);
 }
 
 .BrandShell--login .Logo {
@@ -386,7 +442,7 @@ textarea:focus,
 }
 
 .BrandShell--login .Footer {
-  color: #5d7068;
+  color: #617066;
 }
 
 .BrandShell--login .Footer:hover,
@@ -395,20 +451,22 @@ textarea:focus,
 }
 
 .BrandShell--login .Footer .Powered {
-  color: #5d7068;
+  color: #617066;
 }
 
 .BrandShell--login .Footer .BaseLine {
-  color: var(--brand-blue-dark);
+  color: var(--brand-green-dark);
   max-width: 340px;
   margin: 0 auto;
 }
 
 .BrandShell--login .IllustrationLogin {
+  position: relative;
   background-image: url('/branding/brand-logo.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: min(42%, 280px);
+  filter: drop-shadow(0 18px 28px rgba(124, 179, 66, 0.2));
 }
 
 .BrandShell--login .PasswordReset a,
@@ -424,13 +482,15 @@ textarea:focus,
 }
 
 .BrandShell--login .Form .InputText:focus {
-  border-color: var(--brand-blue);
+  border-color: var(--brand-green);
   box-shadow: 0 0 0 2px var(--brand-focus);
 }
 
 @media (max-width: 768px) {
   .BrandShell--login .FormWrapper {
-    padding-top: 64px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+    padding: 52px 28px 28px;
   }
 
   .BrandShell--login .Footer .BaseLine {
@@ -443,8 +503,9 @@ body.BrandShell .AknHeader-menu,
 .AknHeader-menu {
   border-right-color: #d9e6dc !important;
   background:
-    linear-gradient(180deg, rgba(177, 215, 76, 0.14) 0, rgba(177, 215, 76, 0) 84px),
-    linear-gradient(180deg, #ffffff 0, #f7fbf8 100%) !important;
+    radial-gradient(circle at top, rgba(163, 217, 119, 0.18), transparent 24%),
+    linear-gradient(180deg, rgba(124, 179, 66, 0.18) 0, rgba(124, 179, 66, 0) 72px),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%) !important;
 }
 
 body.BrandShell .AknHeader-menuItem,
@@ -459,7 +520,7 @@ body.BrandShell .AknHeader-menuItem--active,
 .AknHeader-menuItem--active {
   color: var(--brand-green) !important;
   border-left-color: var(--brand-orange) !important;
-  background: linear-gradient(90deg, rgba(177, 215, 76, 0.16), rgba(177, 215, 76, 0) 88%) !important;
+  background: linear-gradient(90deg, rgba(124, 179, 66, 0.18), rgba(124, 179, 66, 0) 88%) !important;
 }
 
 body.BrandShell .AknHeader-menuItemImage:not(:first-child),
@@ -471,7 +532,9 @@ body.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-men
 .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-menuItem {
   border-left-width: 0 !important;
   padding-right: 0 !important;
-  background: linear-gradient(180deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+  background:
+    radial-gradient(circle at top center, rgba(163, 217, 119, 0.22), transparent 52%),
+    linear-gradient(180deg, rgba(124, 179, 66, 0.16), rgba(124, 179, 66, 0) 72%) !important;
 }
 
 body.BrandShell .AknHeader-menuBlock[data-drop-zone='mainMenu'] > .AknHeader-menuItemContainer:first-child .AknHeader-logoImage,
@@ -487,7 +550,7 @@ body.BrandShell .AknVerticalList-item.active,
 body.BrandShell .AknVerticalList-item--active,
 .AknVerticalList-item.active,
 .AknVerticalList-item--active {
-  background: linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%) !important;
+  background: linear-gradient(90deg, rgba(124, 179, 66, 0.2), rgba(124, 179, 66, 0) 72%) !important;
   box-shadow: inset 3px 0 0 var(--brand-green) !important;
 }
 
@@ -506,8 +569,10 @@ body.BrandShell .AknTitleContainer,
 body.BrandShell header.BrandShell-pageHeader,
 .AknTitleContainer,
 header.BrandShell-pageHeader {
-  background: linear-gradient(180deg, #ffffff 0, #fbfdf9 100%) !important;
-  box-shadow: 0 1px 0 rgba(20, 151, 207, 0.08), 0 12px 28px rgba(15, 31, 23, 0.03) !important;
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 42px),
+    linear-gradient(180deg, #ffffff 0, #f8fbf2 100%) !important;
+  box-shadow: 0 1px 0 rgba(124, 179, 66, 0.08), 0 16px 34px rgba(26, 26, 26, 0.05) !important;
 }
 
 body.BrandShell .AknTitleContainer-title,
@@ -541,8 +606,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   padding: 0 18px;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(135deg, var(--brand-green) 0%, #6dc43c 100%);
-  box-shadow: 0 18px 36px rgba(15, 31, 23, 0.22);
+  background: var(--brand-stripe);
+  box-shadow: 0 18px 36px rgba(26, 26, 26, 0.18), var(--brand-glow-soft);
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -553,8 +618,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .BrandGuideButton:hover,
 .BrandGuideButton:focus {
-  background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green) 100%);
-  box-shadow: 0 22px 42px rgba(15, 31, 23, 0.28);
+  background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green) 72%, var(--brand-lime) 100%);
+  box-shadow: 0 22px 42px rgba(26, 26, 26, 0.22), 0 0 16px rgba(124, 179, 66, 0.28);
   transform: translateY(-2px);
   outline: none;
 }
@@ -590,10 +655,11 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   width: min(420px, calc(100vw - 24px));
   height: 100vh;
   background:
-    radial-gradient(circle at top right, rgba(20, 151, 207, 0.12), transparent 34%),
-    linear-gradient(180deg, #ffffff 0%, #f6fbf1 100%);
-  border-left: 1px solid rgba(15, 31, 23, 0.08);
-  box-shadow: -18px 0 38px rgba(15, 31, 23, 0.16);
+    radial-gradient(circle at top right, rgba(28, 167, 216, 0.12), transparent 34%),
+    radial-gradient(circle at top left, rgba(163, 217, 119, 0.18), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #f8fbf2 100%);
+  border-left: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: -18px 0 38px rgba(26, 26, 26, 0.14);
   transform: translateX(100%);
   transition: transform 220ms ease;
 }
@@ -612,7 +678,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  border-bottom: 1px solid rgba(15, 31, 23, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .BrandGuidePanel-heading {
@@ -651,7 +717,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 }
 
 .BrandGuidePanel-footer {
-  border-top: 1px solid rgba(15, 31, 23, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   background: rgba(255, 255, 255, 0.88);
 }
 
@@ -676,8 +742,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   min-height: 28px;
   padding: 0 12px;
   border-radius: 999px;
-  background: rgba(20, 151, 207, 0.12);
-  color: var(--brand-blue-dark);
+  background: rgba(124, 179, 66, 0.12);
+  color: var(--brand-green-dark);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -711,8 +777,9 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   margin-top: 12px;
   padding: 14px 16px;
   border-radius: 16px;
-  background: var(--brand-blue-soft);
-  color: var(--brand-blue-dark);
+  border: 1px solid rgba(124, 179, 66, 0.18);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(241, 248, 233, 0.94) 100%);
+  color: var(--brand-green-dark);
 }
 
 .BrandGuideList {
@@ -764,8 +831,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 }
 
 .BrandGuideActionButton--primary {
-  background: var(--brand-green);
-  box-shadow: 0 12px 24px rgba(84, 175, 49, 0.22);
+  background: var(--brand-stripe);
+  box-shadow: 0 12px 24px rgba(124, 179, 66, 0.22);
   color: #fff;
 }
 
@@ -776,13 +843,13 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .BrandGuideActionButton--ghost {
   background: #fff;
-  border-color: rgba(20, 151, 207, 0.22);
-  color: var(--brand-blue-dark);
+  border-color: rgba(124, 179, 66, 0.2);
+  color: var(--brand-green-dark);
 }
 
 .BrandGuideActionButton--ghost:hover,
 .BrandGuideActionButton--ghost:focus {
-  background: var(--brand-blue-soft);
+  background: linear-gradient(180deg, #ffffff 0, #f1f8e9 100%);
 }
 
 .BrandGuideActionButton--text {
@@ -803,9 +870,9 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 .BrandGuideWalkthroughRing {
   position: fixed;
   z-index: 2891;
-  border: 3px solid var(--brand-orange);
+  border: 3px solid var(--brand-green);
   border-radius: 18px;
-  box-shadow: 0 0 0 9999px rgba(15, 31, 23, 0.18), 0 18px 28px rgba(15, 31, 23, 0.18);
+  box-shadow: 0 0 0 9999px rgba(26, 26, 26, 0.16), 0 18px 28px rgba(26, 26, 26, 0.18), 0 0 0 1px rgba(163, 217, 119, 0.2), 0 0 18px rgba(124, 179, 66, 0.22);
   opacity: 0;
   pointer-events: none;
   transition: opacity 180ms ease, top 180ms ease, left 180ms ease, width 180ms ease, height 180ms ease;
@@ -821,8 +888,11 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   width: min(360px, calc(100vw - 32px));
   padding: 18px;
   border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 22px 44px rgba(15, 31, 23, 0.24);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background:
+    linear-gradient(180deg, rgba(124, 179, 66, 0.06) 0, rgba(124, 179, 66, 0) 56px),
+    #fff;
+  box-shadow: 0 22px 44px rgba(26, 26, 26, 0.2);
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);

@@ -11,19 +11,27 @@ const {
   createJob,
   createRun,
   ensureSchema,
+  getAlert,
   getCatalogProduct,
   getJob,
   getRun,
+  listCatalogProducts,
   listAlerts,
   listJobs,
   listNotifications,
   listProposals,
   listRuns,
   listSnapshots,
+  updateAlert,
   upsertCatalogProduct,
 } = require('./lib/store');
 
 const port = Number(process.env.MARKETPLACE_ORCHESTRATOR_PORT || 8090);
+
+function sendHtml(response, statusCode, body) {
+  response.writeHead(statusCode, { 'Content-Type': 'text/html; charset=utf-8' });
+  response.end(body);
+}
 
 function tenantSummary(tenant) {
   const listingWriterClient = createListingWriterClient(tenant.code);
@@ -42,6 +50,7 @@ function tenantSummary(tenant) {
       enabled: tenant.amazon.enabled !== false,
       mode: tenant.amazon.mode || 'mock',
       sellerId: tenant.amazon.sellerId || null,
+      pilotFamilyCodes: tenant.amazon.pilotFamilyCodes || [],
       brandSources: (tenant.amazon.brandSources || []).map((source) => ({
         code: source.code,
         label: source.label,
@@ -56,6 +65,226 @@ function tenantSummary(tenant) {
       readiness: listingWriterClient.readiness(),
     } : null,
   };
+}
+
+function statusCounts(records, field) {
+  return records.reduce((summary, record) => {
+    const key = record[field] || 'unknown';
+    summary[key] = (summary[key] || 0) + 1;
+    return summary;
+  }, {});
+}
+
+async function buildDashboardSummary(tenantCode = null) {
+  const [runs, jobs, alerts, proposals, notifications, snapshots] = await Promise.all([
+    listRuns({ tenantCode: tenantCode || undefined }),
+    listJobs({ tenantCode: tenantCode || undefined }),
+    listAlerts({ tenantCode: tenantCode || undefined }),
+    listProposals({ tenantCode: tenantCode || undefined }),
+    listNotifications({ tenantCode: tenantCode || undefined }),
+    listSnapshots({ tenantCode: tenantCode || undefined }),
+  ]);
+
+  const activeAlerts = alerts.filter((alert) => !['acknowledged', 'resolved'].includes(alert.status));
+  const tenants = [];
+
+  for (const tenant of listTenants().filter((tenant) => !tenantCode || tenant.code === tenantCode)) {
+      const tenantJobs = jobs.filter((job) => job.tenantCode === tenant.code);
+      const tenantRuns = runs.filter((run) => run.tenantCode === tenant.code);
+      const tenantAlerts = alerts.filter((alert) => alert.tenantCode === tenant.code);
+      const tenantProposals = proposals.filter((proposal) => proposal.tenantCode === tenant.code);
+      const tenantSnapshots = snapshots.filter((snapshot) => snapshot.tenantCode === tenant.code);
+      const tenantNotifications = notifications.filter((notification) => notification.tenantCode === tenant.code);
+      const tenantCatalogProducts = (await listCatalogProducts(tenant.code)).length;
+
+      tenants.push({
+        ...tenantSummary(tenant),
+        queue: statusCounts(tenantJobs, 'status'),
+        runs: statusCounts(tenantRuns, 'status'),
+        alerts: {
+          total: tenantAlerts.length,
+          active: tenantAlerts.filter((alert) => !['acknowledged', 'resolved'].includes(alert.status)).length,
+          bySeverity: statusCounts(tenantAlerts, 'severity'),
+        },
+        proposals: statusCounts(tenantProposals, 'status'),
+        notifications: tenantNotifications.length,
+        snapshots: tenantSnapshots.length,
+        catalogProducts: tenantCatalogProducts,
+        marketplaces: (tenant.marketplaces || []).map((marketplace) => {
+          const marketplaceJobs = tenantJobs.filter((job) => job.marketplaceCode === marketplace.code);
+          const marketplaceRuns = tenantRuns.filter((run) => run.marketplaceCode === marketplace.code);
+          const marketplaceAlerts = tenantAlerts.filter((alert) => alert.marketplaceCode === marketplace.code);
+          const marketplaceProposals = tenantProposals.filter((proposal) => proposal.marketplaceCode === marketplace.code);
+
+          return {
+            code: marketplace.code,
+            label: marketplace.label,
+            channel: marketplace.channel,
+            queue: statusCounts(marketplaceJobs, 'status'),
+            runs: statusCounts(marketplaceRuns, 'status'),
+            alerts: {
+              total: marketplaceAlerts.length,
+              active: marketplaceAlerts.filter((alert) => !['acknowledged', 'resolved'].includes(alert.status)).length,
+              bySeverity: statusCounts(marketplaceAlerts, 'severity'),
+            },
+            proposals: statusCounts(marketplaceProposals, 'status'),
+          };
+        }),
+      });
+  }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    store: 'mysql',
+    totals: {
+      tenants: tenants.length,
+      queuedJobs: jobs.filter((job) => job.status === 'queued').length,
+      processingJobs: jobs.filter((job) => job.status === 'processing').length,
+      failedJobs: jobs.filter((job) => job.status === 'failed').length,
+      activeAlerts: activeAlerts.length,
+      openProposals: proposals.filter((proposal) => proposal.status === 'open').length,
+      notifications: notifications.length,
+      snapshots: snapshots.length,
+      runs: runs.length,
+      catalogProducts: tenants.reduce((total, tenant) => total + Number(tenant.catalogProducts || 0), 0),
+    },
+    tenants,
+    recent: {
+      jobs: jobs.slice(0, 10),
+      alerts: alerts.slice(0, 10),
+      runs: runs.slice(0, 10),
+      proposals: proposals.slice(0, 10),
+    },
+  };
+}
+
+function renderDashboardPage() {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coppermind Marketplace Dashboard</title>
+  <style>
+    :root { color-scheme: light; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f4f7fb; color: #1f3043; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    h1, h2, h3 { margin: 0; }
+    .hero { display: grid; gap: 8px; margin-bottom: 20px; }
+    .muted { color: #62748a; font-size: 14px; }
+    .stats, .tenant-grid, .market-grid, .recent-grid { display: grid; gap: 14px; }
+    .stats { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: 20px; }
+    .tenant-grid, .recent-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+    .market-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .card { background: #fff; border: 1px solid #dce4ee; border-radius: 18px; padding: 18px; box-shadow: 0 10px 24px rgba(33, 53, 71, 0.06); }
+    .stat { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; background: #e8eef6; font-size: 12px; font-weight: 700; color: #304d68; }
+    .pill.warn { background: #fff0db; color: #8a5200; }
+    .pill.bad { background: #fde9e7; color: #a02a27; }
+    .pill.good { background: #def4e7; color: #0c6a3a; }
+    .list { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+    .list li { padding: 12px; border: 1px solid #e6ebf2; border-radius: 12px; background: #fbfcfe; }
+    code { font-family: Consolas, monospace; font-size: 12px; }
+    .empty { color: #708299; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Coppermind Marketplace Operations</h1>
+      <div class="muted">Queue depth, Amazon readiness, pilot-family cutover, alerts, and recent runs.</div>
+    </div>
+    <div id="app" class="empty">Loading dashboard...</div>
+  </div>
+  <script>
+    function pill(label, kind) {
+      return '<span class="pill ' + (kind || '') + '">' + label + '</span>';
+    }
+
+    function renderCounts(title, counts) {
+      const entries = Object.entries(counts || {});
+      if (!entries.length) {
+        return '<div class="muted">' + title + ': none</div>';
+      }
+
+      return '<div class="meta">' + entries.map(([key, value]) => pill(title + ' ' + key + ': ' + value)).join('') + '</div>';
+    }
+
+    function renderRecent(items, title, mapper) {
+      if (!items.length) {
+        return '<div class="card"><h3>' + title + '</h3><div class="empty">No recent records.</div></div>';
+      }
+
+      return '<div class="card"><h3>' + title + '</h3><ul class="list">' +
+        items.map(mapper).join('') + '</ul></div>';
+    }
+
+    fetch('/v1/dashboard')
+      .then((response) => response.json())
+      .then((data) => {
+        const totals = data.totals || {};
+        const app = document.getElementById('app');
+        app.innerHTML =
+          '<div class="stats">' +
+            '<div class="card"><div class="muted">Queued jobs</div><div class="stat">' + (totals.queuedJobs || 0) + '</div></div>' +
+            '<div class="card"><div class="muted">Processing jobs</div><div class="stat">' + (totals.processingJobs || 0) + '</div></div>' +
+            '<div class="card"><div class="muted">Failed jobs</div><div class="stat">' + (totals.failedJobs || 0) + '</div></div>' +
+            '<div class="card"><div class="muted">Active alerts</div><div class="stat">' + (totals.activeAlerts || 0) + '</div></div>' +
+            '<div class="card"><div class="muted">Open proposals</div><div class="stat">' + (totals.openProposals || 0) + '</div></div>' +
+            '<div class="card"><div class="muted">Notifications</div><div class="stat">' + (totals.notifications || 0) + '</div></div>' +
+          '</div>' +
+          '<div class="tenant-grid">' +
+            (data.tenants || []).map((tenant) => {
+              const amazon = tenant.amazon || null;
+              return '<div class="card">' +
+                '<h2>' + tenant.label + '</h2>' +
+                '<div class="muted"><code>' + tenant.code + '</code></div>' +
+                '<div class="meta">' +
+                  (amazon ? pill('Amazon ' + (amazon.mode || 'mock'), amazon.mode === 'live' ? 'good' : 'warn') : '') +
+                  (amazon && amazon.pilotFamilyCodes && amazon.pilotFamilyCodes.length ? pill('Pilot families: ' + amazon.pilotFamilyCodes.join(', '), 'warn') : '') +
+                  pill('Alerts: ' + ((tenant.alerts || {}).active || 0), ((tenant.alerts || {}).active || 0) ? 'bad' : 'good') +
+                '</div>' +
+                renderCounts('Queue', tenant.queue) +
+                renderCounts('Runs', tenant.runs) +
+                renderCounts('Proposals', tenant.proposals) +
+                '<div class="market-grid" style="margin-top:14px;">' +
+                  (tenant.marketplaces || []).map((marketplace) =>
+                    '<div class="card">' +
+                      '<h3>' + marketplace.label + '</h3>' +
+                      '<div class="muted">' + marketplace.channel + '</div>' +
+                      renderCounts('Queue', marketplace.queue) +
+                      renderCounts('Runs', marketplace.runs) +
+                      '<div class="meta">' +
+                        pill('Alerts: ' + ((marketplace.alerts || {}).active || 0), ((marketplace.alerts || {}).active || 0) ? 'bad' : 'good') +
+                      '</div>' +
+                    '</div>'
+                  ).join('') +
+                '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
+          '<div class="recent-grid" style="margin-top:20px;">' +
+            renderRecent(data.recent?.jobs || [], 'Recent jobs', (job) =>
+              '<li><strong>' + job.type + '</strong><div class="muted">' + (job.marketplaceCode || 'global') + ' • ' + job.status + '</div></li>'
+            ) +
+            renderRecent(data.recent?.alerts || [], 'Recent alerts', (alert) =>
+              '<li><strong>' + alert.title + '</strong><div class="muted">' + alert.severity + ' • ' + alert.status + '</div></li>'
+            ) +
+            renderRecent(data.recent?.runs || [], 'Recent runs', (run) =>
+              '<li><strong>' + (run.marketplaceCode || 'unknown') + '</strong><div class="muted">' + run.status + ' • ' + (run.product?.identifier || 'unknown SKU') + '</div></li>'
+            ) +
+            renderRecent(data.recent?.proposals || [], 'Recent proposals', (proposal) =>
+              '<li><strong>' + proposal.sku + '</strong><div class="muted">' + proposal.field + ' • ' + proposal.status + '</div></li>'
+            ) +
+          '</div>';
+      })
+      .catch((error) => {
+        document.getElementById('app').textContent = error.message || 'Failed to load dashboard.';
+      });
+  </script>
+</body>
+</html>`;
 }
 
 function resolveWorkflow(tenantCode, marketplaceCode, response) {
@@ -118,6 +347,16 @@ async function handleRequest(request, response) {
       openAlerts: activeAlerts,
       openProposals: openProposals.length,
     });
+    return;
+  }
+
+  if (request.method === 'GET' && url.pathname === '/dashboard') {
+    sendHtml(response, 200, renderDashboardPage());
+    return;
+  }
+
+  if (request.method === 'GET' && url.pathname === '/v1/dashboard') {
+    sendJson(response, 200, await buildDashboardSummary(url.searchParams.get('tenant') || null));
     return;
   }
 
@@ -192,6 +431,29 @@ async function handleRequest(request, response) {
         status: url.searchParams.get('status') || undefined,
       }),
     });
+    return;
+  }
+
+  if (request.method === 'POST' && parts.length === 4 && parts[0] === 'v1' && parts[1] === 'alerts') {
+    const alert = await getAlert(parts[2]);
+    if (!alert) {
+      sendJson(response, 404, { error: `Unknown alert "${parts[2]}".` });
+      return;
+    }
+
+    const action = parts[3];
+    if (!['acknowledge', 'resolve'].includes(action)) {
+      sendJson(response, 404, { error: `Unsupported alert action "${action}".` });
+      return;
+    }
+
+    const updated = await updateAlert(parts[2], (current) => ({
+      ...current,
+      status: action === 'acknowledge' ? 'acknowledged' : 'resolved',
+      acknowledgedAt: action === 'acknowledge' ? new Date().toISOString() : current.acknowledgedAt,
+    }));
+
+    sendJson(response, 200, updated);
     return;
   }
 

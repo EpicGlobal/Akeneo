@@ -82,7 +82,7 @@ function parseMaybeJson(text) {
   }
 }
 
-function resolveAmazonContext(tenantCode, marketplaceCode) {
+function resolveAmazonContext(tenantCode, marketplaceCode, overrides = {}) {
   const tenant = findTenant(tenantCode);
   if (!tenant) {
     throw new Error(`Unknown tenant "${tenantCode}".`);
@@ -105,10 +105,11 @@ function resolveAmazonContext(tenantCode, marketplaceCode) {
     marketplace,
     amazon: {
       ...tenantAmazon,
-      baseUri: tenantAmazon.baseUri || endpoint.baseUri,
-      awsRegion: tenantAmazon.awsRegion || endpoint.awsRegion,
-      mode: (tenantAmazon.mode || 'mock').toLowerCase(),
-      sellerId: tenantAmazon.sellerId || null,
+      ...overrides,
+      baseUri: overrides.baseUri || tenantAmazon.baseUri || endpoint.baseUri,
+      awsRegion: overrides.awsRegion || tenantAmazon.awsRegion || endpoint.awsRegion,
+      mode: (overrides.mode || tenantAmazon.mode || 'mock').toLowerCase(),
+      sellerId: overrides.sellerId || tenantAmazon.sellerId || null,
     },
   };
 }
@@ -427,8 +428,8 @@ function buildListingBody(marketplace, product, overrides = {}) {
   return body;
 }
 
-function createAmazonClient(tenantCode, marketplaceCode) {
-  const context = resolveAmazonContext(tenantCode, marketplaceCode);
+function createAmazonClient(tenantCode, marketplaceCode, overrides = {}) {
+  const context = resolveAmazonContext(tenantCode, marketplaceCode, overrides);
 
   return {
     context,

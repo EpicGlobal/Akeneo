@@ -25,6 +25,7 @@ final class AssetLinkRepository
             sprintf(
                 <<<SQL
                 SELECT tenant_code, owner_type, owner_id, resource_ref, resource_title, resource_extension, preview_url, download_url, ui_url,
+                       asset_role,
                        is_primary, synced_attribute, synced_at, linked_by, linked_at
                 FROM %s
                 WHERE tenant_code = :tenant_code AND owner_type = :owner_type AND owner_id = :owner_id
@@ -52,6 +53,7 @@ final class AssetLinkRepository
             sprintf(
                 <<<SQL
                 SELECT tenant_code, owner_type, owner_id, resource_ref, resource_title, resource_extension, preview_url, download_url, ui_url,
+                       asset_role,
                        is_primary, synced_attribute, synced_at, linked_by, linked_at
                 FROM %s
                 WHERE tenant_code = :tenant_code AND resource_ref = :resource_ref
@@ -77,6 +79,7 @@ final class AssetLinkRepository
         array $asset,
         ?int $linkedBy,
         bool $isPrimary = false,
+        ?string $assetRole = null,
         ?string $tenantCode = null,
     ): void {
         $tenantCode = $this->normalizeTenantCode($tenantCode);
@@ -98,6 +101,10 @@ final class AssetLinkRepository
             $shouldBePrimary = $isPrimary
                 || (null !== $existingLink && (bool) $existingLink['is_primary'])
                 || !$this->ownerHasPrimaryLink($ownerType, $ownerId, $tenantCode);
+            $normalizedAssetRole = $this->normalizeAssetRole($assetRole);
+            if (null === $normalizedAssetRole && null !== $existingLink && isset($existingLink['asset_role'])) {
+                $normalizedAssetRole = $this->normalizeAssetRole((string) $existingLink['asset_role']);
+            }
 
             if ($shouldBePrimary) {
                 $this->clearPrimaryFlag($ownerType, $ownerId, $tenantCode);
@@ -108,10 +115,10 @@ final class AssetLinkRepository
                     <<<SQL
                     INSERT INTO %s (
                         tenant_code, owner_type, owner_id, resource_ref, resource_title, resource_extension, preview_url, download_url, ui_url,
-                        is_primary, linked_by, linked_at
+                        asset_role, is_primary, linked_by, linked_at
                     ) VALUES (
                         :tenant_code, :owner_type, :owner_id, :resource_ref, :resource_title, :resource_extension, :preview_url, :download_url, :ui_url,
-                        :is_primary, :linked_by, :linked_at
+                        :asset_role, :is_primary, :linked_by, :linked_at
                     )
                     ON DUPLICATE KEY UPDATE
                         resource_title = VALUES(resource_title),
@@ -119,6 +126,7 @@ final class AssetLinkRepository
                         preview_url = VALUES(preview_url),
                         download_url = VALUES(download_url),
                         ui_url = VALUES(ui_url),
+                        asset_role = VALUES(asset_role),
                         is_primary = VALUES(is_primary),
                         linked_by = VALUES(linked_by),
                         linked_at = VALUES(linked_at)
@@ -135,6 +143,7 @@ final class AssetLinkRepository
                     'preview_url' => (string) ($asset['preview_url'] ?? ''),
                     'download_url' => (string) ($asset['download_url'] ?? ''),
                     'ui_url' => (string) ($asset['ui_url'] ?? ''),
+                    'asset_role' => $normalizedAssetRole ?? '',
                     'is_primary' => $shouldBePrimary ? 1 : 0,
                     'linked_by' => $linkedBy,
                     'linked_at' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
@@ -181,6 +190,54 @@ final class AssetLinkRepository
         ]);
     }
 
+    /**
+     * @param array<int, int> $resourceRefs
+     *
+     * @return array<int, int>
+     */
+    public function getWhereUsedMap(array $resourceRefs, ?string $tenantCode = null): array
+    {
+        $tenantCode = $this->normalizeTenantCode($tenantCode);
+        $resourceRefs = array_values(array_unique(array_filter(array_map(
+            static fn (mixed $resourceRef): int => (int) $resourceRef,
+            $resourceRefs
+        ), static fn (int $resourceRef): bool => $resourceRef > 0)));
+
+        if ([] === $resourceRefs) {
+            return [];
+        }
+
+        $parameters = ['tenant_code' => $tenantCode];
+        $placeholders = [];
+
+        foreach ($resourceRefs as $index => $resourceRef) {
+            $parameter = sprintf('resource_ref_%d', $index);
+            $parameters[$parameter] = $resourceRef;
+            $placeholders[] = sprintf(':%s', $parameter);
+        }
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT resource_ref, COUNT(DISTINCT CONCAT(owner_type, ':', owner_id)) AS where_used_count
+                FROM %s
+                WHERE tenant_code = :tenant_code AND resource_ref IN (%s)
+                GROUP BY resource_ref
+                SQL,
+                self::TABLE_NAME,
+                implode(', ', $placeholders)
+            ),
+            $parameters
+        );
+
+        $whereUsedMap = [];
+        foreach ($statement->fetchAllAssociative() as $row) {
+            $whereUsedMap[(int) $row['resource_ref']] = (int) $row['where_used_count'];
+        }
+
+        return $whereUsedMap;
+    }
+
     private function clearPrimaryFlag(string $ownerType, string $ownerId, string $tenantCode): void
     {
         $this->connection->update(self::TABLE_NAME, ['is_primary' => 0], [
@@ -215,7 +272,7 @@ final class AssetLinkRepository
         $row = $this->connection->fetchAssociative(
             sprintf(
                 <<<SQL
-                SELECT tenant_code, owner_type, owner_id, resource_ref, is_primary
+                SELECT tenant_code, owner_type, owner_id, resource_ref, asset_role, is_primary
                 FROM %s
                 WHERE tenant_code = :tenant_code AND owner_type = :owner_type AND owner_id = :owner_id AND resource_ref = :resource_ref
                 LIMIT 1
@@ -286,6 +343,7 @@ final class AssetLinkRepository
             'preview_url' => (string) ($row['preview_url'] ?? ''),
             'download_url' => (string) ($row['download_url'] ?? ''),
             'ui_url' => (string) ($row['ui_url'] ?? ''),
+            'asset_role' => '' !== trim((string) ($row['asset_role'] ?? '')) ? (string) $row['asset_role'] : null,
             'is_primary' => (bool) $row['is_primary'],
             'synced_attribute' => null !== $row['synced_attribute'] ? (string) $row['synced_attribute'] : null,
             'synced_at' => null !== $row['synced_at'] ? (string) $row['synced_at'] : null,
@@ -293,6 +351,19 @@ final class AssetLinkRepository
             'linked_at' => (string) $row['linked_at'],
             'is_linked' => true,
         ];
+    }
+
+    private function normalizeAssetRole(?string $assetRole): ?string
+    {
+        $assetRole = strtolower(trim((string) $assetRole));
+        if ('' === $assetRole) {
+            return null;
+        }
+
+        $assetRole = preg_replace('/[^a-z0-9._-]+/', '_', $assetRole) ?? '';
+        $assetRole = trim($assetRole, '._-');
+
+        return '' !== $assetRole ? substr($assetRole, 0, 100) : null;
     }
 
     private function normalizeTenantCode(?string $tenantCode): string

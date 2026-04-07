@@ -46,13 +46,14 @@ That lets you test:
 - proposal generation,
 - auto-applied catalog updates.
 
-All mock state is stored in `var/marketplace-orchestrator/`.
+The orchestrator persists runs, jobs, alerts, proposals, notifications, snapshots, catalog state, and email outbox records in MySQL-backed Coppermind tables.
 
 ## Going live
 
 To move from mock mode to live mode, update the tenant Amazon config with:
 
 - `mode: "live"`
+- optional `pilotFamilyCodes` to restrict live execution to one SKU family while the rest of the catalog stays in preview-only behavior
 - Login with Amazon credentials
 - seller refresh token
 - AWS signing credentials
@@ -62,10 +63,17 @@ To move from mock mode to live mode, update the tenant Amazon config with:
 
 The service already supports `put`, `patch`, and `feed` listing submission modes at the connector layer.
 
+## Operator visibility
+
+- `GET /dashboard` renders a lightweight operator dashboard.
+- `GET /v1/dashboard` returns queue, alert, proposal, run, and tenant readiness summary JSON.
+- `POST /v1/alerts/{alertId}/acknowledge`
+- `POST /v1/alerts/{alertId}/resolve`
+
 ## Next hardening steps
 
-1. Move from file-backed state to durable database and queue storage.
-2. Add idempotency keys for publish submissions and notification ingest.
-3. Add real Seller Central app-notification template management.
-4. Add richer Amazon attribute mapping per product type.
-5. Add webhook signing or gateway validation for external notification ingest.
+1. Add richer Amazon attribute mapping per product type.
+2. Add real Seller Central app-notification template management.
+3. Add webhook signing or gateway validation for external notification ingest.
+4. Add operator actions for proposal approval and replay from the dashboard.
+5. Add tenant provisioning, billing, and retention controls around the orchestration layer.

@@ -114,16 +114,16 @@ up:
 
 .PHONY: resourcespace-up
 resourcespace-up:
-	$(RESOURCE_SPACE_COMPOSE) up -d --build resourcespace mariadb resourcespace-writeback-worker
+	$(RESOURCE_SPACE_COMPOSE) up -d --build resourcespace mariadb resourcespace-writeback-worker resourcespace-media-ingest-worker resourcespace-outbox-worker
 
 .PHONY: resourcespace-logs
 resourcespace-logs:
-	$(RESOURCE_SPACE_COMPOSE) logs -f resourcespace mariadb resourcespace-writeback-worker
+	$(RESOURCE_SPACE_COMPOSE) logs -f resourcespace mariadb resourcespace-writeback-worker resourcespace-media-ingest-worker resourcespace-outbox-worker
 
 .PHONY: resourcespace-down
 resourcespace-down:
-	$(RESOURCE_SPACE_COMPOSE) stop resourcespace mariadb resourcespace-writeback-worker
-	$(RESOURCE_SPACE_COMPOSE) rm -sf resourcespace mariadb resourcespace-writeback-worker
+	$(RESOURCE_SPACE_COMPOSE) stop resourcespace mariadb resourcespace-writeback-worker resourcespace-media-ingest-worker resourcespace-outbox-worker
+	$(RESOURCE_SPACE_COMPOSE) rm -sf resourcespace mariadb resourcespace-writeback-worker resourcespace-media-ingest-worker resourcespace-outbox-worker
 
 .PHONY: marketplace-up
 marketplace-up:

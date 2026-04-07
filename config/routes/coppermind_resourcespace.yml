@@ -22,6 +22,11 @@ coppermind_resourcespace_product_assets_sync:
     requirements:
         resourceRef: '\d+'
 
+coppermind_resourcespace_product_workflow_update:
+    path: /rest/resourcespace/product/{uuid}/workflow
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::workflowProductAction
+    methods: [POST]
+
 coppermind_resourcespace_asset_writeback_retry:
     path: /rest/resourcespace/assets/{resourceRef}/writeback
     controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::retryWritebackAction
@@ -52,3 +57,8 @@ coppermind_resourcespace_product_model_assets_sync:
     methods: [POST]
     requirements:
         resourceRef: '\d+'
+
+coppermind_resourcespace_product_model_workflow_update:
+    path: /rest/resourcespace/product-model/{code}/workflow
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::workflowProductModelAction
+    methods: [POST]
