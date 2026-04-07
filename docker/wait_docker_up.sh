@@ -2,6 +2,16 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [ -f "$PROJECT_ROOT/.env" ]; then
+    set -a
+    # shellcheck disable=SC1090
+    . "$PROJECT_ROOT/.env"
+    set +a
+fi
+
 MAX_COUNTER=45
 COUNTER=1
 MYSQL_ROOT_PASSWORD="${APP_DATABASE_ROOT_PASSWORD:-root}"
