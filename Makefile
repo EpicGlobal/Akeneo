@@ -127,6 +127,7 @@ resourcespace-down:
 
 .PHONY: marketplace-up
 marketplace-up:
+	$(MARKETPLACE_COMPOSE) run --rm marketplace-orchestrator npm install --no-audit --no-fund
 	$(MARKETPLACE_COMPOSE) up -d marketplace-orchestrator marketplace-orchestrator-worker
 
 .PHONY: marketplace-logs
