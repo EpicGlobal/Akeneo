@@ -125,6 +125,19 @@ set_env_value "MARKETPLACE_ORCHESTRATOR_BASE_URI" "$MARKETPLACE_ORCHESTRATOR_BAS
 
 APP_SECRET_VALUE="${APP_SECRET_VALUE:-$(openssl rand -hex 32)}" bash "$PROJECT_ROOT/scripts/aws-first-run.sh" "$TARGET"
 
+custom_migrations=(
+  "Pim\\Upgrade\\Schema\\Version_7_0_20260316110000_create_resourcespace_asset_link_table"
+  "Pim\\Upgrade\\Schema\\Version_7_0_20260323110000_add_resourcespace_writeback_job_table"
+  "Pim\\Upgrade\\Schema\\Version_7_0_20260324110000_add_tenant_scoped_resourcespace_configuration"
+  "Pim\\Upgrade\\Schema\\Version_7_0_20260406120000_add_governance_outbox_ingest_tables"
+)
+
+# Akeneo's installer baselines every discovered migration as executed on a fresh install.
+# Replay only the Coppermind migrations so their schema is actually created.
+for migration in "${custom_migrations[@]}"; do
+  sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console doctrine:migrations:version '$migration' --delete --env=prod --no-interaction"
+done
+
 sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console doctrine:migrations:migrate --env=prod --no-interaction"
 sg docker -c "cd '$PROJECT_ROOT' && make resourcespace-up"
 sg docker -c "cd '$PROJECT_ROOT' && make marketplace-up"

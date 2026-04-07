@@ -28,6 +28,7 @@ bash scripts/aws-ec2-bootstrap.sh <public-ip-or-url>
 - pulls secrets from AWS Systems Manager Parameter Store
 - writes the required `.env` values for Akeneo, ResourceSpace, and object storage
 - runs the existing `scripts/aws-first-run.sh` bootstrap
+- replays the Coppermind migrations that Akeneo's installer marks as executed during a fresh catalog install
 - runs Doctrine migrations
 - starts ResourceSpace plus background workers
 - starts the marketplace orchestrator plus worker
