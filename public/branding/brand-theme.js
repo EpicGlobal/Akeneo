@@ -7,7 +7,7 @@
     blue: "#1ca7d8",
     surface: "linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 42px), linear-gradient(180deg, #ffffff 0, #f8fbf2 100%)"
   };
-  var guideSeenKey = "coppermind.brandGuide.seen.v1";
+  var guideSeenKey = "operator.brandGuide.seen.v1";
   var guideState = {
     routeSignature: "",
     contextId: "",
@@ -149,7 +149,7 @@
       }
 
       image.removeAttribute("srcset");
-      image.alt = "Company logo";
+      image.alt = "Operator logo";
       image.classList.add("BrandShell-sidebarLogoImage");
 
       setImportant(image, "width", "56px");
@@ -302,7 +302,7 @@
         steps: [
           {
             title: "Use the login form",
-            body: "Enter your Akeneo credentials here. After login, start with structure rather than jumping straight into products.",
+            body: "Enter your Operator credentials here. After login, start with structure rather than jumping straight into products.",
             selectors: [".AuthenticationWrapper .FormWrapper", "form[name='login']", "form"]
           },
           {
@@ -402,7 +402,7 @@
           },
           {
             title: "Use the ResourceSpace DAM tab for media",
-            body: "That tab lets you search ResourceSpace, link assets, mark a primary asset, sync the binary into Akeneo, and retry DAM write-back jobs.",
+            body: "That tab lets you search ResourceSpace, link assets, mark a primary asset, sync the binary into the catalog, and retry DAM write-back jobs.",
             resolve: findResourceSpaceTab,
             optional: true
           },
@@ -513,7 +513,7 @@
         id: "generic",
         label: "Guide",
         title: "Use the menu for navigation, the header for actions, and the main panel for the actual work.",
-        summary: "Akeneo changes page layouts, but the operating pattern stays consistent across screens.",
+        summary: "Screen layouts change, but the operating pattern stays consistent across Operator.",
         flow: [
           "Navigate from the left menu.",
           "Check the page header for context and actions.",
@@ -620,7 +620,7 @@
     var walkthroughCard = createElement("div", "BrandGuideWalkthroughCard");
     var header = createElement("div", "BrandGuidePanel-header");
     var heading = createElement("div", "BrandGuidePanel-heading");
-    var eyebrow = createElement("div", "BrandGuidePanel-eyebrow", "Coppermind Guide");
+    var eyebrow = createElement("div", "BrandGuidePanel-eyebrow", "Operator Guide");
     var title = createElement("h2", "BrandGuidePanel-title", "Guide");
 
     toggle.type = "button";
@@ -645,7 +645,7 @@
     heading.appendChild(title);
     header.appendChild(heading);
     header.appendChild(close);
-    footer.appendChild(createElement("p", "BrandGuidePanel-note", "The guide changes automatically as you move through the PIM and DAM."));
+    footer.appendChild(createElement("p", "BrandGuidePanel-note", "The Operator guide adapts as you move through catalog, DAM, and workflow screens."));
 
     panel.appendChild(header);
     panel.appendChild(content);

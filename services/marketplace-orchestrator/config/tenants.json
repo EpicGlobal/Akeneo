@@ -58,7 +58,7 @@
         "brandSources": [
           {
             "code": "brand_site_boot_100121",
-            "label": "Coppermind Brand Site",
+            "label": "Operator Brand Site",
             "marketplaceCode": "amazon_us",
             "sku": "100121",
             "fixturePath": "fixtures/brand-source-default.html",

@@ -113,7 +113,7 @@ That lets the browser load ResourceSpace on `localhost:8081` while Akeneo's PHP 
 - Unlinking an asset removes the DAM link, but it does not clear any Akeneo media value that was already synced.
 - The sync flow now queues binary ingest in `coppermind_resourcespace_media_ingest_job` and processes it in the background.
 - Write-back is attempted immediately after every link change. If ResourceSpace is unavailable, Akeneo keeps the local link change and queues the metadata update for retry in `coppermind_resourcespace_writeback_job`.
-- Governance state, approvals, audit records, and marketplace outbox events are now persisted in Akeneo-side Coppermind tables.
+- Governance state, approvals, audit records, and marketplace outbox events are now persisted in Operator-side platform tables inside Akeneo.
 
 ## Write-back reliability
 

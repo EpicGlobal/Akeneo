@@ -46,7 +46,7 @@ That lets you test:
 - proposal generation,
 - auto-applied catalog updates.
 
-The orchestrator persists runs, jobs, alerts, proposals, notifications, snapshots, catalog state, and email outbox records in MySQL-backed Coppermind tables.
+The orchestrator persists runs, jobs, alerts, proposals, notifications, snapshots, catalog state, and email outbox records in MySQL-backed Operator platform tables.
 
 ## Going live
 

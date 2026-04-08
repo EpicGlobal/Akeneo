@@ -11,8 +11,8 @@
             <link rel="icon" type="image/png" href="{{ asset('branding/brand-favicon.png') }}?v=20260313c" />
             <link rel="shortcut icon" href="{{ asset('branding/brand-favicon.png') }}?v=20260313c" />
             <link rel="stylesheet" href="{{ asset('css/pim.css', 'frontend') }}"/>
-            <link rel="stylesheet" href="{{ asset('branding/brand-theme.css') }}?v=20260406eos1"/>
-            <script type="text/javascript" src="{{ asset('branding/brand-theme.js') }}?v=20260406eos1"></script>
+            <link rel="stylesheet" href="{{ asset('branding/brand-theme.css') }}?v=20260408operator1"/>
+            <script type="text/javascript" src="{{ asset('branding/brand-theme.js') }}?v=20260408operator1"></script>
         {% endblock %}
     {% endblock %}
     {{ external_javascript_dependencies() }}
@@ -27,13 +27,17 @@
                         {# We keep the "AknLogin-title" class for the compatibility with the following behat step: \Pim\Behat\Context\NavigationContext::iAmLoggedInThroughTheUi #}
                         <div class="Logo AknLogin-title">
                             {%- block brandLogo -%}
-                                <img
-                                    class="BrandLogo-image"
-                                    src="{{ asset('branding/brand-logo.png') }}?v=20260313c"
-                                    alt="Company logo"
-                                    width="132"
-                                    height="179"
-                                />
+                                <div class="BrandLogo-lockup">
+                                    <img
+                                        class="BrandLogo-image"
+                                        src="{{ asset('branding/brand-logo.png') }}?v=20260313c"
+                                        alt="Operator logo"
+                                        width="132"
+                                        height="179"
+                                    />
+                                    <div class="BrandLogo-wordmark">Operator</div>
+                                    <div class="BrandLogo-tagline">Epic Global's commerce control plane for catalog, assets, and marketplace operations.</div>
+                                </div>
                             {%- endblock -%}
                         </div>
                         <div class="ContainerForm">
@@ -57,9 +61,9 @@
                     </div>
                     <a class="Footer" href="{{ path('pim_user_security_login') }}">
                         <div class="Powered">
-                            Powered by Akeneo PIM
+                            Operator
                         </div>
-                        <div class="BaseLine">Product information management with your brand identity</div>
+                        <div class="BaseLine">Catalog, DAM, workflow, and marketplace operations in one Epic Global workspace.</div>
                     </a>
                 </div>
                 <div class="RightWrapper">

@@ -1,6 +1,6 @@
 # Marketplace Orchestrator
 
-This service is the Coppermind-owned orchestration layer on top of Akeneo and ResourceSpace.
+This service is the Operator-owned orchestration layer on top of Akeneo and ResourceSpace.
 
 It now does more than marketplace readiness checks:
 
@@ -28,7 +28,7 @@ The API is exposed at `http://localhost:8090`.
 
 ## Data model
 
-The worker persists state in MySQL-backed `coppermind_marketplace_*` tables:
+The worker persists state in MySQL-backed `coppermind_marketplace_*` tables that underpin the Operator orchestration runtime:
 
 - catalog
 - jobs

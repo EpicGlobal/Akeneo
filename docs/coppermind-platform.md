@@ -1,14 +1,14 @@
-# Coppermind Platform Layer
+# Operator Platform Layer
 
 This repo now has three distinct layers:
 
 1. Akeneo Community Edition as the core product-information engine.
 2. ResourceSpace as the core digital-asset system.
-3. Coppermind-owned orchestration, governance, and tenant operations on top.
+3. Operator-owned orchestration, governance, and tenant operations on top.
 
 The third layer is where the product becomes meaningfully yours.
 
-## What belongs in the Coppermind layer
+## What belongs in the Operator layer
 
 - Governance: attribute lifecycle, reference data stewardship, validation policy, approval flows, and publish blockers.
 - Marketplace orchestration: channel-specific enrichment, taxonomy mapping, listing generation, submission retries, and feedback loops.
@@ -23,7 +23,7 @@ Akeneo should stay focused on product authoring, product modeling, catalog struc
 
 ResourceSpace should stay focused on asset storage, previewing, metadata, and asset retrieval.
 
-Coppermind-owned services should handle the differentiated logic that spans systems or external channels:
+Operator-owned services should handle the differentiated logic that spans systems or external channels:
 
 - policy evaluation,
 - tenant-scoped connector settings,
@@ -46,7 +46,7 @@ That is the start of tenant isolation for connector credentials and write-back p
 
 ### Marketplace orchestration service
 
-The first standalone Coppermind service now lives in `services/marketplace-orchestrator`.
+The first standalone Operator service now lives in `services/marketplace-orchestrator`.
 
 Its current role is to:
 

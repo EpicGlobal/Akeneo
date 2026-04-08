@@ -19,9 +19,9 @@ DEPLOY_PARAMETER_PREFIX="${DEPLOY_PARAMETER_PREFIX:-}"
 RESOURCE_SPACE_TENANT_CODE="${RESOURCE_SPACE_TENANT_CODE:-default}"
 COPPERMIND_DEFAULT_TENANT_CODE_VALUE="${COPPERMIND_DEFAULT_TENANT_CODE_VALUE:-default}"
 RESOURCE_SPACE_ADMIN_USERNAME_VALUE="${RESOURCE_SPACE_ADMIN_USERNAME_VALUE:-admin}"
-RESOURCE_SPACE_ADMIN_FULLNAME_VALUE="${RESOURCE_SPACE_ADMIN_FULLNAME_VALUE:-Epic Global DAM Admin}"
+RESOURCE_SPACE_ADMIN_FULLNAME_VALUE="${RESOURCE_SPACE_ADMIN_FULLNAME_VALUE:-Operator DAM Admin}"
 RESOURCE_SPACE_ADMIN_EMAIL_VALUE="${RESOURCE_SPACE_ADMIN_EMAIL_VALUE:-jorgen@epicglobalinc.com}"
-RESOURCE_SPACE_APPLICATION_NAME_VALUE="${RESOURCE_SPACE_APPLICATION_NAME_VALUE:-Epic Global DAM}"
+RESOURCE_SPACE_APPLICATION_NAME_VALUE="${RESOURCE_SPACE_APPLICATION_NAME_VALUE:-Operator Assets}"
 RESOURCE_SPACE_EMAIL_FROM_VALUE="${RESOURCE_SPACE_EMAIL_FROM_VALUE:-no-reply@epicglobalinc.com}"
 RESOURCE_SPACE_EMAIL_NOTIFY_VALUE="${RESOURCE_SPACE_EMAIL_NOTIFY_VALUE:-jorgen@epicglobalinc.com}"
 RESOURCE_SPACE_SEARCH_TEMPLATE_VALUE="${RESOURCE_SPACE_SEARCH_TEMPLATE_VALUE:-akeneo_links:%s}"
@@ -136,7 +136,7 @@ custom_migrations=(
 )
 
 # Akeneo's installer baselines every discovered migration as executed on a fresh install.
-# Replay only the Coppermind migrations so their schema is actually created.
+# Replay only the custom Operator migrations so their schema is actually created.
 for migration in "${custom_migrations[@]}"; do
   sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console doctrine:migrations:version '$migration' --delete --env=prod --no-interaction"
 done
@@ -145,7 +145,7 @@ sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php 
 sg docker -c "cd '$PROJECT_ROOT' && make resourcespace-up"
 sg docker -c "cd '$PROJECT_ROOT' && make marketplace-up"
 
-sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console coppermind:resourcespace:tenant:configure --env=prod --no-interaction --tenant='$RESOURCE_SPACE_TENANT_CODE' --label='Epic Global Default Tenant' --status='active' --enabled=true --base-uri='$RESOURCE_SPACE_BASE_URI_VALUE' --internal-base-uri='$RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE' --api-user='$RESOURCE_SPACE_ADMIN_USERNAME_VALUE' --api-key='$RESOURCE_SPACE_PRIVATE_API_KEY_VALUE' --default-attribute='${RESOURCE_SPACE_DEFAULT_ATTRIBUTE_CODE_VALUE:-}' --writeback-enabled=true --writeback-identifier-field='akeneo_identifier' --writeback-uuid-field='akeneo_product_uuid' --writeback-owner-type-field='akeneo_owner_type' --writeback-links-field='akeneo_links'"
+sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php bin/console coppermind:resourcespace:tenant:configure --env=prod --no-interaction --tenant='$RESOURCE_SPACE_TENANT_CODE' --label='Operator Default Tenant' --status='active' --enabled=true --base-uri='$RESOURCE_SPACE_BASE_URI_VALUE' --internal-base-uri='$RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE' --api-user='$RESOURCE_SPACE_ADMIN_USERNAME_VALUE' --api-key='$RESOURCE_SPACE_PRIVATE_API_KEY_VALUE' --default-attribute='${RESOURCE_SPACE_DEFAULT_ATTRIBUTE_CODE_VALUE:-}' --writeback-enabled=true --writeback-identifier-field='akeneo_identifier' --writeback-uuid-field='akeneo_product_uuid' --writeback-owner-type-field='akeneo_owner_type' --writeback-links-field='akeneo_links'"
 
 sg docker -c "cd '$PROJECT_ROOT' && docker compose stop php node selenium blackfire pubsub-emulator || true"
 
@@ -153,6 +153,6 @@ curl -fsS "$PIM_URL" > /dev/null
 curl -fsS "$RESOURCE_SPACE_BASE_URI_VALUE" > /dev/null
 curl -fsS http://127.0.0.1:8090/health > /dev/null
 
-echo "Epic Global Akeneo deployment completed."
-echo "PIM URL: $PIM_URL"
-echo "DAM URL: $RESOURCE_SPACE_BASE_URI_VALUE"
+echo "Operator deployment completed."
+echo "Operator URL: $PIM_URL"
+echo "Assets URL: $RESOURCE_SPACE_BASE_URI_VALUE"

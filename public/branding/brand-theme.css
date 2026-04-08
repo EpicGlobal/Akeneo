@@ -434,11 +434,34 @@ textarea:focus,
   margin-bottom: 28px;
 }
 
+.BrandShell--login .BrandLogo-lockup {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+
 .BrandShell--login .BrandLogo-image {
   width: 132px;
   height: auto;
   max-width: none;
   max-height: none;
+}
+
+.BrandShell--login .BrandLogo-wordmark {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand-green-dark);
+}
+
+.BrandShell--login .BrandLogo-tagline {
+  max-width: 300px;
+  margin: 0 auto;
+  color: #5f7367;
+  font-size: 13px;
+  line-height: 1.6;
+  text-align: center;
 }
 
 .BrandShell--login .Footer {
@@ -491,6 +514,10 @@ textarea:focus,
     margin-top: 24px;
     margin-bottom: 24px;
     padding: 52px 28px 28px;
+  }
+
+  .BrandShell--login .BrandLogo-wordmark {
+    font-size: 24px;
   }
 
   .BrandShell--login .Footer .BaseLine {

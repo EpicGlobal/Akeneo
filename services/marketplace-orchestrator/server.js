@@ -164,7 +164,7 @@ function renderDashboardPage() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Coppermind Marketplace Dashboard</title>
+  <title>Operator Marketplace Dashboard</title>
   <style>
     :root { color-scheme: light; }
     body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f4f7fb; color: #1f3043; }
@@ -192,7 +192,7 @@ function renderDashboardPage() {
 <body>
   <div class="wrap">
     <div class="hero">
-      <h1>Coppermind Marketplace Operations</h1>
+      <h1>Operator Marketplace Operations</h1>
       <div class="muted">Queue depth, Amazon readiness, pilot-family cutover, alerts, and recent runs.</div>
     </div>
     <div id="app" class="empty">Loading dashboard...</div>

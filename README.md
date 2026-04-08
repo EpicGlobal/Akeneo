@@ -61,15 +61,17 @@ Changelog
 ---------
 You can check out the changelog files in https://github.com/akeneo/pim-community-dev.
 
-ResourceSpace Integration
--------------------------
+Operator Stack
+--------------
 
-This project includes a custom ResourceSpace integration bundle for Akeneo product and product-model edit forms.
+This repository is the Operator catalog and asset stack: Akeneo Community Edition with Epic Global's custom governance, DAM, and marketplace orchestration layers on top.
 
 Setup notes live in [docs/resourcespace.md](docs/resourcespace.md).
 SaaS rollout notes live in [docs/saas-readiness.md](docs/saas-readiness.md).
-Coppermind platform boundary notes live in [docs/coppermind-platform.md](docs/coppermind-platform.md).
+Operator platform boundary notes live in [docs/coppermind-platform.md](docs/coppermind-platform.md).
 Amazon marketplace automation notes live in [docs/amazon-marketplace.md](docs/amazon-marketplace.md).
+Epic AWS deployment notes live in [docs/aws-epic-deployment.md](docs/aws-epic-deployment.md).
+DNS and TLS cutover notes for `operator.epicglobalinc.com` live in [docs/operator-dns-cutover.md](docs/operator-dns-cutover.md).
 
 For local development:
 

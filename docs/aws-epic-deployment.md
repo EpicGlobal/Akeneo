@@ -1,6 +1,12 @@
-# Epic Global AWS Deployment
+# Operator AWS Deployment
 
-This repository can be deployed into Epic Global AWS accounts with the existing Docker Compose runtime and the Epic-specific bootstrap wrapper.
+This repository deploys the Operator application stack into Epic Global AWS accounts with the existing Docker Compose runtime and the Epic-specific bootstrap wrapper.
+
+The runtime still uses the current parameter prefix and bootstrap scripts:
+
+- Parameter Store prefix: `/epic-global/akeneo-pim/prod`
+- Deploy wrapper: `scripts/aws-epic-deploy.sh`
+- EC2 bootstrap helper: `scripts/aws-ec2-bootstrap.sh`
 
 ## Production
 
@@ -29,12 +35,23 @@ bash scripts/aws-ec2-bootstrap.sh <public-ip-or-url>
 - writes the required `.env` values for Akeneo, ResourceSpace, and object storage
 - derives the ResourceSpace private API key for the bootstrap admin user from `RESOURCE_SPACE_API_SCRAMBLE_KEY`
 - runs the existing `scripts/aws-first-run.sh` bootstrap
-- replays the Coppermind migrations that Akeneo's installer marks as executed during a fresh catalog install
+- replays the custom Operator platform migrations that Akeneo's installer marks as executed during a fresh catalog install
 - runs Doctrine migrations
 - starts ResourceSpace plus background workers
 - installs the marketplace orchestrator Node dependencies once, then starts the orchestrator plus worker
 - configures the default tenant-scoped ResourceSpace connection
 - stops non-runtime Akeneo helper containers after the build completes
+
+## Current Epic Prod Footprint
+
+Verified in `epic-prod` / `us-west-2` on April 8, 2026:
+
+- EC2 instance: `i-0f11f729d8189d6a9` (`epic-akeneo-pim-prod`)
+- Elastic IP: `184.32.65.221`
+- VPC: `vpc-0b9e25c427bb6d0a3`
+- Security group: `sg-06c8ff6aa947ca771`
+
+The current public entrypoint is still the raw IP. The Operator hostname cutover plan lives in [docs/operator-dns-cutover.md](operator-dns-cutover.md).
 
 ## Required Parameter Store Keys
 

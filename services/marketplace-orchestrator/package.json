@@ -2,7 +2,7 @@
   "name": "@coppermind/marketplace-orchestrator",
   "private": true,
   "version": "0.1.0",
-  "description": "Standalone tenant-aware marketplace orchestration service for Coppermind",
+  "description": "Standalone tenant-aware marketplace orchestration service for Operator",
   "type": "commonjs",
   "dependencies": {
     "mysql2": "^3.15.2"
