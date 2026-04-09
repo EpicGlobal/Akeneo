@@ -21,6 +21,23 @@ fi
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$PROJECT_ROOT/.env"
 APP_SECRET_VALUE="${APP_SECRET_VALUE:-$(openssl rand -hex 32)}"
+RUNTIME_USER="${BOOTSTRAP_USER:-${SUDO_USER:-${USER:-}}}"
+
+if [[ -z "$RUNTIME_USER" ]]; then
+  if id -u ubuntu >/dev/null 2>&1; then
+    RUNTIME_USER="ubuntu"
+  else
+    RUNTIME_USER="$(id -un)"
+  fi
+fi
+
+RUNTIME_HOME="${HOME:-}"
+if [[ -z "$RUNTIME_HOME" ]]; then
+  RUNTIME_HOME="$(getent passwd "$RUNTIME_USER" | cut -d: -f6)"
+fi
+
+export HOME="$RUNTIME_HOME"
+export USER="$RUNTIME_USER"
 
 dotenv_escape() {
   local value="$1"
