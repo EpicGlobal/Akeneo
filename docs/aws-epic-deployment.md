@@ -28,6 +28,8 @@ powershell -ExecutionPolicy Bypass -File "scripts\aws-epic-stage-deploy.ps1"
 
 That script provisions a dedicated dev EC2 instance, Elastic IP, security group, IAM role/profile, backup bucket, CloudWatch dashboard/alarms, and SSM parameter set under `/epic-global/akeneo-pim/dev`, then bootstraps the repo on the new host.
 
+On reruns, the staging wrapper restores the server-side tracked `.env` to the repo baseline before overlaying the Parameter Store values, removes any stale `.env.local`, validates the Operator, DAM, and marketplace health endpoints, and ensures the default admin user exists.
+
 ## Fresh Host Bootstrap
 
 If the host does not already have Docker and the repo checked out:
@@ -51,6 +53,7 @@ bash scripts/aws-ec2-bootstrap.sh <public-ip-or-url>
 - installs the marketplace orchestrator Node dependencies once, then starts the orchestrator plus worker
 - configures the default tenant-scoped ResourceSpace connection
 - stops non-runtime Akeneo helper containers after the build completes
+- validates the PIM, DAM, and marketplace health endpoints before reporting success
 
 ## Current Epic Prod Footprint
 

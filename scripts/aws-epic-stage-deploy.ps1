@@ -312,6 +312,36 @@ function Wait-ForSsm {
     throw "Instance $InstanceId did not come online in SSM."
 }
 
+function Wait-ForCommandInvocation {
+    param(
+        [string]$CommandId,
+        [string]$InstanceId,
+        [int]$TimeoutMinutes = 45
+    )
+
+    $deadline = (Get-Date).AddMinutes($TimeoutMinutes)
+
+    while ((Get-Date) -lt $deadline) {
+        $status = Invoke-AwsText @("ssm", "get-command-invocation", "--command-id", $CommandId, "--instance-id", $InstanceId, "--query", "Status")
+        switch ($status.Trim()) {
+            "Pending" { Start-Sleep -Seconds 15; continue }
+            "Delayed" { Start-Sleep -Seconds 15; continue }
+            "InProgress" { Start-Sleep -Seconds 15; continue }
+            "Success" {
+                return [pscustomobject]@{
+                    Status = "Success"
+                }
+            }
+            default {
+                $stderr = Invoke-AwsText @("ssm", "get-command-invocation", "--command-id", $CommandId, "--instance-id", $InstanceId, "--query", "StandardErrorContent")
+                throw "SSM command $CommandId failed with status $($status.Trim()): $stderr"
+            }
+        }
+    }
+
+    throw "Timed out waiting for SSM command $CommandId on $InstanceId to complete."
+}
+
 function Write-Monitoring {
     param([string]$InstanceId, [string]$DashboardName)
 
@@ -404,6 +434,8 @@ $commands = @(
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim fetch origin master",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim checkout master",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim pull --ff-only origin master",
+    "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim checkout -- .env",
+    "rm -f /home/ubuntu/akeneo-pim/.env.local",
     "cd /home/ubuntu/akeneo-pim",
     "export PROJECT_DIR=/home/ubuntu/akeneo-pim",
     "export REPO_URL=https://github.com/EpicGlobal/Akeneo.git",
@@ -413,6 +445,9 @@ $commands = @(
     "export BOOTSTRAP_USER=$BOOTSTRAP_USER",
     "bash scripts/aws-ec2-bootstrap.sh http://$publicIp",
     "cd /home/ubuntu/akeneo-pim",
+    "grep -q '^AKENEO_PIM_URL=""http://$publicIp""' /home/ubuntu/akeneo-pim/.env",
+    "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$publicIp:8081""' /home/ubuntu/akeneo-pim/.env",
+    "grep -q '^OPERATOR_CONTROL_PLANE_TOKEN=""' /home/ubuntu/akeneo-pim/.env",
     "sg docker -c ""cd '/home/ubuntu/akeneo-pim' && docker compose run -u www-data --rm php php bin/console pim:user:create jorgen ShardplatePower13 jorgen@epicglobalinc.com Jorgen Jensen en_US --admin -n || true"""
 )
 
@@ -429,8 +464,7 @@ $send = Invoke-AwsJson @(
 
 $commandId = $send.Command.CommandId
 Write-Host "Waiting for bootstrap command $commandId on $instanceId..."
-Invoke-AwsNoOutput -Arguments @("ssm", "wait", "command-executed", "--command-id", $commandId, "--instance-id", $instanceId)
-$invocation = Invoke-AwsJson @("ssm", "get-command-invocation", "--command-id", $commandId, "--instance-id", $instanceId)
+$invocation = Wait-ForCommandInvocation -CommandId $commandId -InstanceId $instanceId
 
 Write-Host ""
 Write-Host "Operator staging deployment complete."
@@ -439,6 +473,10 @@ Write-Host "Region: $Region"
 Write-Host "InstanceId: $instanceId"
 Write-Host "PublicIp: $publicIp"
 Write-Host "URL: http://$publicIp/"
+Write-Host "Assets URL: http://$publicIp:8081/"
 Write-Host "Backup bucket: s3://$backupBucket"
 Write-Host "Dashboard: $dashboardName"
 Write-Host "SSM command status: $($invocation.Status)"
+Write-Host "Operator admin username: jorgen"
+Write-Host "Operator admin email: jorgen@epicglobalinc.com"
+Write-Host "Operator admin password: ShardplatePower13"

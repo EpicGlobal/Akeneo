@@ -16,6 +16,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$PROJECT_ROOT/.env"
 AWS_REGION="${AWS_REGION:-us-west-2}"
 DEPLOY_PARAMETER_PREFIX="${DEPLOY_PARAMETER_PREFIX:-}"
+RUNTIME_USER="${BOOTSTRAP_USER:-${SUDO_USER:-${USER:-}}}"
 RESOURCE_SPACE_TENANT_CODE="${RESOURCE_SPACE_TENANT_CODE:-default}"
 COPPERMIND_DEFAULT_TENANT_CODE_VALUE="${COPPERMIND_DEFAULT_TENANT_CODE_VALUE:-default}"
 RESOURCE_SPACE_ADMIN_USERNAME_VALUE="${RESOURCE_SPACE_ADMIN_USERNAME_VALUE:-admin}"
@@ -46,6 +47,25 @@ fi
 RESOURCE_SPACE_BASE_URI_VALUE="${RESOURCE_SPACE_BASE_URI_VALUE:-http://${TARGET_HOST}:8081}"
 RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE="${RESOURCE_SPACE_INTERNAL_BASE_URI_VALUE:-http://resourcespace}"
 MARKETPLACE_ORCHESTRATOR_BASE_URI_VALUE="${MARKETPLACE_ORCHESTRATOR_BASE_URI_VALUE:-http://marketplace-orchestrator:8090}"
+LOCAL_PIM_HEALTH_URI="${LOCAL_PIM_HEALTH_URI:-http://127.0.0.1/}"
+LOCAL_RESOURCE_SPACE_HEALTH_URI="${LOCAL_RESOURCE_SPACE_HEALTH_URI:-http://127.0.0.1:8081/}"
+LOCAL_MARKETPLACE_HEALTH_URI="${LOCAL_MARKETPLACE_HEALTH_URI:-http://127.0.0.1:8090/health}"
+
+if [[ -z "$RUNTIME_USER" ]]; then
+  if id -u ubuntu >/dev/null 2>&1; then
+    RUNTIME_USER="ubuntu"
+  else
+    RUNTIME_USER="$(id -un)"
+  fi
+fi
+
+RUNTIME_HOME="${HOME:-}"
+if [[ -z "$RUNTIME_HOME" ]]; then
+  RUNTIME_HOME="$(getent passwd "$RUNTIME_USER" | cut -d: -f6)"
+fi
+
+export HOME="$RUNTIME_HOME"
+export USER="$RUNTIME_USER"
 
 dotenv_escape() {
   local value="$1"
@@ -77,6 +97,24 @@ get_parameter() {
     --name "$name" \
     --query 'Parameter.Value' \
     --output text
+}
+
+wait_for_http_url() {
+  local url="$1"
+  local label="$2"
+  local attempts="${3:-60}"
+  local sleep_seconds="${4:-5}"
+
+  for ((attempt=1; attempt<=attempts; attempt++)); do
+    if curl -fsS --max-time 15 "$url" > /dev/null; then
+      return 0
+    fi
+
+    sleep "$sleep_seconds"
+  done
+
+  echo "Timed out waiting for ${label} at ${url}" >&2
+  return 1
 }
 
 if [[ -n "$DEPLOY_PARAMETER_PREFIX" ]]; then
@@ -153,9 +191,9 @@ sg docker -c "cd '$PROJECT_ROOT' && docker compose run -u www-data --rm php php 
 
 sg docker -c "cd '$PROJECT_ROOT' && docker compose stop php node selenium blackfire pubsub-emulator || true"
 
-curl -fsS "$PIM_URL" > /dev/null
-curl -fsS "$RESOURCE_SPACE_BASE_URI_VALUE" > /dev/null
-curl -fsS http://127.0.0.1:8090/health > /dev/null
+wait_for_http_url "$LOCAL_PIM_HEALTH_URI" "Operator PIM"
+wait_for_http_url "$LOCAL_RESOURCE_SPACE_HEALTH_URI" "Operator DAM"
+wait_for_http_url "$LOCAL_MARKETPLACE_HEALTH_URI" "marketplace orchestrator"
 
 echo "Operator deployment completed."
 echo "Operator URL: $PIM_URL"
