@@ -404,6 +404,7 @@ $commands = @(
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim fetch origin master",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim checkout master",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim pull --ff-only origin master",
+    "cd /home/ubuntu/akeneo-pim",
     "export PROJECT_DIR=/home/ubuntu/akeneo-pim",
     "export REPO_URL=https://github.com/EpicGlobal/Akeneo.git",
     "export BOOTSTRAP_SCRIPT=scripts/aws-epic-deploy.sh",
