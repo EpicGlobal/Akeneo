@@ -713,68 +713,69 @@ define(
 
         var style = document.createElement('style');
         style.id = STYLE_ID;
-        style.textContent = '' +
-          '.CoppermindResourceSpaceTab{padding:20px 0 32px;}' +
-          '.CoppermindResourceSpaceTab-loading,.CoppermindResourceSpaceTab-empty{padding:28px;border:1px dashed rgba(0,0,0,.14);border-radius:18px;background:linear-gradient(180deg,#ffffff 0%,#f8fbf2 100%);color:#4e5b49;box-shadow:0 10px 24px rgba(26,26,26,.04);}' +
-          '.CoppermindResourceSpaceTab-emptySmall{color:#667063;font-size:13px;}' +
-          '.CoppermindResourceSpaceTab-header{display:grid;gap:12px;margin-bottom:16px;}' +
-          '.CoppermindResourceSpaceTab-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}' +
-          '.CoppermindResourceSpaceTab-search{min-width:280px;flex:1 1 320px;}' +
-          '.CoppermindResourceSpaceTab-note{padding:12px 14px;border-radius:14px;border:1px solid rgba(124,179,66,.18);background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(241,248,233,.94) 100%);color:var(--brand-green-dark,#558b2f);font-size:13px;}' +
-          '.CoppermindResourceSpaceTab-note--warning{border-color:rgba(255,140,66,.24);background:linear-gradient(180deg,#fff7ef 0%,#fff1e1 100%);color:#96531d;}' +
-          '.CoppermindResourceSpaceTab-overviewGrid{margin-bottom:18px;}' +
-          '.CoppermindResourceSpaceTab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start;}' +
-          '.CoppermindResourceSpaceTab-panel{background:linear-gradient(180deg,rgba(255,255,255,.98) 0%,rgba(241,248,233,.96) 100%);border:1px solid rgba(0,0,0,.08);border-radius:24px;box-shadow:0 18px 40px rgba(26,26,26,.08);overflow:hidden;}' +
-          '.CoppermindResourceSpaceTab-panel--wide{overflow:visible;}' +
-          '.CoppermindResourceSpaceTab-panelHeader{padding:16px 18px;border-bottom:1px solid rgba(0,0,0,.06);box-shadow:inset 0 3px 0 var(--brand-green,#7cb342);font-size:15px;font-weight:700;color:var(--brand-green-dark,#558b2f);background:linear-gradient(180deg,rgba(124,179,66,.08) 0%,rgba(124,179,66,0) 56px),rgba(255,255,255,.92);}' +
-          '.CoppermindResourceSpaceTab-overviewBody{padding:18px;display:grid;gap:16px;}' +
-          '.CoppermindResourceSpaceTab-statGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}' +
-          '.CoppermindResourceSpaceTab-statCard{padding:14px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(241,248,233,.9) 100%);border:1px solid rgba(124,179,66,.14);box-shadow:0 10px 22px rgba(26,26,26,.04);}' +
-          '.CoppermindResourceSpaceTab-statLabel{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#6f7b63;}' +
-          '.CoppermindResourceSpaceTab-statValue{margin-top:6px;font-size:22px;font-weight:700;color:var(--brand-green-dark,#558b2f);}' +
-          '.CoppermindResourceSpaceTab-section{display:grid;gap:10px;}' +
-          '.CoppermindResourceSpaceTab-sectionTitle{font-size:13px;font-weight:700;color:var(--brand-blue-dark,#148cb8);text-transform:uppercase;letter-spacing:.04em;}' +
-          '.CoppermindResourceSpaceTab-list,.CoppermindResourceSpaceTab-cardList{display:grid;gap:10px;}' +
-          '.CoppermindResourceSpaceTab-listItem{padding:12px 14px;border:1px solid rgba(0,0,0,.07);border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(248,251,242,.86) 100%);}' +
-          '.CoppermindResourceSpaceTab-listItem--warning{background:linear-gradient(180deg,#fff8f0 0%,#fff2e5 100%);border-color:rgba(255,140,66,.24);}' +
-          '.CoppermindResourceSpaceTab-listItemHead{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;}' +
-          '.CoppermindResourceSpaceTab-listBadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;background:rgba(28,167,216,.12);color:var(--brand-blue-dark,#148cb8);font-size:11px;font-weight:700;margin-right:8px;}' +
-          '.CoppermindResourceSpaceTab-listItemMeta,.CoppermindResourceSpaceTab-cardMeta{font-size:12px;color:#667063;}' +
-          '.CoppermindResourceSpaceTab-stageName{font-size:14px;font-weight:700;color:var(--brand-green-dark,#558b2f);}' +
-          '.CoppermindResourceSpaceTab-targetGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}' +
-          '.CoppermindResourceSpaceTab-targetCard{padding:14px;border:1px solid rgba(0,0,0,.07);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(241,248,233,.92) 100%);display:grid;gap:8px;box-shadow:0 10px 22px rgba(26,26,26,.05);}' +
-          '.CoppermindResourceSpaceTab-targetHead{display:flex;justify-content:space-between;gap:10px;align-items:center;}' +
-          '.CoppermindResourceSpaceTab-targetTitle{font-weight:700;color:var(--brand-green-dark,#558b2f);}' +
-          '.CoppermindResourceSpaceTab-targetMeta{font-size:12px;color:#60705e;line-height:1.45;}' +
-          '.CoppermindResourceSpaceTab-targetIssues{display:grid;gap:6px;margin-top:4px;}' +
-          '.CoppermindResourceSpaceTab-targetIssue{font-size:12px;color:#914c00;background:linear-gradient(180deg,#fff6eb 0%,#fff1e2 100%);border-radius:12px;padding:8px 10px;border:1px solid rgba(255,140,66,.18);}' +
-          '.CoppermindResourceSpaceTab-card{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:18px;border-bottom:1px solid rgba(0,0,0,.05);background:linear-gradient(180deg,rgba(255,255,255,.72) 0%,rgba(241,248,233,.3) 100%);}' +
-          '.CoppermindResourceSpaceTab-card:last-child{border-bottom:none;}' +
-          '.CoppermindResourceSpaceTab-card--busy{opacity:.7;}' +
-          '.CoppermindResourceSpaceTab-cardPreview{width:120px;height:120px;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#f7fbff 0%,#f1f8e9 100%);display:flex;align-items:center;justify-content:center;border:1px solid rgba(124,179,66,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.8);}' +
-          '.CoppermindResourceSpaceTab-cardPreview img{width:100%;height:100%;object-fit:cover;display:block;}' +
-          '.CoppermindResourceSpaceTab-noPreview{padding:12px;text-align:center;font-size:12px;color:#667063;}' +
-          '.CoppermindResourceSpaceTab-cardBody{display:grid;gap:10px;min-width:0;}' +
-          '.CoppermindResourceSpaceTab-cardHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}' +
-          '.CoppermindResourceSpaceTab-cardTitle{font-size:16px;font-weight:700;color:var(--brand-green-dark,#558b2f);word-break:break-word;}' +
-          '.CoppermindResourceSpaceTab-badgeRow,.CoppermindResourceSpaceTab-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}' +
-          '.CoppermindResourceSpaceTab-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}' +
-          '.CoppermindResourceSpaceTab-badge--linked,.CoppermindResourceSpaceTab-badge--success,.CoppermindResourceSpaceTab-badge--ready,.CoppermindResourceSpaceTab-badge--approved,.CoppermindResourceSpaceTab-badge--succeeded{background:rgba(124,179,66,.16);color:var(--brand-green-dark,#558b2f);}' +
-          '.CoppermindResourceSpaceTab-badge--primary,.CoppermindResourceSpaceTab-badge--neutral{background:rgba(28,167,216,.12);color:var(--brand-blue-dark,#148cb8);}' +
-          '.CoppermindResourceSpaceTab-badge--warning,.CoppermindResourceSpaceTab-badge--pending{background:rgba(255,140,66,.16);color:#8a5200;}' +
-          '.CoppermindResourceSpaceTab-badge--danger,.CoppermindResourceSpaceTab-badge--failed,.CoppermindResourceSpaceTab-badge--rejected,.CoppermindResourceSpaceTab-badge--blocked{background:rgba(211,47,47,.12);color:#a12e2b;}' +
-          '.CoppermindResourceSpaceTab-badge--not_requested{background:#edf0f4;color:#5e6e81;}' +
-          '.CoppermindResourceSpaceTab-cardSection{display:grid;gap:6px;}' +
-          '.CoppermindResourceSpaceTab-inlineLabel{font-size:12px;font-weight:700;color:#60705e;text-transform:uppercase;letter-spacing:.04em;}' +
-          '.CoppermindResourceSpaceTab-roleSelect{max-width:260px;}' +
-          '.CoppermindResourceSpaceTab-metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px 12px;}' +
-          '.CoppermindResourceSpaceTab-metadataItem{font-size:12px;color:#2f3f2f;line-height:1.45;}' +
-          '.CoppermindResourceSpaceTab-metadataLabel{display:block;color:#6b7b63;font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:11px;margin-bottom:2px;}' +
-          '.CoppermindResourceSpaceTab-inlineNote{padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.45;}' +
-          '.CoppermindResourceSpaceTab-inlineNote--warning{background:linear-gradient(180deg,#fff7ef 0%,#fff1e1 100%);color:#8d5300;border:1px solid rgba(255,140,66,.18);}' +
-          '.CoppermindResourceSpaceTab-inlineNote--danger{background:linear-gradient(180deg,#fff3f3 0%,#fdeceb 100%);color:#9e2a2a;border:1px solid rgba(211,47,47,.12);}' +
-          '.CoppermindResourceSpaceTab-inlineNote--success{background:linear-gradient(180deg,#f8fdf4 0%,#edf7e3 100%);color:var(--brand-green-dark,#558b2f);border:1px solid rgba(124,179,66,.16);}' +
-          '@media (max-width: 900px){.CoppermindResourceSpaceTab-card{grid-template-columns:1fr;}.CoppermindResourceSpaceTab-cardPreview{width:100%;height:220px;}.CoppermindResourceSpaceTab-cardHead{flex-direction:column;align-items:flex-start;}.CoppermindResourceSpaceTab-toolbar{align-items:stretch;}.CoppermindResourceSpaceTab-search{min-width:0;width:100%;}}';
+        style.textContent = [
+          '.CoppermindResourceSpaceTab{padding:20px 0 32px;color:var(--brand-ink,#1a1a1a);}',
+          '.CoppermindResourceSpaceTab-loading,.CoppermindResourceSpaceTab-empty{padding:28px;border:1px dashed rgba(0,0,0,.12);border-radius:14px;background:#fff;color:#4e5b49;box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);}',
+          '.CoppermindResourceSpaceTab-emptySmall{color:#667063;font-size:13px;}',
+          '.CoppermindResourceSpaceTab-header{display:grid;gap:12px;margin-bottom:16px;}',
+          '.CoppermindResourceSpaceTab-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}',
+          '.CoppermindResourceSpaceTab-search{min-width:280px;flex:1 1 320px;}',
+          '.CoppermindResourceSpaceTab-note{padding:12px 14px;border-radius:10px;border:1px solid rgba(124,179,66,.18);background:rgba(241,248,233,.72);color:var(--brand-green-dark,#558b2f);font-size:13px;}',
+          '.CoppermindResourceSpaceTab-note--warning{border-color:rgba(255,140,66,.24);background:rgba(255,243,232,.9);color:#96531d;}',
+          '.CoppermindResourceSpaceTab-overviewGrid{margin-bottom:18px;}',
+          '.CoppermindResourceSpaceTab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:18px;align-items:start;}',
+          '.CoppermindResourceSpaceTab-panel{background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;box-shadow:0 4px 6px rgba(0,0,0,.1),0 2px 4px rgba(0,0,0,.06);overflow:hidden;}',
+          '.CoppermindResourceSpaceTab-panel--wide{overflow:visible;}',
+          '.CoppermindResourceSpaceTab-panelHeader{padding:16px 18px;border-bottom:1px solid rgba(0,0,0,.06);font-size:15px;font-weight:700;color:var(--brand-green-dark,#558b2f);background:linear-gradient(180deg,rgba(239,246,255,.72) 0%,#fff 100%);}',
+          '.CoppermindResourceSpaceTab-overviewBody{padding:18px;display:grid;gap:16px;}',
+          '.CoppermindResourceSpaceTab-statGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}',
+          '.CoppermindResourceSpaceTab-statCard{padding:14px;border-radius:10px;background:#fff;border:1px solid rgba(0,0,0,.08);box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);}',
+          '.CoppermindResourceSpaceTab-statLabel{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:#6f7b63;}',
+          '.CoppermindResourceSpaceTab-statValue{margin-top:6px;font-size:22px;font-weight:700;color:var(--brand-green-dark,#558b2f);}',
+          '.CoppermindResourceSpaceTab-section{display:grid;gap:10px;}',
+          '.CoppermindResourceSpaceTab-sectionTitle{font-size:13px;font-weight:700;color:var(--brand-blue-dark,#148cb8);text-transform:uppercase;letter-spacing:.04em;}',
+          '.CoppermindResourceSpaceTab-list,.CoppermindResourceSpaceTab-cardList{display:grid;gap:10px;}',
+          '.CoppermindResourceSpaceTab-listItem{padding:12px 14px;border:1px solid rgba(0,0,0,.07);border-radius:10px;background:#fff;}',
+          '.CoppermindResourceSpaceTab-listItem--warning{background:#fff7ef;border-color:rgba(255,140,66,.24);}',
+          '.CoppermindResourceSpaceTab-listItemHead{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;}',
+          '.CoppermindResourceSpaceTab-listBadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;background:rgba(28,167,216,.12);color:var(--brand-blue-dark,#148cb8);font-size:11px;font-weight:700;margin-right:8px;}',
+          '.CoppermindResourceSpaceTab-listItemMeta,.CoppermindResourceSpaceTab-cardMeta{font-size:12px;color:#667063;}',
+          '.CoppermindResourceSpaceTab-stageName{font-size:14px;font-weight:700;color:var(--brand-green-dark,#558b2f);}',
+          '.CoppermindResourceSpaceTab-targetGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}',
+          '.CoppermindResourceSpaceTab-targetCard{padding:14px;border:1px solid rgba(0,0,0,.07);border-radius:12px;background:#fff;display:grid;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);}',
+          '.CoppermindResourceSpaceTab-targetHead{display:flex;justify-content:space-between;gap:10px;align-items:center;}',
+          '.CoppermindResourceSpaceTab-targetTitle{font-weight:700;color:var(--brand-green-dark,#558b2f);}',
+          '.CoppermindResourceSpaceTab-targetMeta{font-size:12px;color:#60705e;line-height:1.45;}',
+          '.CoppermindResourceSpaceTab-targetIssues{display:grid;gap:6px;margin-top:4px;}',
+          '.CoppermindResourceSpaceTab-targetIssue{font-size:12px;color:#914c00;background:#fff7ef;border-radius:10px;padding:8px 10px;border:1px solid rgba(255,140,66,.18);}',
+          '.CoppermindResourceSpaceTab-card{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:18px;border-bottom:1px solid rgba(0,0,0,.05);background:rgba(255,255,255,.82);}',
+          '.CoppermindResourceSpaceTab-card:last-child{border-bottom:none;}',
+          '.CoppermindResourceSpaceTab-card--busy{opacity:.7;}',
+          '.CoppermindResourceSpaceTab-cardPreview{width:120px;height:120px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,rgba(239,246,255,.92) 0%,rgba(241,248,233,.92) 100%);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.85);}',
+          '.CoppermindResourceSpaceTab-cardPreview img{width:100%;height:100%;object-fit:cover;display:block;}',
+          '.CoppermindResourceSpaceTab-noPreview{padding:12px;text-align:center;font-size:12px;color:#667063;}',
+          '.CoppermindResourceSpaceTab-cardBody{display:grid;gap:10px;min-width:0;}',
+          '.CoppermindResourceSpaceTab-cardHead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}',
+          '.CoppermindResourceSpaceTab-cardTitle{font-size:16px;font-weight:700;color:var(--brand-green-dark,#558b2f);word-break:break-word;}',
+          '.CoppermindResourceSpaceTab-badgeRow,.CoppermindResourceSpaceTab-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}',
+          '.CoppermindResourceSpaceTab-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}',
+          '.CoppermindResourceSpaceTab-badge--linked,.CoppermindResourceSpaceTab-badge--success,.CoppermindResourceSpaceTab-badge--ready,.CoppermindResourceSpaceTab-badge--approved,.CoppermindResourceSpaceTab-badge--succeeded{background:rgba(124,179,66,.16);color:var(--brand-green-dark,#558b2f);}',
+          '.CoppermindResourceSpaceTab-badge--primary,.CoppermindResourceSpaceTab-badge--neutral{background:rgba(28,167,216,.12);color:var(--brand-blue-dark,#148cb8);}',
+          '.CoppermindResourceSpaceTab-badge--warning,.CoppermindResourceSpaceTab-badge--pending{background:rgba(255,140,66,.16);color:#8a5200;}',
+          '.CoppermindResourceSpaceTab-badge--danger,.CoppermindResourceSpaceTab-badge--failed,.CoppermindResourceSpaceTab-badge--rejected,.CoppermindResourceSpaceTab-badge--blocked{background:rgba(211,47,47,.12);color:#a12e2b;}',
+          '.CoppermindResourceSpaceTab-badge--not_requested{background:#edf0f4;color:#5e6e81;}',
+          '.CoppermindResourceSpaceTab-cardSection{display:grid;gap:6px;}',
+          '.CoppermindResourceSpaceTab-inlineLabel{font-size:12px;font-weight:700;color:#60705e;text-transform:uppercase;letter-spacing:.04em;}',
+          '.CoppermindResourceSpaceTab-roleSelect{max-width:260px;}',
+          '.CoppermindResourceSpaceTab-metadata{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px 12px;}',
+          '.CoppermindResourceSpaceTab-metadataItem{font-size:12px;color:#2f3f2f;line-height:1.45;}',
+          '.CoppermindResourceSpaceTab-metadataLabel{display:block;color:#6b7b63;font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:11px;margin-bottom:2px;}',
+          '.CoppermindResourceSpaceTab-inlineNote{padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.45;}',
+          '.CoppermindResourceSpaceTab-inlineNote--warning{background:#fff7ef;color:#8d5300;border:1px solid rgba(255,140,66,.18);}',
+          '.CoppermindResourceSpaceTab-inlineNote--danger{background:#fff3f3;color:#9e2a2a;border:1px solid rgba(211,47,47,.12);}',
+          '.CoppermindResourceSpaceTab-inlineNote--success{background:#f8fdf4;color:var(--brand-green-dark,#558b2f);border:1px solid rgba(124,179,66,.16);}',
+          '@media (max-width: 900px){.CoppermindResourceSpaceTab-card{grid-template-columns:1fr;}.CoppermindResourceSpaceTab-cardPreview{width:100%;height:220px;}.CoppermindResourceSpaceTab-cardHead{flex-direction:column;align-items:flex-start;}.CoppermindResourceSpaceTab-toolbar{align-items:stretch;}.CoppermindResourceSpaceTab-search{min-width:0;width:100%;}}'
+        ].join('');
 
         document.head.appendChild(style);
       },

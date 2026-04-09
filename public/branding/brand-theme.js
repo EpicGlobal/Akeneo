@@ -4,8 +4,10 @@
   var colors = {
     green: "#7cb342",
     greenDark: "#558b2f",
+    orange: "#ff8c42",
     blue: "#1ca7d8",
-    surface: "linear-gradient(180deg, rgba(124, 179, 66, 0.08) 0, rgba(124, 179, 66, 0) 42px), linear-gradient(180deg, #ffffff 0, #f8fbf2 100%)"
+    surface: "linear-gradient(180deg, rgba(239, 246, 255, 0.92) 0%, #ffffff 100%)",
+    accentSurface: "linear-gradient(90deg, rgba(241, 248, 233, 0.98), rgba(241, 248, 233, 0.6) 100%)"
   };
   var guideSeenKey = "operator.brandGuide.seen.v1";
   var guideState = {
@@ -166,21 +168,26 @@
     });
   };
 
+  var applyThemeRoot = function () {
+    if (!(document.body instanceof HTMLElement)) {
+      return;
+    }
+
+    document.body.classList.add("theme-ecosystem");
+    document.body.setAttribute("data-theme", "ecosystem");
+  };
+
   var brandMainMenu = function () {
     document.querySelectorAll(".AknHeader-menuItem").forEach(function (item) {
       if (!(item instanceof HTMLElement) || !item.classList.contains("AknHeader-menuItem--active")) {
         return;
       }
 
-      setImportant(item, "color", colors.green);
-      setImportant(item, "border-left-color", "#f28b33");
+      setImportant(item, "color", colors.greenDark);
+      setImportant(item, "border-left-color", colors.orange);
       setImportant(item, "border-left-width", "4px");
       setImportant(item, "padding-right", "4px");
-      setImportant(
-        item,
-        "background",
-        "linear-gradient(90deg, rgba(177, 215, 76, 0.16), rgba(177, 215, 76, 0) 88%)"
-      );
+      setImportant(item, "background", colors.accentSurface);
     });
   };
 
@@ -190,8 +197,8 @@
         return;
       }
 
-      setImportant(item, "background", "linear-gradient(90deg, rgba(177, 215, 76, 0.18), rgba(177, 215, 76, 0) 72%)");
-      setImportant(item, "box-shadow", "inset 3px 0 0 #54af31");
+      setImportant(item, "background", colors.accentSurface);
+      setImportant(item, "box-shadow", "inset 3px 0 0 " + colors.green);
 
       item.querySelectorAll("a, span").forEach(function (node) {
         if (node instanceof HTMLElement) {
@@ -1043,6 +1050,7 @@
   };
 
   var applyBranding = function () {
+    applyThemeRoot();
     brandMenuLogo();
     brandMainMenu();
     brandVerticalLists();

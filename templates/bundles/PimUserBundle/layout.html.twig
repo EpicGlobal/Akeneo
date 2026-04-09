@@ -11,13 +11,13 @@
             <link rel="icon" type="image/png" href="{{ asset('branding/brand-favicon.png') }}?v=20260313c" />
             <link rel="shortcut icon" href="{{ asset('branding/brand-favicon.png') }}?v=20260313c" />
             <link rel="stylesheet" href="{{ asset('css/pim.css', 'frontend') }}"/>
-            <link rel="stylesheet" href="{{ asset('branding/brand-theme.css') }}?v=20260408operator1"/>
-            <script type="text/javascript" src="{{ asset('branding/brand-theme.js') }}?v=20260408operator1"></script>
+            <link rel="stylesheet" href="{{ asset('branding/brand-theme.css') }}?v=20260409ecosystem1"/>
+            <script type="text/javascript" src="{{ asset('branding/brand-theme.js') }}?v=20260409ecosystem1"></script>
         {% endblock %}
     {% endblock %}
     {{ external_javascript_dependencies() }}
 </head>
-<body class="{% block bodyClass %}{% endblock %} BrandShell BrandShell--login">
+<body class="{% block bodyClass %}{% endblock %} BrandShell BrandShell--login theme-ecosystem" data-theme="ecosystem">
     <div id="page">
         <div id="top-page">
             {% block main %}
