@@ -342,6 +342,40 @@ function Wait-ForCommandInvocation {
     throw "Timed out waiting for SSM command $CommandId on $InstanceId to complete."
 }
 
+function Invoke-PostBootstrapValidation {
+    param(
+        [string]$InstanceId,
+        [string]$PublicIp
+    )
+
+    $validationCommands = @(
+        "set -eu",
+        "grep -q '^AKENEO_PIM_URL=""http://$PublicIp""' /home/ubuntu/akeneo-pim/.env",
+        "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$($PublicIp):8081""' /home/ubuntu/akeneo-pim/.env",
+        "grep -q '^OPERATOR_CONTROL_PLANE_TOKEN=""' /home/ubuntu/akeneo-pim/.env",
+        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1/ >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
+        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1:8081/ >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
+        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1:8090/health >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
+        "cd /home/ubuntu/akeneo-pim",
+        "sg docker -c ""cd '/home/ubuntu/akeneo-pim' && docker compose run -u www-data --rm php php bin/console pim:user:create jorgen ShardplatePower13 jorgen@epicglobalinc.com Jorgen Jensen en_US --admin -n || true"""
+    )
+
+    $validationPayload = @{ commands = $validationCommands } | ConvertTo-Json -Compress
+    $validationPayloadPath = Join-Path $env:TEMP "operator-$Environment-validation.json"
+    Write-Utf8NoBomFile -Path $validationPayloadPath -Content $validationPayload
+
+    $validationSend = Invoke-AwsJson @(
+        "ssm", "send-command",
+        "--instance-ids", $InstanceId,
+        "--document-name", "AWS-RunShellScript",
+        "--comment", "Validate Operator staging bootstrap",
+        "--parameters", "file://$validationPayloadPath"
+    )
+
+    $validationCommandId = $validationSend.Command.CommandId
+    return Wait-ForCommandInvocation -CommandId $validationCommandId -InstanceId $InstanceId -TimeoutMinutes 10
+}
+
 function Write-Monitoring {
     param([string]$InstanceId, [string]$DashboardName)
 
@@ -446,7 +480,7 @@ $commands = @(
     "bash scripts/aws-ec2-bootstrap.sh http://$publicIp",
     "cd /home/ubuntu/akeneo-pim",
     "grep -q '^AKENEO_PIM_URL=""http://$publicIp""' /home/ubuntu/akeneo-pim/.env",
-    "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$publicIp:8081""' /home/ubuntu/akeneo-pim/.env",
+    "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$($publicIp):8081""' /home/ubuntu/akeneo-pim/.env",
     "grep -q '^OPERATOR_CONTROL_PLANE_TOKEN=""' /home/ubuntu/akeneo-pim/.env",
     "sg docker -c ""cd '/home/ubuntu/akeneo-pim' && docker compose run -u www-data --rm php php bin/console pim:user:create jorgen ShardplatePower13 jorgen@epicglobalinc.com Jorgen Jensen en_US --admin -n || true"""
 )
@@ -464,7 +498,16 @@ $send = Invoke-AwsJson @(
 
 $commandId = $send.Command.CommandId
 Write-Host "Waiting for bootstrap command $commandId on $instanceId..."
-$invocation = Wait-ForCommandInvocation -CommandId $commandId -InstanceId $instanceId
+try {
+    $invocation = Wait-ForCommandInvocation -CommandId $commandId -InstanceId $instanceId
+} catch {
+    Write-Warning $_
+    Write-Host "Running post-bootstrap validation on $instanceId..."
+    $null = Invoke-PostBootstrapValidation -InstanceId $instanceId -PublicIp $publicIp
+    $invocation = [pscustomobject]@{
+        Status = "RecoveredAfterValidation"
+    }
+}
 
 Write-Host ""
 Write-Host "Operator staging deployment complete."
