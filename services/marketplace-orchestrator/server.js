@@ -3,10 +3,20 @@ require('./lib/bootstrap-env');
 const http = require('http');
 
 const { createAmazonClient } = require('./lib/amazon-client');
-const { amazonCredentialStatus, findMarketplace, findTenant, getTenantAmazonConfig, listMarketplaces, listTenants } = require('./lib/config-loader');
+const {
+  amazonCredentialStatus,
+  findMarketplace,
+  findTenant,
+  getTenantAdminSettings,
+  getTenantAmazonConfig,
+  listMarketplaces,
+  listTenants,
+  updateTenantAdminSettings,
+} = require('./lib/config-loader');
 const { createListingWriterClient } = require('./lib/epic-ai-client');
 const { evaluateWorkflow } = require('./lib/engine');
 const { notFound, readJsonBody, sendJson } = require('./lib/http');
+const { applyAutoApprovedChanges } = require('./lib/proposal-engine');
 const {
   createJob,
   createRun,
@@ -14,7 +24,9 @@ const {
   getAlert,
   getCatalogProduct,
   getJob,
+  getProposal,
   getRun,
+  getState,
   listCatalogProducts,
   listAlerts,
   listJobs,
@@ -22,7 +34,9 @@ const {
   listProposals,
   listRuns,
   listSnapshots,
+  setState,
   updateAlert,
+  updateProposal,
   upsertCatalogProduct,
 } = require('./lib/store');
 
@@ -95,10 +109,20 @@ async function buildDashboardSummary(tenantCode = null) {
       const tenantProposals = proposals.filter((proposal) => proposal.tenantCode === tenant.code);
       const tenantSnapshots = snapshots.filter((snapshot) => snapshot.tenantCode === tenant.code);
       const tenantNotifications = notifications.filter((notification) => notification.tenantCode === tenant.code);
-      const tenantCatalogProducts = (await listCatalogProducts(tenant.code)).length;
+      const tenantCatalogRecords = await listCatalogProducts(tenant.code);
+      const tenantCatalogProducts = tenantCatalogRecords.length;
+      const tenantReadiness = readinessSummary(tenantCatalogRecords);
+      const tenantListingHealth = listingHealthSummary(
+        tenantSnapshots.filter((snapshot) => snapshot.type === 'amazon_listing_status')
+      );
+      const tenantAccountHealth = accountHealthSummary(
+        tenantSnapshots.filter((snapshot) => snapshot.type === 'amazon_account_health')
+      );
+      const adminSettings = getTenantAdminSettings(tenant.code);
 
       tenants.push({
         ...tenantSummary(tenant),
+        admin: adminSettings,
         queue: statusCounts(tenantJobs, 'status'),
         runs: statusCounts(tenantRuns, 'status'),
         alerts: {
@@ -110,11 +134,20 @@ async function buildDashboardSummary(tenantCode = null) {
         notifications: tenantNotifications.length,
         snapshots: tenantSnapshots.length,
         catalogProducts: tenantCatalogProducts,
+        publishReadiness: tenantReadiness,
+        listingHealth: tenantListingHealth,
+        accountHealth: tenantAccountHealth,
         marketplaces: (tenant.marketplaces || []).map((marketplace) => {
           const marketplaceJobs = tenantJobs.filter((job) => job.marketplaceCode === marketplace.code);
           const marketplaceRuns = tenantRuns.filter((run) => run.marketplaceCode === marketplace.code);
           const marketplaceAlerts = tenantAlerts.filter((alert) => alert.marketplaceCode === marketplace.code);
           const marketplaceProposals = tenantProposals.filter((proposal) => proposal.marketplaceCode === marketplace.code);
+          const marketplaceListingHealth = listingHealthSummary(
+            tenantSnapshots.filter((snapshot) => snapshot.type === 'amazon_listing_status' && snapshot.marketplaceCode === marketplace.code)
+          );
+          const marketplaceReadiness = readinessSummary(
+            tenantCatalogRecords.filter((record) => (record.marketplaceCodes || []).includes(marketplace.code))
+          );
 
           return {
             code: marketplace.code,
@@ -128,6 +161,8 @@ async function buildDashboardSummary(tenantCode = null) {
               bySeverity: statusCounts(marketplaceAlerts, 'severity'),
             },
             proposals: statusCounts(marketplaceProposals, 'status'),
+            publishReadiness: marketplaceReadiness,
+            listingHealth: marketplaceListingHealth,
           };
         }),
       });
@@ -147,6 +182,8 @@ async function buildDashboardSummary(tenantCode = null) {
       snapshots: snapshots.length,
       runs: runs.length,
       catalogProducts: tenants.reduce((total, tenant) => total + Number(tenant.catalogProducts || 0), 0),
+      readyCatalogProducts: tenants.reduce((total, tenant) => total + Number(tenant.publishReadiness?.ready || 0), 0),
+      blockedCatalogProducts: tenants.reduce((total, tenant) => total + Number(tenant.publishReadiness?.blocked || 0), 0),
     },
     tenants,
     recent: {
@@ -327,6 +364,112 @@ function requestBodySku(payload) {
   return payload?.sku || payload?.product?.identifier || null;
 }
 
+function defaultOnboardingState(tenantCode) {
+  return {
+    tenantCode,
+    status: 'in_progress',
+    currentStep: 'workspace',
+    completedSteps: [],
+    notes: '',
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function onboardingStateKey(tenantCode) {
+  return `tenant_onboarding::${tenantCode}`;
+}
+
+function applyProposalToProduct(product, proposal) {
+  const nextProduct = JSON.parse(JSON.stringify(product || {}));
+  nextProduct.attributes = nextProduct.attributes || {};
+
+  if ('title' === proposal.field) {
+    nextProduct.attributes.marketplace_title = proposal.proposedValue;
+    return nextProduct;
+  }
+
+  if ('description' === proposal.field) {
+    nextProduct.attributes.description = proposal.proposedValue;
+    return nextProduct;
+  }
+
+  nextProduct.attributes[proposal.field] = proposal.proposedValue;
+
+  return nextProduct;
+}
+
+function readinessSummary(catalogRecords) {
+  let ready = 0;
+  let blocked = 0;
+  let unknown = 0;
+  let completenessTotal = 0;
+  let completenessCount = 0;
+
+  for (const record of catalogRecords) {
+    const governance = record.product?.governance || {};
+    if (governance.publishStatus === 'ready') {
+      ready += 1;
+    } else if (governance.publishStatus === 'blocked') {
+      blocked += 1;
+    } else {
+      unknown += 1;
+    }
+
+    const completeness = Number(governance.completenessScore);
+    if (Number.isFinite(completeness)) {
+      completenessTotal += completeness;
+      completenessCount += 1;
+    }
+  }
+
+  return {
+    ready,
+    blocked,
+    unknown,
+    averageCompleteness: completenessCount > 0 ? Number((completenessTotal / completenessCount).toFixed(2)) : 0,
+  };
+}
+
+function listingHealthSummary(snapshots) {
+  let healthy = 0;
+  let unhealthy = 0;
+  let unknown = 0;
+
+  for (const snapshot of snapshots) {
+    const issues = summarizeListingIssues(snapshot.payload || {});
+    if (!snapshot.payload) {
+      unknown += 1;
+      continue;
+    }
+
+    if (listingIsHealthy(snapshot.payload) && issues.length === 0) {
+      healthy += 1;
+      continue;
+    }
+
+    unhealthy += 1;
+  }
+
+  return {
+    healthy,
+    unhealthy,
+    unknown,
+  };
+}
+
+function accountHealthSummary(snapshots) {
+  const latest = snapshots[0]?.payload || null;
+  const suspendedMarketplaces = (latest?.marketplaces?.payload || [])
+    .filter((entry) => entry?.participation?.hasSuspendedListings)
+    .length;
+
+  return {
+    hasSnapshot: Boolean(latest),
+    suspendedMarketplaces,
+    reportId: latest?.report?.reportId || null,
+  };
+}
+
 async function handleRequest(request, response) {
   const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
   const parts = url.pathname.split('/').filter(Boolean);
@@ -356,6 +499,11 @@ async function handleRequest(request, response) {
   }
 
   if (request.method === 'GET' && url.pathname === '/v1/dashboard') {
+    sendJson(response, 200, await buildDashboardSummary(url.searchParams.get('tenant') || null));
+    return;
+  }
+
+  if (request.method === 'GET' && url.pathname === '/v1/reports/overview') {
     sendJson(response, 200, await buildDashboardSummary(url.searchParams.get('tenant') || null));
     return;
   }
@@ -469,12 +617,120 @@ async function handleRequest(request, response) {
     return;
   }
 
+  if (request.method === 'GET' && parts.length === 3 && parts[0] === 'v1' && parts[1] === 'proposals') {
+    const proposal = await getProposal(parts[2]);
+    if (!proposal) {
+      sendJson(response, 404, { error: `Unknown proposal "${parts[2]}".` });
+      return;
+    }
+
+    sendJson(response, 200, proposal);
+    return;
+  }
+
+  if (request.method === 'POST' && parts.length === 4 && parts[0] === 'v1' && parts[1] === 'proposals') {
+    const proposal = await getProposal(parts[2]);
+    if (!proposal) {
+      sendJson(response, 404, { error: `Unknown proposal "${parts[2]}".` });
+      return;
+    }
+
+    const action = parts[3];
+    if (!['approve', 'reject', 'apply'].includes(action)) {
+      sendJson(response, 404, { error: `Unsupported proposal action "${action}".` });
+      return;
+    }
+
+    if (action === 'approve') {
+      sendJson(response, 200, await updateProposal(parts[2], (current) => ({
+        ...current,
+        status: 'approved',
+      })));
+      return;
+    }
+
+    if (action === 'reject') {
+      sendJson(response, 200, await updateProposal(parts[2], (current) => ({
+        ...current,
+        status: 'rejected',
+      })));
+      return;
+    }
+
+    const catalogRecord = await getCatalogProduct(proposal.tenantCode, proposal.sku);
+    if (!catalogRecord) {
+      sendJson(response, 404, { error: `No catalog product exists for SKU "${proposal.sku}".` });
+      return;
+    }
+
+    const nextProduct = applyProposalToProduct(catalogRecord.product, proposal);
+    await upsertCatalogProduct({
+      tenantCode: proposal.tenantCode,
+      sku: proposal.sku,
+      marketplaceCode: proposal.marketplaceCode,
+      product: nextProduct,
+    });
+
+    const updated = await updateProposal(parts[2], (current) => ({
+      ...current,
+      status: 'applied',
+      appliedAt: new Date().toISOString(),
+    }));
+
+    if (proposal.marketplaceCode) {
+      await createJob({
+        type: 'amazon_validation_preview',
+        tenantCode: proposal.tenantCode,
+        marketplaceCode: proposal.marketplaceCode,
+        payload: {
+          sku: proposal.sku,
+        },
+        dedupeKey: `${proposal.tenantCode}:${proposal.marketplaceCode}:${proposal.sku}:amazon_validation_preview`,
+      });
+    }
+
+    sendJson(response, 200, {
+      proposal: updated,
+      catalogProduct: await getCatalogProduct(proposal.tenantCode, proposal.sku),
+    });
+    return;
+  }
+
   if (request.method === 'GET' && url.pathname === '/v1/notifications') {
     sendJson(response, 200, {
       notifications: await listNotifications({
         tenantCode: url.searchParams.get('tenant') || undefined,
         marketplaceCode: url.searchParams.get('marketplace') || undefined,
       }),
+    });
+    return;
+  }
+
+  if (request.method === 'GET' && url.pathname === '/v1/review/inbox') {
+    const tenantCode = url.searchParams.get('tenant') || undefined;
+    const marketplaceCode = url.searchParams.get('marketplace') || undefined;
+    const sku = url.searchParams.get('sku') || undefined;
+    const [alerts, proposals, failedJobs] = await Promise.all([
+      listAlerts({
+        tenantCode,
+        marketplaceCode,
+      }),
+      listProposals({
+        tenantCode,
+        marketplaceCode,
+        sku,
+      }),
+      listJobs({
+        tenantCode,
+        marketplaceCode,
+        status: 'failed',
+      }),
+    ]);
+
+    sendJson(response, 200, {
+      alerts: alerts.filter((alert) => !['acknowledged', 'resolved'].includes(alert.status)),
+      proposals: proposals.filter((proposal) => ['open', 'approved'].includes(proposal.status)),
+      failedJobs,
     });
     return;
   }
@@ -643,6 +899,64 @@ async function handleRequest(request, response) {
       tenantCode,
       payload: {},
     });
+    return;
+  }
+
+  if (request.method === 'GET' && parts.length === 4 && parts[0] === 'v1' && parts[1] === 'tenants' && parts[3] === 'admin-settings') {
+    const tenantCode = parts[2];
+    const settings = getTenantAdminSettings(tenantCode);
+    if (!settings) {
+      sendJson(response, 404, { error: `Unknown tenant "${tenantCode}".` });
+      return;
+    }
+
+    sendJson(response, 200, settings);
+    return;
+  }
+
+  if (request.method === 'PUT' && parts.length === 4 && parts[0] === 'v1' && parts[1] === 'tenants' && parts[3] === 'admin-settings') {
+    const tenantCode = parts[2];
+    const settings = updateTenantAdminSettings(tenantCode, await readJsonBody(request));
+    if (!settings) {
+      sendJson(response, 404, { error: `Unknown tenant "${tenantCode}".` });
+      return;
+    }
+
+    sendJson(response, 200, settings);
+    return;
+  }
+
+  if (request.method === 'GET' && parts.length === 4 && parts[0] === 'v1' && parts[1] === 'tenants' && parts[3] === 'onboarding') {
+    const tenantCode = parts[2];
+    if (!findTenant(tenantCode)) {
+      sendJson(response, 404, { error: `Unknown tenant "${tenantCode}".` });
+      return;
+    }
+
+    const state = await getState(onboardingStateKey(tenantCode));
+    sendJson(response, 200, state?.value || defaultOnboardingState(tenantCode));
+    return;
+  }
+
+  if (request.method === 'PUT' && parts.length === 4 && parts[0] === 'v1' && parts[1] === 'tenants' && parts[3] === 'onboarding') {
+    const tenantCode = parts[2];
+    if (!findTenant(tenantCode)) {
+      sendJson(response, 404, { error: `Unknown tenant "${tenantCode}".` });
+      return;
+    }
+
+    const payload = await readJsonBody(request);
+    const current = (await getState(onboardingStateKey(tenantCode)))?.value || defaultOnboardingState(tenantCode);
+    const next = {
+      ...current,
+      ...payload,
+      tenantCode,
+      completedSteps: Array.isArray(payload.completedSteps) ? [...new Set(payload.completedSteps.map((step) => String(step).trim()).filter(Boolean))] : current.completedSteps,
+      updatedAt: new Date().toISOString(),
+    };
+
+    await setState(onboardingStateKey(tenantCode), next);
+    sendJson(response, 200, next);
     return;
   }
 

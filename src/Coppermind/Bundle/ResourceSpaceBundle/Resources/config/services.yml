@@ -82,3 +82,9 @@ services:
         arguments:
             $securityFacade: '@oro_security.security_facade'
             $userContext: '@pim_user.context.user'
+
+    Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController:
+        arguments:
+            $securityFacade: '@oro_security.security_facade'
+            $userContext: '@pim_user.context.user'
+            $controlPlaneToken: '%env(string:OPERATOR_CONTROL_PLANE_TOKEN)%'

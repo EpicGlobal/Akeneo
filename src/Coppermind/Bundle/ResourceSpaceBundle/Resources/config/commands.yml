@@ -37,3 +37,9 @@ services:
     Coppermind\Bundle\ResourceSpaceBundle\Command\ConfigureTenantCommand:
         tags:
             - { name: console.command, command: 'coppermind:resourcespace:tenant:configure' }
+
+    Coppermind\Bundle\ResourceSpaceBundle\Command\MonitorAssetGovernanceCommand:
+        bind:
+            $lockFactory: '@pim_framework.lock.factory'
+        tags:
+            - { name: console.command, command: 'coppermind:resourcespace:asset-governance:monitor' }

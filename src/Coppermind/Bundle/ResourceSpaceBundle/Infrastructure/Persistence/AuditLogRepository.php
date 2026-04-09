@@ -71,6 +71,50 @@ final class AuditLogRepository
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function findRecent(
+        int $limit = 50,
+        ?string $tenantCode = null,
+        ?string $subjectType = null,
+        ?string $actionCode = null,
+    ): array {
+        $tenantCode = $this->normalizeTenantCode($tenantCode);
+        $where = ['tenant_code = :tenant_code'];
+        $parameters = ['tenant_code' => $tenantCode];
+
+        $subjectType = trim((string) $subjectType);
+        if ('' !== $subjectType) {
+            $where[] = 'subject_type = :subject_type';
+            $parameters['subject_type'] = substr($subjectType, 0, 64);
+        }
+
+        $actionCode = trim((string) $actionCode);
+        if ('' !== $actionCode) {
+            $where[] = 'action_code = :action_code';
+            $parameters['action_code'] = substr($actionCode, 0, 100);
+        }
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT id, tenant_code, actor_user_id, actor_identifier, action_code, subject_type, subject_id, context_json, created_at
+                FROM %s
+                WHERE %s
+                ORDER BY created_at DESC, id DESC
+                LIMIT %d
+                SQL,
+                self::TABLE_NAME,
+                implode(' AND ', $where),
+                max(1, $limit)
+            ),
+            $parameters
+        );
+
+        return array_map([$this, 'normalizeRow'], $statement->fetchAllAssociative());
+    }
+
+    /**
      * @param array<string, mixed> $row
      *
      * @return array<string, mixed>

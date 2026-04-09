@@ -15,6 +15,15 @@ TARGET="$1"
 PROJECT_DIR="${PROJECT_DIR:-$HOME/akeneo-pim}"
 REPO_URL="${REPO_URL:-https://github.com/EpicGlobal/Akeneo.git}"
 BOOTSTRAP_SCRIPT="${BOOTSTRAP_SCRIPT:-scripts/aws-first-run.sh}"
+BOOTSTRAP_USER="${BOOTSTRAP_USER:-${SUDO_USER:-${USER:-}}}"
+
+if [[ -z "$BOOTSTRAP_USER" ]]; then
+  if id -u ubuntu >/dev/null 2>&1; then
+    BOOTSTRAP_USER="ubuntu"
+  else
+    BOOTSTRAP_USER="$(id -un)"
+  fi
+fi
 
 sudo apt-get update
 sudo apt-get install -y awscli ca-certificates curl git make
@@ -34,11 +43,13 @@ if ! command -v docker >/dev/null 2>&1; then
 fi
 
 sudo systemctl enable --now docker
-sudo usermod -aG docker "$USER"
+sudo usermod -aG docker "$BOOTSTRAP_USER" || true
 
 if [[ ! -d "$PROJECT_DIR/.git" ]]; then
   git clone "$REPO_URL" "$PROJECT_DIR"
 fi
+
+sudo chown -R "$BOOTSTRAP_USER":"$BOOTSTRAP_USER" "$PROJECT_DIR"
 
 git -C "$PROJECT_DIR" fetch origin master
 git -C "$PROJECT_DIR" checkout master

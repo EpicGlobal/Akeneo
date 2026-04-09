@@ -11,6 +11,8 @@ It now does more than marketplace readiness checks:
 - watches approved brand sources,
 - generates enrichment proposals,
 - auto-applies low-risk changes,
+- exposes a review inbox for manually approved changes and exception handling,
+- persists tenant onboarding state and tenant admin settings,
 - runs Amazon validation preview before publish,
 - submits listing updates in mock or live mode,
 - monitors listing health and account health,
@@ -41,6 +43,7 @@ The worker persists state in MySQL-backed `coppermind_marketplace_*` tables that
 ## Configuration
 
 Tenant and marketplace settings live in `config/tenants.json`.
+Runtime overrides for tenant admin settings are persisted in `config/tenant-overrides.json`.
 
 The sample tenant is configured in `mock` Amazon mode so the full worker stack is testable without credentials.
 
@@ -60,13 +63,23 @@ If you want a controlled cutover, set `pilotFamilyCodes` in tenant Amazon config
 - `GET /health`
 - `GET /dashboard`
 - `GET /v1/dashboard`
+- `GET /v1/reports/overview`
 - `GET /v1/tenants`
+- `GET /v1/tenants/{tenantCode}/admin-settings`
+- `PUT /v1/tenants/{tenantCode}/admin-settings`
+- `GET /v1/tenants/{tenantCode}/onboarding`
+- `PUT /v1/tenants/{tenantCode}/onboarding`
 - `GET /v1/tenants/{tenantCode}/marketplaces`
 - `GET /v1/tenants/{tenantCode}/amazon-config`
 - `GET /v1/runs`
 - `GET /v1/jobs`
 - `GET /v1/alerts`
 - `GET /v1/proposals`
+- `GET /v1/proposals/{proposalId}`
+- `POST /v1/proposals/{proposalId}/approve`
+- `POST /v1/proposals/{proposalId}/reject`
+- `POST /v1/proposals/{proposalId}/apply`
+- `GET /v1/review/inbox`
 - `GET /v1/notifications`
 - `GET /v1/snapshots`
 - `GET /v1/catalog/{tenantCode}/products/{sku}`
@@ -103,7 +116,13 @@ Invoke-RestMethod -Uri "http://localhost:8090/v1/proposals?tenant=default&market
 Invoke-RestMethod -Uri "http://localhost:8090/v1/jobs?tenant=default&type=amazon_publish_execution"
 ```
 
-4. Send a synthetic Amazon issue notification:
+4. Review pending proposals and alerts in one inbox:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8090/v1/review/inbox?tenant=default&marketplace=amazon_us"
+```
+
+5. Send a synthetic Amazon issue notification:
 
 ```powershell
 $payload = '{"tenantCode":"default","marketplaceCode":"amazon_us","notificationType":"LISTINGS_ITEM_ISSUES_CHANGE","sku":"100121","issues":[{"code":"MISSING_BULLET","message":"Bullet content is incomplete"}]}'

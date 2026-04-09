@@ -18,6 +18,16 @@ export DEPLOY_PARAMETER_PREFIX=/epic-global/akeneo-pim/prod
 bash scripts/aws-epic-deploy.sh <public-ip-or-url>
 ```
 
+## Development / Staging
+
+For an isolated `epic-dev` environment in `us-west-2`, use the provisioning script from this workstation:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "scripts\aws-epic-stage-deploy.ps1"
+```
+
+That script provisions a dedicated dev EC2 instance, Elastic IP, security group, IAM role/profile, backup bucket, CloudWatch dashboard/alarms, and SSM parameter set under `/epic-global/akeneo-pim/dev`, then bootstraps the repo on the new host.
+
 ## Fresh Host Bootstrap
 
 If the host does not already have Docker and the repo checked out:
@@ -60,8 +70,10 @@ Under the chosen prefix:
 - `app_secret`
 - `app_database_password`
 - `app_database_root_password`
+- `backup_s3_uri`
 - `object_storage_access_key`
 - `object_storage_secret_key`
+- `operator_control_plane_token`
 - `resource_space_db_password`
 - `resource_space_db_root_password`
 - `resource_space_admin_password`
@@ -75,3 +87,4 @@ Under the chosen prefix:
 - configure a real mailer/SES path
 - provide live Amazon and Epic AI credentials when ready
 - create and map a real Akeneo media attribute if you want one-click binary sync from the DAM
+- if using staging, optionally add a dev hostname and tighten the security group after smoke testing

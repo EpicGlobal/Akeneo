@@ -62,3 +62,35 @@ coppermind_resourcespace_product_model_workflow_update:
     path: /rest/resourcespace/product-model/{code}/workflow
     controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController::workflowProductModelAction
     methods: [POST]
+
+coppermind_operator_dashboard:
+    path: /rest/operator/dashboard
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController::dashboardAction
+    methods: [GET]
+
+coppermind_operator_approvals:
+    path: /rest/operator/approvals
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController::approvalsAction
+    methods: [GET]
+
+coppermind_operator_exceptions:
+    path: /rest/operator/exceptions
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController::exceptionsAction
+    methods: [GET]
+
+coppermind_operator_asset_rights:
+    path: /rest/operator/assets/rights
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController::rightsAction
+    methods: [GET]
+
+coppermind_operator_asset_metadata_update:
+    path: /rest/operator/assets/{resourceRef}/metadata
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController::updateAssetMetadataAction
+    methods: [POST]
+    requirements:
+        resourceRef: '\d+'
+
+coppermind_operator_audit:
+    path: /rest/operator/audit
+    controller: Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController::auditAction
+    methods: [GET]

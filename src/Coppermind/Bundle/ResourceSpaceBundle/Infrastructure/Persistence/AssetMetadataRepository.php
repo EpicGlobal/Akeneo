@@ -60,6 +60,20 @@ final class AssetMetadataRepository
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public function findByResourceRef(int $resourceRef, ?string $tenantCode = null): ?array
+    {
+        if ($resourceRef <= 0) {
+            return null;
+        }
+
+        $metadata = $this->findByResourceRefs([$resourceRef], $tenantCode);
+
+        return $metadata[$resourceRef] ?? null;
+    }
+
+    /**
      * @param array<string, mixed> $payload
      */
     public function upsertFromPayload(int $resourceRef, array $payload, ?string $tenantCode = null): void
@@ -120,6 +134,48 @@ final class AssetMetadataRepository
                 'updated_at' => $this->now(),
             ]
         );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function findComplianceQueue(int $windowDays = 30, int $limit = 100, ?string $tenantCode = null): array
+    {
+        $tenantCode = $this->normalizeTenantCode($tenantCode);
+        $cutoff = (new \DateTimeImmutable(sprintf('+%d days', max(0, $windowDays))))->format('Y-m-d H:i:s');
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT tenant_code, resource_ref, rights_status, license_code, expires_at, rendition_key,
+                       derivative_of_resource_ref, metadata_json, updated_at
+                FROM %s
+                WHERE tenant_code = :tenant_code
+                    AND (
+                        (expires_at IS NOT NULL AND expires_at <= :cutoff)
+                        OR rights_status IN ('restricted', 'expired')
+                    )
+                ORDER BY
+                    CASE
+                        WHEN expires_at IS NULL THEN 1
+                        WHEN expires_at < :now THEN 0
+                        ELSE 1
+                    END ASC,
+                    expires_at ASC,
+                    updated_at DESC
+                LIMIT %d
+                SQL,
+                self::TABLE_NAME,
+                max(1, $limit)
+            ),
+            [
+                'tenant_code' => $tenantCode,
+                'cutoff' => $cutoff,
+                'now' => $this->now(),
+            ]
+        );
+
+        return array_map([$this, 'normalizeRow'], $statement->fetchAllAssociative());
     }
 
     /**

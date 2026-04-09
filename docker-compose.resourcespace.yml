@@ -105,6 +105,30 @@ services:
     networks:
       - 'pim'
 
+  resourcespace-asset-governance-worker:
+    image: 'akeneo/pim-php-dev:8.1'
+    environment:
+      APP_ENV: '${APP_ENV:-prod}'
+      PHP_IDE_CONFIG: 'serverName=pim-docker-asset-governance-worker'
+      XDEBUG_MODE: '${XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: 'client_host=172.17.0.1'
+    depends_on:
+      - 'mysql'
+      - 'resourcespace'
+    volumes:
+      - './:/srv/pim'
+    working_dir: '/srv/pim'
+    command: >-
+      sh -lc "while true; do
+      php bin/console coppermind:resourcespace:asset-governance:monitor --env=${APP_ENV:-prod} --quiet-when-idle --window-days=${RESOURCE_SPACE_ASSET_GOVERNANCE_WINDOW_DAYS:-30} --limit=${RESOURCE_SPACE_ASSET_GOVERNANCE_WORKER_LIMIT:-100} || true;
+      sleep ${RESOURCE_SPACE_ASSET_GOVERNANCE_WORKER_INTERVAL_SECONDS:-900};
+      done"
+    user: 'www-data'
+    init: true
+    restart: unless-stopped
+    networks:
+      - 'pim'
+
   mariadb:
     image: 'mariadb'
     restart: unless-stopped

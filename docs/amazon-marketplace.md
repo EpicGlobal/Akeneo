@@ -67,13 +67,30 @@ The service already supports `put`, `patch`, and `feed` listing submission modes
 
 - `GET /dashboard` renders a lightweight operator dashboard.
 - `GET /v1/dashboard` returns queue, alert, proposal, run, and tenant readiness summary JSON.
+- `GET /v1/reports/overview` returns a readiness-first summary for the control plane.
+- `GET /v1/review/inbox` returns open alerts, pending proposals, and failed jobs together.
+- `GET /v1/proposals/{proposalId}` returns the proposal detail.
+- `POST /v1/proposals/{proposalId}/approve`
+- `POST /v1/proposals/{proposalId}/reject`
+- `POST /v1/proposals/{proposalId}/apply`
 - `POST /v1/alerts/{alertId}/acknowledge`
 - `POST /v1/alerts/{alertId}/resolve`
+
+## Tenant admin and onboarding
+
+The orchestrator now stores lightweight operator-facing tenant state alongside the marketplace runtime:
+
+- `GET /v1/tenants/{tenantCode}/admin-settings`
+- `PUT /v1/tenants/{tenantCode}/admin-settings`
+- `GET /v1/tenants/{tenantCode}/onboarding`
+- `PUT /v1/tenants/{tenantCode}/onboarding`
+
+This keeps first-pilot settings like live mode, pilot SKU families, alert routing, and onboarding step completion close to the operator workflow.
 
 ## Next hardening steps
 
 1. Add richer Amazon attribute mapping per product type.
 2. Add real Seller Central app-notification template management.
 3. Add webhook signing or gateway validation for external notification ingest.
-4. Add operator actions for proposal approval and replay from the dashboard.
+4. Add true connector coverage beyond Amazon for live tenants.
 5. Add tenant provisioning, billing, and retention controls around the orchestration layer.

@@ -91,6 +91,100 @@ final class GovernanceStateRepository
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function listStates(
+        int $limit = 100,
+        ?string $tenantCode = null,
+        ?string $publishStatus = null,
+        ?string $approvalStatus = null,
+        ?string $ownerType = null,
+    ): array {
+        $tenantCode = $this->normalizeTenantCode($tenantCode);
+        $where = ['tenant_code = :tenant_code'];
+        $parameters = ['tenant_code' => $tenantCode];
+
+        $publishStatus = trim((string) $publishStatus);
+        if ('' !== $publishStatus) {
+            $where[] = 'publish_status = :publish_status';
+            $parameters['publish_status'] = substr($publishStatus, 0, 32);
+        }
+
+        $approvalStatus = trim((string) $approvalStatus);
+        if ('' !== $approvalStatus) {
+            $where[] = 'approval_status = :approval_status';
+            $parameters['approval_status'] = substr($approvalStatus, 0, 32);
+        }
+
+        $ownerType = trim((string) $ownerType);
+        if ('' !== $ownerType) {
+            $where[] = 'owner_type = :owner_type';
+            $parameters['owner_type'] = substr($ownerType, 0, 32);
+        }
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT tenant_code, owner_type, owner_id, family_code, approval_status, publish_status,
+                       completeness_score, blocker_count, blockers_json, targets_json, approvals_json, updated_at
+                FROM %s
+                WHERE %s
+                ORDER BY
+                    CASE publish_status WHEN 'blocked' THEN 0 ELSE 1 END ASC,
+                    blocker_count DESC,
+                    completeness_score ASC,
+                    updated_at DESC
+                LIMIT %d
+                SQL,
+                self::TABLE_NAME,
+                implode(' AND ', $where),
+                max(1, $limit)
+            ),
+            $parameters
+        );
+
+        return array_map([$this, 'normalizeRow'], $statement->fetchAllAssociative());
+    }
+
+    /**
+     * @return array<string, int|float>
+     */
+    public function summarize(?string $tenantCode = null): array
+    {
+        $tenantCode = $this->normalizeTenantCode($tenantCode);
+        $row = $this->connection->fetchAssociative(
+            sprintf(
+                <<<SQL
+                SELECT
+                    COUNT(1) AS total_owners,
+                    SUM(CASE WHEN publish_status = 'ready' THEN 1 ELSE 0 END) AS ready_owners,
+                    SUM(CASE WHEN publish_status = 'blocked' THEN 1 ELSE 0 END) AS blocked_owners,
+                    SUM(CASE WHEN approval_status = 'approved' THEN 1 ELSE 0 END) AS approved_owners,
+                    SUM(CASE WHEN approval_status = 'pending' THEN 1 ELSE 0 END) AS pending_owners,
+                    SUM(CASE WHEN approval_status = 'rejected' THEN 1 ELSE 0 END) AS rejected_owners,
+                    AVG(completeness_score) AS average_completeness,
+                    SUM(blocker_count) AS total_blockers
+                FROM %s
+                WHERE tenant_code = :tenant_code
+                SQL,
+                self::TABLE_NAME
+            ),
+            ['tenant_code' => $tenantCode]
+        );
+
+        return [
+            'total_owners' => max(0, (int) ($row['total_owners'] ?? 0)),
+            'ready_owners' => max(0, (int) ($row['ready_owners'] ?? 0)),
+            'blocked_owners' => max(0, (int) ($row['blocked_owners'] ?? 0)),
+            'approved_owners' => max(0, (int) ($row['approved_owners'] ?? 0)),
+            'pending_owners' => max(0, (int) ($row['pending_owners'] ?? 0)),
+            'rejected_owners' => max(0, (int) ($row['rejected_owners'] ?? 0)),
+            'average_completeness' => round((float) ($row['average_completeness'] ?? 0), 2),
+            'total_blockers' => max(0, (int) ($row['total_blockers'] ?? 0)),
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $row
      *
      * @return array<string, mixed>

@@ -44,6 +44,59 @@ final class GovernanceApprovalRepository
         return array_map([$this, 'normalizeRow'], $statement->fetchAllAssociative());
     }
 
+    /**
+     * @param array<int, string> $statuses
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function listByStatuses(array $statuses, int $limit = 100, ?string $tenantCode = null): array
+    {
+        $tenantCode = $this->normalizeTenantCode($tenantCode);
+        $statuses = array_values(array_unique(array_filter(array_map(
+            static fn (string $status): string => trim($status),
+            $statuses
+        ))));
+
+        if ([] === $statuses) {
+            return [];
+        }
+
+        $parameters = ['tenant_code' => $tenantCode];
+        $placeholders = [];
+
+        foreach ($statuses as $index => $status) {
+            $parameter = sprintf('status_%d', $index);
+            $parameters[$parameter] = substr($status, 0, 32);
+            $placeholders[] = sprintf(':%s', $parameter);
+        }
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT tenant_code, owner_type, owner_id, stage_code, status, comment_text, requested_at,
+                       approved_at, approved_by, rejected_at, rejected_by, updated_at
+                FROM %s
+                WHERE tenant_code = :tenant_code AND status IN (%s)
+                ORDER BY
+                    CASE status
+                        WHEN 'pending' THEN 0
+                        WHEN 'rejected' THEN 1
+                        ELSE 2
+                    END,
+                    updated_at DESC,
+                    stage_code ASC
+                LIMIT %d
+                SQL,
+                self::TABLE_NAME,
+                implode(', ', $placeholders),
+                max(1, $limit)
+            ),
+            $parameters
+        );
+
+        return array_map([$this, 'normalizeRow'], $statement->fetchAllAssociative());
+    }
+
     public function requestStage(
         string $ownerType,
         string $ownerId,

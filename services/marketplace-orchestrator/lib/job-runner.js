@@ -573,10 +573,16 @@ async function processPublishExecution(job) {
     sku,
     status: 'open',
   });
+  const approvedProposals = await listProposals({
+    tenantCode: job.tenantCode,
+    marketplaceCode: marketplace.code,
+    sku,
+    status: 'approved',
+  });
 
   const autoApproved = job.payload.autoApprovedOnly
     ? openProposals.filter((proposal) => proposal.autoApplyEligible)
-    : openProposals;
+    : [...approvedProposals, ...openProposals.filter((proposal) => proposal.autoApplyEligible)];
   const manualReviewRequired = openProposals.filter((proposal) => !proposal.autoApplyEligible);
 
   if (manualReviewRequired.length > 0 && job.payload.autoApprovedOnly) {

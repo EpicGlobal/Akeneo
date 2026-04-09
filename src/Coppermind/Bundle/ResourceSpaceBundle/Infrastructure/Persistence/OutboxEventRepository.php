@@ -192,6 +192,92 @@ final class OutboxEventRepository
     }
 
     /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function listEvents(
+        int $limit = 50,
+        ?string $tenantCode = null,
+        ?string $status = null,
+        ?string $ownerType = null,
+    ): array {
+        $where = [];
+        $parameters = [];
+        $tenantCode = $this->normalizeOptionalTenantCode($tenantCode);
+
+        if (null !== $tenantCode) {
+            $where[] = 'tenant_code = :tenant_code';
+            $parameters['tenant_code'] = $tenantCode;
+        }
+
+        $status = trim((string) $status);
+        if ('' !== $status) {
+            $where[] = 'status = :status';
+            $parameters['status'] = substr($status, 0, 32);
+        }
+
+        $ownerType = trim((string) $ownerType);
+        if ('' !== $ownerType) {
+            $where[] = 'owner_type = :owner_type';
+            $parameters['owner_type'] = substr($ownerType, 0, 32);
+        }
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT id, tenant_code, event_type, owner_type, owner_id, dedupe_key, payload_json,
+                       status, attempt_count, available_at, processed_at, last_error, created_at, updated_at
+                FROM %s
+                %s
+                ORDER BY created_at DESC, id DESC
+                LIMIT %d
+                SQL,
+                self::TABLE_NAME,
+                [] !== $where ? 'WHERE ' . implode(' AND ', $where) : '',
+                max(1, $limit)
+            ),
+            $parameters
+        );
+
+        return array_map([$this, 'normalizeRow'], $statement->fetchAllAssociative());
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    public function summarizeByStatus(?string $tenantCode = null): array
+    {
+        $tenantCode = $this->normalizeOptionalTenantCode($tenantCode);
+        $parameters = [];
+        $where = '';
+
+        if (null !== $tenantCode) {
+            $where = 'WHERE tenant_code = :tenant_code';
+            $parameters['tenant_code'] = $tenantCode;
+        }
+
+        $statement = $this->connection->executeQuery(
+            sprintf(
+                <<<SQL
+                SELECT status, COUNT(1) AS status_count
+                FROM %s
+                %s
+                GROUP BY status
+                SQL,
+                self::TABLE_NAME,
+                $where
+            ),
+            $parameters
+        );
+
+        $summary = [];
+        foreach ($statement->fetchAllAssociative() as $row) {
+            $summary[(string) ($row['status'] ?? 'unknown')] = max(0, (int) ($row['status_count'] ?? 0));
+        }
+
+        return $summary;
+    }
+
+    /**
      * @param array<string, mixed> $row
      *
      * @return array<string, mixed>

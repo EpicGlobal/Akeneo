@@ -5,9 +5,36 @@ const path = require('path');
 
 const DEFAULT_CONFIG_FILE = process.env.MARKETPLACE_ORCHESTRATOR_CONFIG_FILE
   || path.resolve(__dirname, '..', 'config', 'tenants.json');
+const DEFAULT_OVERRIDE_FILE = process.env.MARKETPLACE_ORCHESTRATOR_OVERRIDE_FILE
+  || path.resolve(__dirname, '..', 'config', 'tenant-overrides.json');
+
+function loadJsonFile(filePath, fallback) {
+  if (!fs.existsSync(filePath)) {
+    return fallback;
+  }
+
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  } catch (error) {
+    return fallback;
+  }
+}
 
 function loadConfig() {
-  return JSON.parse(fs.readFileSync(DEFAULT_CONFIG_FILE, 'utf8'));
+  return loadJsonFile(DEFAULT_CONFIG_FILE, { tenants: [] });
+}
+
+function loadOverrides() {
+  return loadJsonFile(DEFAULT_OVERRIDE_FILE, { tenants: {} });
+}
+
+function ensureOverrideDirectory() {
+  fs.mkdirSync(path.dirname(DEFAULT_OVERRIDE_FILE), { recursive: true });
+}
+
+function saveOverrides(payload) {
+  ensureOverrideDirectory();
+  fs.writeFileSync(DEFAULT_OVERRIDE_FILE, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 }
 
 function envValue(...names) {
@@ -75,6 +102,97 @@ function envJson(...names) {
 
 function tenantPrefix(tenant) {
   return tenant?.envPrefix || `MARKETPLACE_${String(tenant?.code || '').replace(/[^A-Za-z0-9]+/g, '_').toUpperCase()}`;
+}
+
+function sanitizeString(value, maxLength = 255) {
+  const normalized = String(value || '').trim();
+  return normalized ? normalized.slice(0, maxLength) : '';
+}
+
+function sanitizeStringList(value) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return [...new Set(value.map((entry) => sanitizeString(entry, 160)).filter(Boolean))];
+}
+
+function mergeMarketplaces(baseMarketplaces = [], overrideMarketplaces = {}) {
+  const overrides = Array.isArray(overrideMarketplaces)
+    ? Object.fromEntries(overrideMarketplaces.map((marketplace) => [marketplace.code, marketplace]))
+    : overrideMarketplaces;
+
+  return baseMarketplaces.map((marketplace) => {
+    const override = overrides?.[marketplace.code] || null;
+    if (!override) {
+      return marketplace;
+    }
+
+    return {
+      ...marketplace,
+      ...override,
+      amazon: marketplace.amazon || override.amazon ? {
+        ...(marketplace.amazon || {}),
+        ...(override.amazon || {}),
+      } : undefined,
+    };
+  });
+}
+
+function mergeTenant(baseTenant, overrideTenant) {
+  if (!overrideTenant) {
+    return baseTenant;
+  }
+
+  const merged = {
+    ...baseTenant,
+    ...overrideTenant,
+  };
+
+  if (baseTenant.governance || overrideTenant.governance) {
+    merged.governance = {
+      ...(baseTenant.governance || {}),
+      ...(overrideTenant.governance || {}),
+    };
+  }
+
+  if (baseTenant.amazon || overrideTenant.amazon) {
+    merged.amazon = {
+      ...(baseTenant.amazon || {}),
+      ...(overrideTenant.amazon || {}),
+      notifications: {
+        ...(baseTenant.amazon?.notifications || {}),
+        ...(overrideTenant.amazon?.notifications || {}),
+      },
+      alerts: {
+        ...(baseTenant.amazon?.alerts || {}),
+        ...(overrideTenant.amazon?.alerts || {}),
+        email: {
+          ...(baseTenant.amazon?.alerts?.email || {}),
+          ...(overrideTenant.amazon?.alerts?.email || {}),
+        },
+        sellerCentral: {
+          ...(baseTenant.amazon?.alerts?.sellerCentral || {}),
+          ...(overrideTenant.amazon?.alerts?.sellerCentral || {}),
+        },
+      },
+    };
+  }
+
+  if (baseTenant.ai || overrideTenant.ai) {
+    merged.ai = {
+      ...(baseTenant.ai || {}),
+      ...(overrideTenant.ai || {}),
+      listingWriter: {
+        ...(baseTenant.ai?.listingWriter || {}),
+        ...(overrideTenant.ai?.listingWriter || {}),
+      },
+    };
+  }
+
+  merged.marketplaces = mergeMarketplaces(baseTenant.marketplaces || [], overrideTenant.marketplaces || {});
+
+  return merged;
 }
 
 function resolveAmazonConfig(tenant) {
@@ -159,7 +277,10 @@ function resolveTenant(tenant) {
 }
 
 function listTenants() {
-  return (loadConfig().tenants || []).map(resolveTenant);
+  const overrides = loadOverrides();
+  return (loadConfig().tenants || [])
+    .map((tenant) => mergeTenant(tenant, overrides?.tenants?.[tenant.code] || null))
+    .map(resolveTenant);
 }
 
 function findTenant(tenantCode) {
@@ -229,13 +350,122 @@ function amazonCredentialStatus(amazonConfig) {
   };
 }
 
+function getTenantAdminSettings(tenantCode) {
+  const tenant = findTenant(tenantCode);
+  if (!tenant) {
+    return null;
+  }
+
+  return {
+    tenantCode: tenant.code,
+    label: tenant.label,
+    governance: tenant.governance || null,
+    amazon: tenant.amazon ? {
+      enabled: tenant.amazon.enabled !== false,
+      mode: tenant.amazon.mode || 'mock',
+      pilotFamilyCodes: tenant.amazon.pilotFamilyCodes || [],
+      notificationTypes: tenant.amazon.notifications?.types || [],
+      alerts: {
+        email: {
+          enabled: tenant.amazon.alerts?.email?.enabled ?? false,
+          to: tenant.amazon.alerts?.email?.to || [],
+        },
+        sellerCentral: tenant.amazon.alerts?.sellerCentral || {},
+      },
+      credentialStatus: amazonCredentialStatus(tenant.amazon),
+    } : null,
+    ai: tenant.ai?.listingWriter ? {
+      enabled: tenant.ai.listingWriter.enabled !== false,
+      providerIds: tenant.ai.listingWriter.providerIds || [],
+    } : null,
+    marketplaces: (tenant.marketplaces || []).map((marketplace) => ({
+      code: marketplace.code,
+      label: marketplace.label,
+      channel: marketplace.channel,
+      requiredAttributes: marketplace.requiredAttributes || [],
+      requiredAssetRoles: marketplace.requiredAssetRoles || [],
+      requiredApprovals: marketplace.requiredApprovals || [],
+      minimumImageCount: marketplace.minimumImageCount || 0,
+      automation: marketplace.automation || [],
+      amazon: marketplace.amazon || null,
+    })),
+  };
+}
+
+function updateTenantAdminSettings(tenantCode, payload = {}) {
+  const baseTenant = (loadConfig().tenants || []).find((tenant) => tenant.code === tenantCode);
+  if (!baseTenant) {
+    return null;
+  }
+
+  const overrides = loadOverrides();
+  const tenantOverrides = {
+    ...(overrides.tenants?.[tenantCode] || {}),
+  };
+
+  if (undefined !== payload.label) {
+    tenantOverrides.label = sanitizeString(payload.label, 191) || baseTenant.label;
+  }
+
+  if (payload.amazon && 'object' === typeof payload.amazon) {
+    tenantOverrides.amazon = {
+      ...(tenantOverrides.amazon || {}),
+      mode: sanitizeString(payload.amazon.mode, 32) || tenantOverrides.amazon?.mode || baseTenant.amazon?.mode || 'mock',
+      pilotFamilyCodes: undefined !== payload.amazon.pilotFamilyCodes
+        ? sanitizeStringList(payload.amazon.pilotFamilyCodes)
+        : (tenantOverrides.amazon?.pilotFamilyCodes || baseTenant.amazon?.pilotFamilyCodes || []),
+      notifications: {
+        ...(tenantOverrides.amazon?.notifications || {}),
+        types: undefined !== payload.amazon.notificationTypes
+          ? sanitizeStringList(payload.amazon.notificationTypes)
+          : (tenantOverrides.amazon?.notifications?.types || baseTenant.amazon?.notifications?.types || []),
+      },
+      alerts: {
+        ...(tenantOverrides.amazon?.alerts || {}),
+        email: {
+          ...(tenantOverrides.amazon?.alerts?.email || {}),
+          enabled: undefined !== payload.amazon.alerts?.email?.enabled
+            ? Boolean(payload.amazon.alerts.email.enabled)
+            : (tenantOverrides.amazon?.alerts?.email?.enabled ?? baseTenant.amazon?.alerts?.email?.enabled ?? false),
+          to: undefined !== payload.amazon.alerts?.email?.to
+            ? sanitizeStringList(payload.amazon.alerts.email.to)
+            : (tenantOverrides.amazon?.alerts?.email?.to || baseTenant.amazon?.alerts?.email?.to || []),
+        },
+      },
+    };
+  }
+
+  if (payload.ai && 'object' === typeof payload.ai && payload.ai.listingWriter && 'object' === typeof payload.ai.listingWriter) {
+    tenantOverrides.ai = {
+      ...(tenantOverrides.ai || {}),
+      listingWriter: {
+        ...(tenantOverrides.ai?.listingWriter || {}),
+        enabled: undefined !== payload.ai.listingWriter.enabled
+          ? Boolean(payload.ai.listingWriter.enabled)
+          : (tenantOverrides.ai?.listingWriter?.enabled ?? baseTenant.ai?.listingWriter?.enabled ?? true),
+        providerIds: undefined !== payload.ai.listingWriter.providerIds
+          ? sanitizeStringList(payload.ai.listingWriter.providerIds)
+          : (tenantOverrides.ai?.listingWriter?.providerIds || baseTenant.ai?.listingWriter?.providerIds || []),
+      },
+    };
+  }
+
+  overrides.tenants = overrides.tenants || {};
+  overrides.tenants[tenantCode] = tenantOverrides;
+  saveOverrides(overrides);
+
+  return getTenantAdminSettings(tenantCode);
+}
+
 module.exports = {
   amazonCredentialStatus,
   findMarketplace,
   findTenant,
+  getTenantAdminSettings,
   getTenantAmazonConfig,
   getTenantListingWriterConfig,
   listMarketplaces,
   listTenants,
   loadConfig,
+  updateTenantAdminSettings,
 };

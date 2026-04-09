@@ -72,9 +72,17 @@ Operator platform boundary notes live in [docs/coppermind-platform.md](docs/copp
 Amazon marketplace automation notes live in [docs/amazon-marketplace.md](docs/amazon-marketplace.md).
 Epic AWS deployment notes live in [docs/aws-epic-deployment.md](docs/aws-epic-deployment.md).
 DNS and TLS cutover notes for `operator.epicglobalinc.com` live in [docs/operator-dns-cutover.md](docs/operator-dns-cutover.md).
+Backup, restore, and monitoring notes live in [docs/operator-ops.md](docs/operator-ops.md).
 
 For local development:
 
 - Start the pinned ResourceSpace stack and write-back worker with `make resourcespace-up`.
 - Start the standalone marketplace orchestration service with `make marketplace-up`.
 - The PIM runs at `http://localhost:8080`, ResourceSpace runs at `http://localhost:8081`, and the marketplace orchestrator runs at `http://localhost:8090`.
+
+Recent Operator additions in this repo:
+
+- Akeneo-side governance workflow state, approvals, asset-rights queue, and operator APIs
+- durable outbox and async media-ingest workers
+- marketplace review inbox, proposal approval/apply endpoints, onboarding state, and readiness reporting
+- Epic AWS deployment wrappers for isolated prod/dev environments
