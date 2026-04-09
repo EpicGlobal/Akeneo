@@ -25,6 +25,14 @@ if [[ -z "$BOOTSTRAP_USER" ]]; then
   fi
 fi
 
+run_git() {
+  if [[ "$(id -un)" == "$BOOTSTRAP_USER" ]]; then
+    git "$@"
+  else
+    sudo -u "$BOOTSTRAP_USER" git "$@"
+  fi
+}
+
 sudo apt-get update
 sudo apt-get install -y awscli ca-certificates curl git make
 
@@ -46,14 +54,14 @@ sudo systemctl enable --now docker
 sudo usermod -aG docker "$BOOTSTRAP_USER" || true
 
 if [[ ! -d "$PROJECT_DIR/.git" ]]; then
-  git clone "$REPO_URL" "$PROJECT_DIR"
+  sudo -u "$BOOTSTRAP_USER" git clone "$REPO_URL" "$PROJECT_DIR"
 fi
 
 sudo chown -R "$BOOTSTRAP_USER":"$BOOTSTRAP_USER" "$PROJECT_DIR"
 
-git -C "$PROJECT_DIR" fetch origin master
-git -C "$PROJECT_DIR" checkout master
-git -C "$PROJECT_DIR" pull --ff-only origin master
+run_git -C "$PROJECT_DIR" fetch origin master
+run_git -C "$PROJECT_DIR" checkout master
+run_git -C "$PROJECT_DIR" pull --ff-only origin master
 
 cd "$PROJECT_DIR"
 bash "$BOOTSTRAP_SCRIPT" "$TARGET"
