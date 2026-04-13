@@ -5,6 +5,7 @@ const http = require('http');
 const { createAmazonClient } = require('./lib/amazon-client');
 const {
   amazonCredentialStatus,
+  createTenantConfig,
   findMarketplace,
   findTenant,
   getTenantAdminSettings,
@@ -512,6 +513,13 @@ async function handleRequest(request, response) {
     sendJson(response, 200, {
       tenants: listTenants().map(tenantSummary),
     });
+    return;
+  }
+
+  if (request.method === 'POST' && url.pathname === '/v1/tenants') {
+    const payload = await readJsonBody(request);
+    const tenant = createTenantConfig(payload);
+    sendJson(response, 201, tenantSummary(tenant));
     return;
   }
 

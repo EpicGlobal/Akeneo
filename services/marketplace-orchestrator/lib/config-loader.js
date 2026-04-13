@@ -109,6 +109,15 @@ function sanitizeString(value, maxLength = 255) {
   return normalized ? normalized.slice(0, maxLength) : '';
 }
 
+function normalizeCode(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 64);
+}
+
 function sanitizeStringList(value) {
   if (!Array.isArray(value)) {
     return [];
@@ -117,12 +126,16 @@ function sanitizeStringList(value) {
   return [...new Set(value.map((entry) => sanitizeString(entry, 160)).filter(Boolean))];
 }
 
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
 function mergeMarketplaces(baseMarketplaces = [], overrideMarketplaces = {}) {
   const overrides = Array.isArray(overrideMarketplaces)
     ? Object.fromEntries(overrideMarketplaces.map((marketplace) => [marketplace.code, marketplace]))
     : overrideMarketplaces;
 
-  return baseMarketplaces.map((marketplace) => {
+  const merged = baseMarketplaces.map((marketplace) => {
     const override = overrides?.[marketplace.code] || null;
     if (!override) {
       return marketplace;
@@ -137,6 +150,31 @@ function mergeMarketplaces(baseMarketplaces = [], overrideMarketplaces = {}) {
       } : undefined,
     };
   });
+
+  const knownCodes = new Set(baseMarketplaces.map((marketplace) => marketplace.code));
+  for (const [marketplaceCode, override] of Object.entries(overrides || {})) {
+    if (knownCodes.has(marketplaceCode) || !override || 'object' !== typeof override) {
+      continue;
+    }
+
+    merged.push({
+      code: sanitizeString(override.code, 80) || marketplaceCode,
+      label: sanitizeString(override.label, 120) || marketplaceCode,
+      channel: sanitizeString(override.channel, 80) || '',
+      locale: sanitizeString(override.locale, 32) || '',
+      market: sanitizeString(override.market, 32) || '',
+      requiredAttributes: sanitizeStringList(override.requiredAttributes),
+      requiredAssetRoles: sanitizeStringList(override.requiredAssetRoles),
+      requiredApprovals: sanitizeStringList(override.requiredApprovals),
+      minimumImageCount: Number.isFinite(Number(override.minimumImageCount)) ? Number(override.minimumImageCount) : 0,
+      automation: sanitizeStringList(override.automation),
+      amazon: override.amazon ? {
+        ...override.amazon,
+      } : undefined,
+    });
+  }
+
+  return merged;
 }
 
 function mergeTenant(baseTenant, overrideTenant) {
@@ -276,11 +314,45 @@ function resolveTenant(tenant) {
   };
 }
 
+function buildSyntheticBaseTenant(overrideTenant, baseTenants) {
+  const templateCode = sanitizeString(overrideTenant?.templateCode, 64) || 'default';
+  const template = (baseTenants || []).find((tenant) => tenant.code === templateCode) || (baseTenants || [])[0] || null;
+  if (!template) {
+    return null;
+  }
+
+  const code = normalizeCode(overrideTenant?.code) || template.code;
+  const label = sanitizeString(overrideTenant?.label, 191) || `${template.label} Tenant`;
+  const synthetic = clone(template);
+  synthetic.code = code;
+  synthetic.label = label;
+  return synthetic;
+}
+
 function listTenants() {
+  const config = loadConfig();
   const overrides = loadOverrides();
-  return (loadConfig().tenants || [])
-    .map((tenant) => mergeTenant(tenant, overrides?.tenants?.[tenant.code] || null))
-    .map(resolveTenant);
+  const baseTenants = config.tenants || [];
+  const merged = new Map();
+
+  for (const tenant of baseTenants) {
+    merged.set(tenant.code, mergeTenant(tenant, overrides?.tenants?.[tenant.code] || null));
+  }
+
+  for (const [tenantCode, overrideTenant] of Object.entries(overrides?.tenants || {})) {
+    if (merged.has(tenantCode)) {
+      continue;
+    }
+
+    const syntheticBase = buildSyntheticBaseTenant({ ...overrideTenant, code: tenantCode }, baseTenants);
+    if (!syntheticBase) {
+      continue;
+    }
+
+    merged.set(tenantCode, mergeTenant(syntheticBase, { ...overrideTenant, code: tenantCode }));
+  }
+
+  return [...merged.values()].map(resolveTenant);
 }
 
 function findTenant(tenantCode) {
@@ -392,8 +464,69 @@ function getTenantAdminSettings(tenantCode) {
   };
 }
 
+function createTenantConfig(payload = {}) {
+  const code = normalizeCode(payload.code || payload.label);
+  if (!code) {
+    throw new Error('Tenant code is required.');
+  }
+
+  const label = sanitizeString(payload.label, 191);
+  if (!label) {
+    throw new Error('Tenant label is required.');
+  }
+
+  const existingTenant = findTenant(code);
+  if (existingTenant) {
+    throw new Error(`Tenant "${code}" already exists.`);
+  }
+
+  const config = loadConfig();
+  const baseTenants = config.tenants || [];
+  const templateCode = sanitizeString(payload.templateCode, 64) || 'default';
+  const template = baseTenants.find((tenant) => tenant.code === templateCode) || baseTenants[0] || null;
+  if (!template) {
+    throw new Error('No tenant template is available.');
+  }
+
+  const overrides = loadOverrides();
+  overrides.tenants = overrides.tenants || {};
+  overrides.tenants[code] = {
+    templateCode: template.code,
+    code,
+    label,
+    ownerEmail: sanitizeString(payload.ownerEmail, 191) || '',
+    status: sanitizeString(payload.status, 32) || 'draft',
+    amazon: {
+      ...(payload.amazon && 'object' === typeof payload.amazon ? {
+        mode: sanitizeString(payload.amazon.mode, 32) || template.amazon?.mode || 'mock',
+        pilotFamilyCodes: sanitizeStringList(payload.amazon.pilotFamilyCodes || []),
+        notifications: {
+          types: sanitizeStringList(payload.amazon.notificationTypes || []),
+        },
+        alerts: {
+          email: {
+            enabled: Boolean(payload.amazon.alerts?.email?.enabled),
+            to: sanitizeStringList(payload.amazon.alerts?.email?.to || []),
+          },
+        },
+      } : {}),
+    },
+    ai: payload.ai && 'object' === typeof payload.ai ? {
+      listingWriter: {
+        enabled: undefined !== payload.ai.listingWriter?.enabled
+          ? Boolean(payload.ai.listingWriter.enabled)
+          : (template.ai?.listingWriter?.enabled ?? true),
+        providerIds: sanitizeStringList(payload.ai.listingWriter?.providerIds || []),
+      },
+    } : undefined,
+  };
+
+  saveOverrides(overrides);
+  return findTenant(code);
+}
+
 function updateTenantAdminSettings(tenantCode, payload = {}) {
-  const baseTenant = (loadConfig().tenants || []).find((tenant) => tenant.code === tenantCode);
+  const baseTenant = findTenant(tenantCode);
   if (!baseTenant) {
     return null;
   }
@@ -459,6 +592,7 @@ function updateTenantAdminSettings(tenantCode, payload = {}) {
 
 module.exports = {
   amazonCredentialStatus,
+  createTenantConfig,
   findMarketplace,
   findTenant,
   getTenantAdminSettings,

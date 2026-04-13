@@ -14,6 +14,7 @@ fi
 BACKUP_DIR="$1"
 CONFIRM="${2:-}"
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+STARTED_AT="$(date --iso-8601=seconds)"
 
 if [[ ! -d "$BACKUP_DIR" ]]; then
   echo "Backup directory not found: $BACKUP_DIR" >&2
@@ -56,5 +57,23 @@ docker compose -f docker-compose.yml -f docker-compose.resourcespace.yml exec -T
   'tar xzf - -C /var/www/html/filestore' < "${BACKUP_DIR}/resourcespace-filestore.tar.gz"
 
 popd >/dev/null
+
+if [[ -n "${OPERATOR_CONTROL_PLANE_OPS_BASE_URL:-}" ]] && command -v curl >/dev/null 2>&1; then
+  curl -fsS -X POST "${OPERATOR_CONTROL_PLANE_OPS_BASE_URL%/}/api/ops/backups" \
+    -H 'Content-Type: application/json' \
+    --data-binary @- >/dev/null || true <<JSON
+{
+  "environment": "${OPERATOR_CONTROL_PLANE_ENVIRONMENT:-unknown}",
+  "tenantCode": "${OPERATOR_CONTROL_PLANE_OPS_TENANT:-}",
+  "scope": "restore_drill",
+  "status": "success",
+  "location": "${BACKUP_DIR}",
+  "startedAt": "${STARTED_AT}",
+  "completedAt": "$(date --iso-8601=seconds)",
+  "restoreDrillAt": "$(date --iso-8601=seconds)",
+  "notes": "Operator restore completed from ${BACKUP_DIR}"
+}
+JSON
+fi
 
 echo "Restore complete."

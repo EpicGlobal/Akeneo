@@ -8,6 +8,11 @@ The runtime still uses the current parameter prefix and bootstrap scripts:
 - Deploy wrapper: `scripts/aws-epic-deploy.sh`
 - EC2 bootstrap helper: `scripts/aws-ec2-bootstrap.sh`
 
+The broader Operator control plane now lives in the separate suite workspace:
+
+- Control plane app: `../Epic Commerce Platform/apps/operator-control-plane`
+- Local compose packaging: `../Epic Commerce Platform/infra/docker-compose.operator-control-plane.yml`
+
 ## Production
 
 From an EC2 instance in the target account:
@@ -87,7 +92,16 @@ Under the chosen prefix:
 
 - point DNS at the host or Elastic IP
 - add TLS in front of port 80
+- put the Operator control plane behind its own hostname/TLS and make it the primary suite entry point
 - configure a real mailer/SES path
 - provide live Amazon and Epic AI credentials when ready
 - create and map a real Akeneo media attribute if you want one-click binary sync from the DAM
 - if using staging, optionally add a dev hostname and tighten the security group after smoke testing
+
+## SaaS Hardening Follow-Up
+
+For broader rollout beyond design-partner pilots:
+
+- move public media to managed object storage and CDN delivery
+- finish clean hostnames/TLS for DAM, marketplace, and AI
+- keep backup, restore drill, and monitor signals flowing into the Operator control plane
