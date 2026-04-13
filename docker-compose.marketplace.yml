@@ -9,6 +9,9 @@ services:
       MARKETPLACE_ORCHESTRATOR_PORT: '${MARKETPLACE_ORCHESTRATOR_PORT:-8090}'
       MARKETPLACE_ORCHESTRATOR_DATA_DIR: '/srv/pim/var/marketplace-orchestrator'
       MARKETPLACE_ORCHESTRATOR_CONFIG_FILE: '/srv/pim/services/marketplace-orchestrator/config/tenants.json'
+      MARKETPLACE_ORCHESTRATOR_OVERRIDE_FILE: '/srv/pim/services/marketplace-orchestrator/config/tenant-overrides.json'
+      MARKETPLACE_ORCHESTRATOR_PUBLIC_BASE_URL: '${MARKETPLACE_ORCHESTRATOR_PUBLIC_BASE_URL:-http://localhost:8090}'
+      MARKETPLACE_DB_CREATE_IF_MISSING: '${MARKETPLACE_DB_CREATE_IF_MISSING:-false}'
     command: 'node server.js'
     volumes:
       - './:/srv/pim'
@@ -29,8 +32,10 @@ services:
     environment:
       MARKETPLACE_ORCHESTRATOR_DATA_DIR: '/srv/pim/var/marketplace-orchestrator'
       MARKETPLACE_ORCHESTRATOR_CONFIG_FILE: '/srv/pim/services/marketplace-orchestrator/config/tenants.json'
+      MARKETPLACE_ORCHESTRATOR_OVERRIDE_FILE: '/srv/pim/services/marketplace-orchestrator/config/tenant-overrides.json'
       MARKETPLACE_WORKER_POLL_MS: '${MARKETPLACE_WORKER_POLL_MS:-5000}'
       MARKETPLACE_WORKER_BATCH_SIZE: '${MARKETPLACE_WORKER_BATCH_SIZE:-10}'
+      MARKETPLACE_DB_CREATE_IF_MISSING: '${MARKETPLACE_DB_CREATE_IF_MISSING:-false}'
     command: 'node worker.js'
     volumes:
       - './:/srv/pim'

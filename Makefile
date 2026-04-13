@@ -7,6 +7,7 @@ PHP_RUN = $(CMD_ON_PROJECT) php
 YARN_RUN = docker compose run -u node --rm -e YARN_REGISTRY -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD node yarn
 RESOURCE_SPACE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.resourcespace.yml
 MARKETPLACE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.marketplace.yml
+CONTROL_PLANE_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.marketplace.yml -f docker-compose.resourcespace.yml -f docker-compose.operator-control-plane.yml
 
 ifdef NO_DOCKER
   CMD_ON_PROJECT =
@@ -138,6 +139,20 @@ marketplace-logs:
 marketplace-down:
 	$(MARKETPLACE_COMPOSE) stop marketplace-orchestrator marketplace-orchestrator-worker
 	$(MARKETPLACE_COMPOSE) rm -sf marketplace-orchestrator marketplace-orchestrator-worker
+
+.PHONY: control-plane-up
+control-plane-up:
+	$(CONTROL_PLANE_COMPOSE) build operator-control-plane
+	$(CONTROL_PLANE_COMPOSE) up -d operator-control-plane
+
+.PHONY: control-plane-logs
+control-plane-logs:
+	$(CONTROL_PLANE_COMPOSE) logs -f operator-control-plane
+
+.PHONY: control-plane-down
+control-plane-down:
+	$(CONTROL_PLANE_COMPOSE) stop operator-control-plane
+	$(CONTROL_PLANE_COMPOSE) rm -sf operator-control-plane
 
 .PHONY: down
 down:

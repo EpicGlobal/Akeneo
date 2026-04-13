@@ -12,6 +12,7 @@ The broader Operator control plane now lives in the separate suite workspace:
 
 - Control plane app: `../Epic Commerce Platform/apps/operator-control-plane`
 - Local compose packaging: `../Epic Commerce Platform/infra/docker-compose.operator-control-plane.yml`
+- Akeneo-side runtime overlay: `docker-compose.operator-control-plane.yml`
 
 ## Production
 
@@ -35,6 +36,17 @@ That script provisions a dedicated dev EC2 instance, Elastic IP, security group,
 
 On reruns, the staging wrapper restores the server-side tracked `.env` to the repo baseline before overlaying the Parameter Store values, removes any stale `.env.local`, validates the Operator, DAM, and marketplace health endpoints, and ensures the default admin user exists.
 
+It now also:
+
+- bundles the local `Operator Control Plane` app from the sibling suite workspace,
+- uploads that bundle to the dev backup bucket,
+- deploys it on the EC2 host under `/home/ubuntu/operator-control-plane/app`,
+- starts it through the shared Docker runtime,
+- and validates the clean suite routes:
+  - `/control-plane/`
+  - `/market/`
+  - `/assets/`
+
 ## Fresh Host Bootstrap
 
 If the host does not already have Docker and the repo checked out:
@@ -50,15 +62,19 @@ bash scripts/aws-ec2-bootstrap.sh <public-ip-or-url>
 
 - pulls secrets from AWS Systems Manager Parameter Store
 - writes the required `.env` values for Akeneo, ResourceSpace, and object storage
+- provisions and wires a managed media bucket for the staged S3/CDN cutover
+- writes the shared control-plane/public route values used by the suite shell
 - derives the ResourceSpace private API key for the bootstrap admin user from `RESOURCE_SPACE_API_SCRAMBLE_KEY`
 - runs the existing `scripts/aws-first-run.sh` bootstrap
 - replays the custom Operator platform migrations that Akeneo's installer marks as executed during a fresh catalog install
 - runs Doctrine migrations
 - starts ResourceSpace plus background workers
 - installs the marketplace orchestrator Node dependencies once, then starts the orchestrator plus worker
+- deploys the Operator control plane from the local suite bundle and starts it in the shared runtime
+- installs the host backup/monitor cron baseline plus log rotation
 - configures the default tenant-scoped ResourceSpace connection
 - stops non-runtime Akeneo helper containers after the build completes
-- validates the PIM, DAM, and marketplace health endpoints before reporting success
+- validates the PIM, DAM, marketplace, and control-plane health endpoints before reporting success
 
 ## Current Epic Prod Footprint
 
@@ -79,6 +95,8 @@ Under the chosen prefix:
 - `app_database_password`
 - `app_database_root_password`
 - `backup_s3_uri`
+- `media_bucket`
+- `media_cdn_base_url` (optional)
 - `object_storage_access_key`
 - `object_storage_secret_key`
 - `operator_control_plane_token`
@@ -102,6 +120,6 @@ Under the chosen prefix:
 
 For broader rollout beyond design-partner pilots:
 
-- move public media to managed object storage and CDN delivery
+- complete the live Akeneo/DAM media cutover to the provisioned managed object storage and CDN layer
 - finish clean hostnames/TLS for DAM, marketplace, and AI
 - keep backup, restore drill, and monitor signals flowing into the Operator control plane

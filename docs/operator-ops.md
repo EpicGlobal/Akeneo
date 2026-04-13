@@ -56,6 +56,20 @@ To feed the ops dashboard, set:
 - `OPERATOR_CONTROL_PLANE_OPS_BASE_URL`
 - `OPERATOR_CONTROL_PLANE_ENVIRONMENT`
 - `OPERATOR_CONTROL_PLANE_OPS_TENANT`
+- `MARKETPLACE_ORCHESTRATOR_PUBLIC_BASE_URL` or `OPERATOR_MONITOR_MARKETPLACE_URL`
+
+The host-side cron baseline can be installed with:
+
+```bash
+bash scripts/operator-install-ops-cron.sh
+```
+
+That creates:
+
+- `/etc/cron.d/operator`
+- `/etc/logrotate.d/operator`
+- `/var/log/operator/backup.log`
+- `/var/log/operator/monitor.log`
 
 ## Recommended scheduling
 

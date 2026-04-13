@@ -16,6 +16,7 @@ function databaseConfig() {
   if (url) {
     return {
       uri: url,
+      createIfMissing: /^(1|true|yes)$/i.test(String(process.env.MARKETPLACE_DB_CREATE_IF_MISSING || '').trim()),
       waitForConnections: true,
       connectionLimit: Math.max(2, Number(process.env.MARKETPLACE_DB_POOL_LIMIT || 10) || 10),
       queueLimit: 0,
@@ -37,6 +38,7 @@ function databaseConfig() {
     database: process.env.MARKETPLACE_DB_NAME?.trim()
       || process.env.APP_DATABASE_NAME?.trim()
       || 'akeneo_pim',
+    createIfMissing: /^(1|true|yes)$/i.test(String(process.env.MARKETPLACE_DB_CREATE_IF_MISSING || '').trim()),
     waitForConnections: true,
     connectionLimit: Math.max(2, Number(process.env.MARKETPLACE_DB_POOL_LIMIT || 10) || 10),
     queueLimit: 0,
@@ -45,7 +47,7 @@ function databaseConfig() {
 }
 
 async function ensureDatabaseExists(config) {
-  if (config.uri || !config.database) {
+  if (config.uri || !config.database || !config.createIfMissing) {
     return;
   }
 
@@ -68,7 +70,9 @@ async function ensureDatabaseExists(config) {
 
 function getPool() {
   if (!pool) {
-    pool = mysql.createPool(databaseConfig());
+    const config = databaseConfig();
+    const { createIfMissing, ...poolConfig } = config;
+    pool = mysql.createPool(poolConfig);
   }
 
   return pool;
@@ -80,7 +84,8 @@ async function ensureSchema() {
       const config = databaseConfig();
       await ensureDatabaseExists(config);
       if (!pool) {
-        pool = mysql.createPool(config);
+        const { createIfMissing, ...poolConfig } = config;
+        pool = mysql.createPool(poolConfig);
       }
 
       const connection = await pool.getConnection();

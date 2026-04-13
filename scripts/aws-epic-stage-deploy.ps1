@@ -248,6 +248,92 @@ function Ensure-BackupBucket {
     Invoke-AwsNoOutput -Arguments @("s3api", "put-public-access-block", "--bucket", $BucketName, "--public-access-block-configuration", "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true")
 }
 
+function Ensure-MediaBucket {
+    param([string]$BucketName)
+
+    if (-not (Test-AwsCommand @("s3api", "head-bucket", "--bucket", $BucketName))) {
+        Invoke-AwsNoOutput -Arguments @("s3api", "create-bucket", "--bucket", $BucketName, "--create-bucket-configuration", "LocationConstraint=$Region") -FailureMessage "Failed to create media bucket $BucketName"
+    }
+
+    Invoke-AwsNoOutput -Arguments @("s3api", "put-public-access-block", "--bucket", $BucketName, "--public-access-block-configuration", "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true")
+    Invoke-AwsNoOutput -Arguments @("s3api", "put-bucket-versioning", "--bucket", $BucketName, "--versioning-configuration", "Status=Enabled")
+
+    $encryptionPath = Join-Path $env:TEMP "$BucketName-encryption.json"
+    $encryption = @'
+{
+  "Rules": [
+    {
+      "ApplyServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+      }
+    }
+  ]
+}
+'@
+    Write-Utf8NoBomFile -Path $encryptionPath -Content $encryption
+    Invoke-AwsNoOutput -Arguments @("s3api", "put-bucket-encryption", "--bucket", $BucketName, "--server-side-encryption-configuration", "file://$encryptionPath")
+}
+
+function Ensure-RoleBucketAccess {
+    param(
+        [string]$RoleName,
+        [string]$BucketName,
+        [string]$PolicyName
+    )
+
+    $policyPath = Join-Path $env:TEMP "$RoleName-$PolicyName.json"
+    $policy = @"
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:GetObject", "s3:DeleteObject", "s3:AbortMultipartUpload"],
+      "Resource": "arn:aws:s3:::$BucketName/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::$BucketName"
+    }
+  ]
+}
+"@
+    Write-Utf8NoBomFile -Path $policyPath -Content $policy
+    Invoke-AwsNoOutput -Arguments @("iam", "put-role-policy", "--role-name", $RoleName, "--policy-name", $PolicyName, "--policy-document", "file://$policyPath") -FailureMessage "Failed to attach bucket access policy $PolicyName to $RoleName"
+}
+
+function New-ControlPlaneBundle {
+    param([string]$SourcePath)
+
+    if (-not (Test-Path (Join-Path $SourcePath "package.json"))) {
+        throw "Operator control-plane package.json was not found at $SourcePath"
+    }
+
+    $stagingRoot = Join-Path $env:TEMP "operator-control-plane-bundle-$Environment"
+    if (Test-Path $stagingRoot) {
+        Remove-Item -Recurse -Force $stagingRoot
+    }
+
+    New-Item -ItemType Directory -Path $stagingRoot | Out-Null
+    $null = & robocopy $SourcePath $stagingRoot /MIR /XD node_modules .git var /XF .env .env.local .env.production
+    if ($LASTEXITCODE -gt 7) {
+        throw "Failed to stage the Operator control-plane bundle from $SourcePath"
+    }
+
+    $bundlePath = Join-Path $env:TEMP "operator-control-plane-$Environment.tar.gz"
+    if (Test-Path $bundlePath) {
+        Remove-Item -Force $bundlePath
+    }
+
+    & tar -czf $bundlePath -C $stagingRoot .
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create control-plane bundle $bundlePath"
+    }
+
+    return $bundlePath
+}
+
 function Ensure-Instance {
     param(
         [string]$AmiId,
@@ -351,11 +437,13 @@ function Invoke-PostBootstrapValidation {
     $validationCommands = @(
         "set -eu",
         "grep -q '^AKENEO_PIM_URL=""http://$PublicIp""' /home/ubuntu/akeneo-pim/.env",
-        "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$($PublicIp):8081""' /home/ubuntu/akeneo-pim/.env",
+        "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$($PublicIp)/assets""' /home/ubuntu/akeneo-pim/.env",
+        "grep -q '^OPERATOR_MEDIA_STORAGE_BUCKET=""' /home/ubuntu/akeneo-pim/.env",
         "grep -q '^OPERATOR_CONTROL_PLANE_TOKEN=""' /home/ubuntu/akeneo-pim/.env",
         'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1/ >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
-        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1:8081/ >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
-        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1:8090/health >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
+        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1/assets/pages/login.php?no_redirect=true >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
+        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1/market/health >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
+        'success=0; for attempt in $(seq 1 60); do if curl -fsS http://127.0.0.1/control-plane/health >/dev/null; then success=1; break; fi; sleep 5; done; [ "$success" -eq 1 ]',
         "cd /home/ubuntu/akeneo-pim",
         "sg docker -c ""cd '/home/ubuntu/akeneo-pim' && docker compose run -u www-data --rm php php bin/console pim:user:create jorgen ShardplatePower13 jorgen@epicglobalinc.com Jorgen Jensen en_US --admin -n || true"""
     )
@@ -426,12 +514,18 @@ $instanceProfileName = "$namePrefix-instance-profile"
 $securityGroupName = "$namePrefix-sg"
 $dashboardName = "Operator-$Environment"
 $backupBucket = "epic-operator-$Environment-backups-$accountId-$Region"
+$mediaBucket = "epic-operator-$Environment-media-$accountId-$Region"
 $vpcId = Invoke-AwsText @("ec2", "describe-vpcs", "--filters", "Name=isDefault,Values=true", "--query", "Vpcs[0].VpcId")
 $subnetId = Invoke-AwsText @("ec2", "describe-subnets", "--filters", "Name=default-for-az,Values=true", "Name=vpc-id,Values=$vpcId", "--query", "Subnets[0].SubnetId")
 $amiId = Invoke-AwsText @("ssm", "get-parameter", "--name", "/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id", "--query", "Parameter.Value")
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$workspaceRoot = Split-Path -Parent $repoRoot
+$controlPlaneSource = Join-Path $workspaceRoot "Epic Commerce Platform\apps\operator-control-plane"
 
 Ensure-BackupBucket -BucketName $backupBucket
+Ensure-MediaBucket -BucketName $mediaBucket
 Ensure-RoleAndProfile -RoleName $roleName -InstanceProfileName $instanceProfileName -BucketName $backupBucket
+Ensure-RoleBucketAccess -RoleName $roleName -BucketName $mediaBucket -PolicyName "$roleName-media"
 $securityGroupId = Ensure-SecurityGroup -VpcId $vpcId -GroupName $securityGroupName
 
 $parameterValues = @{
@@ -439,6 +533,8 @@ $parameterValues = @{
     "app_database_password" = New-RandomHex 16
     "app_database_root_password" = New-RandomHex 16
     "backup_s3_uri" = "s3://$backupBucket"
+    "media_bucket" = $mediaBucket
+    "media_cdn_base_url" = ""
     "object_storage_access_key" = "operator$Environment"
     "object_storage_secret_key" = New-RandomHex 24
     "operator_control_plane_token" = New-RandomHex 24
@@ -452,6 +548,11 @@ $parameterValues = @{
 foreach ($entry in $parameterValues.GetEnumerator()) {
     Ensure-Parameter -Name "$parameterPrefix/$($entry.Key)" -Value "$($entry.Value)"
 }
+
+$controlPlaneBundlePath = New-ControlPlaneBundle -SourcePath $controlPlaneSource
+$controlPlaneBundleKey = "artifacts/operator-control-plane/$Environment/operator-control-plane-$([DateTime]::UtcNow.ToString('yyyyMMddHHmmss')).tar.gz"
+$controlPlaneBundleUri = "s3://$backupBucket/$controlPlaneBundleKey"
+Invoke-AwsNoOutput -Arguments @("s3", "cp", $controlPlaneBundlePath, $controlPlaneBundleUri) -FailureMessage "Failed to upload control-plane bundle to $controlPlaneBundleUri"
 
 $instanceId = Ensure-Instance -AmiId $amiId -SubnetId $subnetId -SecurityGroupId $securityGroupId -InstanceProfileName $instanceProfileName -NameTag $namePrefix
 Invoke-AwsNoOutput -Arguments @("ec2", "wait", "instance-running", "--instance-ids", $instanceId)
@@ -477,10 +578,30 @@ $commands = @(
     "export AWS_REGION=$Region",
     "export DEPLOY_PARAMETER_PREFIX=$parameterPrefix",
     "export BOOTSTRAP_USER=$BOOTSTRAP_USER",
+    "export RESOURCE_SPACE_BASE_URI_VALUE=http://$publicIp/assets",
+    "export MARKETPLACE_ORCHESTRATOR_PUBLIC_BASE_URL_VALUE=http://$publicIp/market",
+    "export OPERATOR_CONTROL_PLANE_BUNDLE_URI=$controlPlaneBundleUri",
+    "export OPERATOR_CONTROL_PLANE_ENVIRONMENT_VALUE=$Environment",
+    "export OPERATOR_CONTROL_PLANE_PUBLIC_BASE_URL_VALUE=http://$publicIp/control-plane",
+    "export OPERATOR_CONTROL_PLANE_CATALOG_PUBLIC_URL_VALUE=http://$publicIp",
+    "export OPERATOR_CONTROL_PLANE_DAM_PUBLIC_URL_VALUE=http://$publicIp/assets",
+    "export OPERATOR_CONTROL_PLANE_MARKETPLACE_PUBLIC_URL_VALUE=http://$publicIp/market/dashboard",
+    "export OPERATOR_CONTROL_PLANE_OPS_BASE_URL_VALUE=http://127.0.0.1/control-plane",
+    "export OPERATOR_CONTROL_PLANE_OPS_TENANT_VALUE=default",
+    "export LOCAL_RESOURCE_SPACE_HEALTH_URI=http://127.0.0.1/assets/pages/login.php?no_redirect=true",
+    "export LOCAL_MARKETPLACE_HEALTH_URI=http://127.0.0.1/market/health",
+    "export LOCAL_CONTROL_PLANE_HEALTH_URI=http://127.0.0.1/control-plane/health",
+    "export OPERATOR_MEDIA_STORAGE_BUCKET_VALUE=$mediaBucket",
+    "export OPERATOR_MEDIA_STORAGE_REGION_VALUE=$Region",
+    "export OPERATOR_MEDIA_STORAGE_ENDPOINT_VALUE=",
+    "export OPERATOR_MEDIA_STORAGE_USE_PATH_STYLE_ENDPOINT_VALUE=0",
+    "export OPERATOR_MEDIA_STORAGE_ACCESS_KEY_VALUE=",
+    "export OPERATOR_MEDIA_STORAGE_SECRET_KEY_VALUE=",
     "bash scripts/aws-ec2-bootstrap.sh http://$publicIp",
     "cd /home/ubuntu/akeneo-pim",
     "grep -q '^AKENEO_PIM_URL=""http://$publicIp""' /home/ubuntu/akeneo-pim/.env",
-    "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$($publicIp):8081""' /home/ubuntu/akeneo-pim/.env",
+    "grep -q '^RESOURCE_SPACE_BASE_URI=""http://$($publicIp)/assets""' /home/ubuntu/akeneo-pim/.env",
+    "grep -q '^OPERATOR_MEDIA_STORAGE_BUCKET=""$mediaBucket""' /home/ubuntu/akeneo-pim/.env",
     "grep -q '^OPERATOR_CONTROL_PLANE_TOKEN=""' /home/ubuntu/akeneo-pim/.env",
     "sg docker -c ""cd '/home/ubuntu/akeneo-pim' && docker compose run -u www-data --rm php php bin/console pim:user:create jorgen ShardplatePower13 jorgen@epicglobalinc.com Jorgen Jensen en_US --admin -n || true"""
 )
@@ -516,8 +637,11 @@ Write-Host "Region: $Region"
 Write-Host "InstanceId: $instanceId"
 Write-Host "PublicIp: $publicIp"
 Write-Host "URL: http://$publicIp/"
-Write-Host "Assets URL: http://$($publicIp):8081/"
+Write-Host "Control plane URL: http://$publicIp/control-plane/"
+Write-Host "Assets URL: http://$($publicIp)/assets/"
+Write-Host "Marketplace URL: http://$($publicIp)/market/dashboard"
 Write-Host "Backup bucket: s3://$backupBucket"
+Write-Host "Media bucket: s3://$mediaBucket"
 Write-Host "Dashboard: $dashboardName"
 Write-Host "SSM command status: $($invocation.Status)"
 Write-Host "Operator admin username: jorgen"

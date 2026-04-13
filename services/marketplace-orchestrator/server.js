@@ -42,6 +42,20 @@ const {
 } = require('./lib/store');
 
 const port = Number(process.env.MARKETPLACE_ORCHESTRATOR_PORT || 8090);
+const publicBaseUrl = String(process.env.MARKETPLACE_ORCHESTRATOR_PUBLIC_BASE_URL || `http://localhost:${port}`).replace(/\/+$/, '');
+const publicBasePath = (() => {
+  try {
+    const pathname = new URL(publicBaseUrl).pathname.replace(/\/+$/, '');
+    return '/' === pathname ? '' : pathname;
+  } catch (error) {
+    return '';
+  }
+})();
+
+function withPublicBasePath(pathname) {
+  const normalizedPath = String(pathname || '').startsWith('/') ? String(pathname || '') : `/${String(pathname || '')}`;
+  return `${publicBasePath}${normalizedPath}`;
+}
 
 function sendHtml(response, statusCode, body) {
   response.writeHead(statusCode, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -258,7 +272,7 @@ function renderDashboardPage() {
         items.map(mapper).join('') + '</ul></div>';
     }
 
-    fetch('/v1/dashboard')
+    fetch('${withPublicBasePath('/v1/dashboard')}')
       .then((response) => response.json())
       .then((data) => {
         const totals = data.totals || {};
