@@ -545,6 +545,10 @@ $parameterValues = @{
     "resource_space_api_scramble_key" = New-RandomHex 24
 }
 
+if ([string]::IsNullOrWhiteSpace($parameterValues["media_cdn_base_url"])) {
+    $parameterValues.Remove("media_cdn_base_url")
+}
+
 foreach ($entry in $parameterValues.GetEnumerator()) {
     Ensure-Parameter -Name "$parameterPrefix/$($entry.Key)" -Value "$($entry.Value)"
 }
@@ -566,11 +570,11 @@ $commands = @(
     "cd /home/ubuntu",
     "if [ ! -d /home/ubuntu/akeneo-pim ]; then sudo -u ubuntu -H git clone https://github.com/EpicGlobal/Akeneo.git /home/ubuntu/akeneo-pim; fi",
     "chown -R ubuntu:ubuntu /home/ubuntu/akeneo-pim || true",
+    "rm -f /home/ubuntu/akeneo-pim/.env.local",
+    "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim checkout -- .env || true",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim fetch origin master",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim checkout master",
     "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim pull --ff-only origin master",
-    "sudo -u ubuntu -H git -C /home/ubuntu/akeneo-pim checkout -- .env",
-    "rm -f /home/ubuntu/akeneo-pim/.env.local",
     "cd /home/ubuntu/akeneo-pim",
     "export PROJECT_DIR=/home/ubuntu/akeneo-pim",
     "export REPO_URL=https://github.com/EpicGlobal/Akeneo.git",

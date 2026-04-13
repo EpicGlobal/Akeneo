@@ -59,6 +59,8 @@ fi
 
 sudo chown -R "$BOOTSTRAP_USER":"$BOOTSTRAP_USER" "$PROJECT_DIR"
 
+rm -f "$PROJECT_DIR/.env.local"
+run_git -C "$PROJECT_DIR" checkout -- .env || true
 run_git -C "$PROJECT_DIR" fetch origin master
 run_git -C "$PROJECT_DIR" checkout master
 run_git -C "$PROJECT_DIR" pull --ff-only origin master
