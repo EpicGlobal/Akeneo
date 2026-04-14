@@ -79,11 +79,15 @@ services:
             $findIdentifier: '@Akeneo\Pim\Enrichment\Component\Product\Query\FindIdentifier'
 
     Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\DamController:
+        public: true
+        tags: ['controller.service_arguments']
         arguments:
             $securityFacade: '@oro_security.security_facade'
             $userContext: '@pim_user.context.user'
 
     Coppermind\Bundle\ResourceSpaceBundle\Controller\InternalApi\OperatorConsoleController:
+        public: true
+        tags: ['controller.service_arguments']
         arguments:
             $securityFacade: '@oro_security.security_facade'
             $userContext: '@pim_user.context.user'
