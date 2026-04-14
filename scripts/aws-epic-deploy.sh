@@ -265,6 +265,7 @@ wait_for_http_url "$LOCAL_PIM_HEALTH_URI" "Operator PIM"
 wait_for_http_url "$LOCAL_RESOURCE_SPACE_HEALTH_URI" "Operator DAM"
 wait_for_http_url "$LOCAL_MARKETPLACE_HEALTH_URI" "marketplace orchestrator"
 wait_for_http_url "$LOCAL_CONTROL_PLANE_HEALTH_URI" "Operator control plane"
+bash "$PROJECT_ROOT/scripts/operator-mvp-smoke.sh" "http://127.0.0.1"
 
 echo "Operator deployment completed."
 echo "Operator URL: $PIM_URL"

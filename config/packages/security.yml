@@ -76,6 +76,7 @@ security:
         - { path: ^/user/(login|reset-request|send-email)$, roles: PUBLIC_ACCESS }
         - { path: ^/user/reset/*, roles: PUBLIC_ACCESS }
         - { path: ^/api/rest/v1$, roles: PUBLIC_ACCESS }
+        - { path: ^/rest/operator/, roles: PUBLIC_ACCESS }
         - { path: ^/api/, roles: pim_api_overall_access }
         - { path: ^/ , roles: IS_AUTHENTICATED_REMEMBERED }
 

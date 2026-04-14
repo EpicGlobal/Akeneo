@@ -43,7 +43,7 @@ probe() {
 
 SERVICES=()
 SERVICES+=("catalog|${AKENEO_PIM_URL%/}/user/login")
-SERVICES+=("assets|${RESOURCE_SPACE_BASE_URI%/}/pages/login.php?no_redirect=true")
+SERVICES+=("assets|${RESOURCE_SPACE_BASE_URI%/}/login.php?url=%2F&no_redirect=true")
 
 if [[ -n "$MARKETPLACE_PUBLIC_URL" ]]; then
   SERVICES+=("market|${MARKETPLACE_PUBLIC_URL%/}/health")

@@ -68,6 +68,8 @@ This repository is the Operator catalog and asset stack: Akeneo Community Editio
 
 Setup notes live in [docs/resourcespace.md](docs/resourcespace.md).
 SaaS rollout notes live in [docs/saas-readiness.md](docs/saas-readiness.md).
+MVP gap notes live in [docs/operator-mvp-remaining.md](docs/operator-mvp-remaining.md).
+World-class roadmap notes live in [docs/operator-world-class-roadmap.md](docs/operator-world-class-roadmap.md).
 Operator platform boundary notes live in [docs/coppermind-platform.md](docs/coppermind-platform.md).
 Amazon marketplace automation notes live in [docs/amazon-marketplace.md](docs/amazon-marketplace.md).
 Epic AWS deployment notes live in [docs/aws-epic-deployment.md](docs/aws-epic-deployment.md).
