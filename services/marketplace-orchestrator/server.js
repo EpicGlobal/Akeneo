@@ -445,6 +445,17 @@ function readinessSummary(catalogRecords) {
   };
 }
 
+function summarizeListingIssues(statusPayload) {
+  return statusPayload?.issues
+    || statusPayload?.payload?.issues
+    || [];
+}
+
+function listingIsHealthy(statusPayload) {
+  const statuses = statusPayload?.summaries?.[0]?.status || [];
+  return statuses.includes('BUYABLE') && statuses.includes('DISCOVERABLE');
+}
+
 function listingHealthSummary(snapshots) {
   let healthy = 0;
   let unhealthy = 0;
