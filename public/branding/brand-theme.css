@@ -1845,7 +1845,15 @@ body.BrandShell--compactNav.BrandRoute--products .AknFilterBox-searchContainer,
 body.BrandShell--compactNav.BrandRoute--products .AknFilterBox-search {
   width: calc(100vw - 184px) !important;
   max-width: calc(100vw - 184px) !important;
+  min-width: 0 !important;
   flex: 1 1 100% !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search.search-zone .AknFilterBox-searchContainer.filter-item,
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search.search-zone .AknFilterBox-search {
+  width: calc(100vw - 184px) !important;
+  max-width: calc(100vw - 184px) !important;
+  min-width: 0 !important;
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-mainContainer {
@@ -1960,6 +1968,11 @@ body.BrandShell .CoppermindResourceSpaceTab-listBadge {
 body.BrandShell .CoppermindResourceSpaceTab-stageName,
 body.BrandShell .CoppermindResourceSpaceTab-targetTitle {
   color: #2e4321 !important;
+}
+
+body.BrandShell .CoppermindResourceSpaceTab-badge--blocked {
+  background: #7d310a !important;
+  color: #ffffff !important;
 }
 
 .OperatorWorkspaceAction--primary,
