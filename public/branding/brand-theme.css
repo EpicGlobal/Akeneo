@@ -1661,3 +1661,170 @@ body.BrandShell--login .BrandGuideWalkthroughCard {
   background: #ffffff;
   box-shadow: var(--brand-shadow-lg);
 }
+
+/* Deep-audit hardening */
+.BrandGuidePanel {
+  display: none;
+}
+
+.BrandGuidePanel.is-open {
+  display: flex;
+}
+
+body.BrandGuide-drawerOpen {
+  overflow: hidden;
+}
+
+[data-drop-zone='communication-channel-panel'] .AknPanel--collapsed {
+  display: none !important;
+}
+
+body.BrandRoute--products:not(.BrandProductsPanelsOpen) .AknDefault-contentWithColumn {
+  display: block !important;
+}
+
+body.BrandRoute--products:not(.BrandProductsPanelsOpen) .AknDefault-thirdColumnContainer,
+body.BrandRoute--products:not(.BrandProductsPanelsOpen) .AknColumn {
+  display: none !important;
+}
+
+body.BrandRoute--products:not(.BrandProductsPanelsOpen) .AknDefault-contentWithBottom {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+body.BrandRoute--product-editor .AknDefault-thirdColumnContainer:empty {
+  display: none !important;
+}
+
+body.BrandRoute--product-editor .AknDefault-contentWithBottom {
+  max-width: none !important;
+}
+
+body.BrandShell .AknDefault-container,
+body.BrandShell .AknDefault-container .view,
+body.BrandShell .AknDefault-contentWithColumn,
+body.BrandShell .AknDefault-contentWithBottom,
+body.BrandShell .AknDefault-mainContent,
+body.BrandShell .AknColumn-main,
+body.BrandShell .AknGridContainer {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+body.BrandShell--compactNav .AknHeader,
+body.BrandShell--compactNav .AknHeader-menu {
+  width: 80px !important;
+  min-width: 80px !important;
+  flex: 0 0 80px !important;
+}
+
+body.BrandShell--compactNav .AknHeader nav[aria-label='Main navigation'] {
+  width: 80px !important;
+  min-width: 80px !important;
+}
+
+body.BrandShell--compactNav .AknHeader nav[aria-label='Main navigation'] > [role='menu']:not(:first-child) {
+  display: none !important;
+}
+
+body.BrandShell--compactNav .AknDefault-container {
+  width: calc(100vw - 80px) !important;
+}
+
+body.BrandShell--compactNav .AknDefault-container,
+body.BrandShell--compactNav .AknDefault-container .view,
+body.BrandShell--compactNav .AknDefault-contentWithColumn,
+body.BrandShell--compactNav .AknDefault-contentWithBottom,
+body.BrandShell--compactNav .AknDefault-mainContent,
+body.BrandShell--compactNav .AknColumn-main,
+body.BrandShell--compactNav .AknGridContainer {
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+body.BrandShell--compactNav .AknTitleContainer,
+body.BrandShell--compactNav .BrandShell-pageHeader,
+body.BrandShell--compactNav .OperatorWorkspaceHome,
+body.BrandShell--compactNav .OperatorRouteBanner {
+  margin-left: 12px !important;
+  margin-right: 12px !important;
+}
+
+.OperatorWorkspaceEyebrow,
+.OperatorRouteBanner-eyebrow {
+  color: #35571c !important;
+}
+
+.OperatorWorkspaceBody,
+.OperatorRouteBanner-body,
+.OperatorWorkspaceAction-body,
+.OperatorWorkspaceList-body,
+.OperatorWorkspaceMetric-label,
+.BrandGuidePanel-note,
+.BrandGuideSection-copy,
+.BrandGuideSection-callout,
+.BrandGuideWalkthroughCard-copy {
+  color: #394842 !important;
+}
+
+.OperatorWorkspaceAction--primary,
+.OperatorRouteBanner-action[data-variant='primary'] {
+  background: var(--brand-green) !important;
+  border-color: var(--brand-green) !important;
+  color: #ffffff !important;
+  box-shadow: var(--brand-shadow-sm) !important;
+}
+
+.OperatorWorkspaceAction--primary:hover,
+.OperatorWorkspaceAction--primary:focus,
+.OperatorRouteBanner-action[data-variant='primary']:hover,
+.OperatorRouteBanner-action[data-variant='primary']:focus {
+  background: var(--brand-green-dark) !important;
+  border-color: var(--brand-green-dark) !important;
+  color: #ffffff !important;
+}
+
+.BrandGuideButton {
+  color: #2f4d1a !important;
+}
+
+.AknButton--apply,
+.AknButton--action,
+.AknButton--important {
+  text-shadow: none !important;
+}
+
+.AknButton--apply {
+  background: #5f8f25 !important;
+  border-color: #5f8f25 !important;
+}
+
+.AknButton--apply:hover,
+.AknButton--apply.AknButton--active {
+  background: #4f7b1f !important;
+  border-color: #4f7b1f !important;
+}
+
+.AknButton--action {
+  background: #0f84ad !important;
+  border-color: #0f84ad !important;
+}
+
+.AknButton--action:hover,
+.AknButton--action.AknButton--active {
+  background: #0c6f92 !important;
+  border-color: #0c6f92 !important;
+}
+
+.AknButton--important {
+  background: #db752f !important;
+  border-color: #db752f !important;
+}
+
+.AknButton--important:hover,
+.AknButton--important.AknButton--active {
+  background: #bd6122 !important;
+  border-color: #bd6122 !important;
+}

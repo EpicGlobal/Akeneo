@@ -232,6 +232,14 @@
     document.body.setAttribute("data-theme", "ecosystem");
   };
 
+  var setBodyClass = function (className, enabled) {
+    if (!(document.body instanceof HTMLElement) || !className) {
+      return;
+    }
+
+    document.body.classList.toggle(className, !!enabled);
+  };
+
   var brandMainMenu = function () {
     document.querySelectorAll(".AknHeader-menuItem").forEach(function (item) {
       if (!(item instanceof HTMLElement) || !item.classList.contains("AknHeader-menuItem--active")) {
@@ -307,9 +315,42 @@
 
       if (title instanceof HTMLElement) {
         title.classList.add("BrandShell-pageHeaderTitle");
+        if ("H1" !== title.tagName) {
+          title.setAttribute("role", "heading");
+          title.setAttribute("aria-level", "1");
+        }
         setImportant(title, "color", colors.greenDark);
       }
     });
+  };
+
+  var ensureMainLandmark = function () {
+    var main = findFirst([
+      ".AknColumn-main",
+      ".AknDefault-mainContent",
+      ".AknDefault-container .view",
+      "main"
+    ]);
+
+    if (!(main instanceof HTMLElement)) {
+      return;
+    }
+
+    if ("MAIN" !== main.tagName) {
+      main.setAttribute("role", "main");
+    }
+
+    if (!main.getAttribute("aria-label")) {
+      if (isProductEditorSurface()) {
+        main.setAttribute("aria-label", "Product editor");
+      } else if (isProductListSurface()) {
+        main.setAttribute("aria-label", "Product work queue");
+      } else if (isDashboardSurface()) {
+        main.setAttribute("aria-label", "Operator workspace");
+      } else {
+        main.setAttribute("aria-label", "Main content");
+      }
+    }
   };
 
   var appendList = function (parent, ordered, items) {
@@ -361,6 +402,7 @@
   var knownRouteClasses = [
     "BrandRoute--dashboard",
     "BrandRoute--products",
+    "BrandRoute--product-editor",
     "BrandRoute--connect",
     "BrandRoute--settings",
     "BrandRoute--system"
@@ -377,6 +419,8 @@
 
     if (isDashboardSurface()) {
       document.body.classList.add("BrandRoute--dashboard");
+    } else if (isProductEditorSurface()) {
+      document.body.classList.add("BrandRoute--product-editor");
     } else if (isProductListSurface()) {
       document.body.classList.add("BrandRoute--products");
     } else if (isConnectSurface()) {
@@ -385,6 +429,91 @@
       document.body.classList.add("BrandRoute--settings");
     } else if (isSystemSurface()) {
       document.body.classList.add("BrandRoute--system");
+    }
+  };
+
+  var syncCompactViewportShell = function () {
+    setBodyClass("BrandShell--compactNav", isAuthenticatedShell() && isCompactViewport() && !isLoginPage());
+
+    if (!isCompactViewport()) {
+      setBodyClass("BrandProductsPanelsOpen", false);
+    }
+  };
+
+  var enhanceAccessibleFields = function () {
+    document.querySelectorAll("button[data-original-title]").forEach(function (button) {
+      if (!(button instanceof HTMLElement)) {
+        return;
+      }
+
+      if (!button.getAttribute("aria-label")) {
+        button.setAttribute("aria-label", button.getAttribute("data-original-title"));
+      }
+    });
+
+    document.querySelectorAll(".download-file").forEach(function (element) {
+      if (element instanceof HTMLElement && !element.getAttribute("aria-label")) {
+        element.setAttribute("aria-label", "Download linked file");
+      }
+    });
+
+    document.querySelectorAll(".AknTextField--noRightRadius[data-currency]").forEach(function (input) {
+      if (!(input instanceof HTMLElement)) {
+        return;
+      }
+
+      var currency = input.getAttribute("data-currency") || "currency";
+      input.setAttribute("aria-label", "Amount in " + currency);
+    });
+
+    document.querySelectorAll(".AknMetricField-unit.unit, select.AknMetricField-unit, .select2-focusser.select2-offscreen").forEach(function (field) {
+      if (field instanceof HTMLElement && !field.getAttribute("aria-label")) {
+        field.setAttribute("aria-label", "Measurement unit");
+      }
+    });
+
+    document.querySelectorAll("input.CoppermindResourceSpaceTab-search, [data-role='resourcespace-query']").forEach(function (field) {
+      if (field instanceof HTMLElement && !field.getAttribute("aria-label")) {
+        field.setAttribute("aria-label", "Search ResourceSpace assets");
+      }
+    });
+  };
+
+  var applyPrimaryActionSignals = function () {
+    document.querySelectorAll("[data-variant='primary']").forEach(function (element) {
+      if (element instanceof HTMLElement) {
+        element.removeAttribute("data-variant");
+      }
+    });
+
+    if (isDashboardSurface()) {
+      var workspacePrimary = document.querySelector(".OperatorWorkspaceAction--primary");
+
+      if (workspacePrimary instanceof HTMLElement) {
+        workspacePrimary.setAttribute("data-variant", "primary");
+      }
+
+      return;
+    }
+
+    if (isProductEditorSurface()) {
+      var editorPrimary = findFirst([
+        ".AknTitleContainer .AknButton--apply",
+        ".AknTitleContainer .AknDropdownButton--apply .AknDropdownButton-button",
+        "button.AknButton--apply"
+      ]);
+
+      if (editorPrimary instanceof HTMLElement) {
+        editorPrimary.setAttribute("data-variant", "primary");
+      }
+
+      return;
+    }
+
+    var bannerAction = document.querySelector(".OperatorRouteBanner-action");
+
+    if (bannerAction instanceof HTMLElement) {
+      bannerAction.setAttribute("data-variant", "primary");
     }
   };
 
@@ -920,16 +1049,36 @@
     parent.appendChild(card);
   };
 
-  var appendActionItem = function (parent, href, title, body) {
+  var appendActionItem = function (parent, href, title, body, options) {
     if (!(parent instanceof HTMLElement)) {
       return;
     }
 
     var item = createElement("a", "OperatorWorkspaceAction");
+    var config = options || {};
+
+    if (config.primary) {
+      item.classList.add("OperatorWorkspaceAction--primary");
+    }
+
     item.href = href;
     item.appendChild(createElement("div", "OperatorWorkspaceAction-title", title));
     item.appendChild(createElement("div", "OperatorWorkspaceAction-body", body));
     parent.appendChild(item);
+  };
+
+  var toggleProductsPanels = function () {
+    if (!(document.body instanceof HTMLElement)) {
+      return;
+    }
+
+    document.body.classList.toggle("BrandProductsPanelsOpen");
+
+    var collapseButton = document.querySelector(".AknColumn-collapseButton");
+
+    if (collapseButton instanceof HTMLElement) {
+      collapseButton.click();
+    }
   };
 
   var appendListItem = function (parent, title, body) {
@@ -1053,7 +1202,7 @@
     var operationsList = createElement("ul", "OperatorWorkspaceList");
 
     hero.appendChild(createElement("div", "OperatorWorkspaceEyebrow", "Operator workspace"));
-    hero.appendChild(createElement("h2", "OperatorWorkspaceTitle", "Run catalog, asset, and marketplace work from one surface."));
+    hero.appendChild(createElement("h1", "OperatorWorkspaceTitle", "Run catalog, asset, and marketplace work from one surface."));
     hero.appendChild(createElement(
       "p",
       "OperatorWorkspaceBody",
@@ -1066,7 +1215,7 @@
     appendMetricCard(metrics, "Pending approvals", pendingApprovals, pendingApprovals > 0 ? "warn" : "");
     appendMetricCard(metrics, "Average completeness", averageCompleteness + "%", "");
 
-    appendActionItem(actions, "#/enrich/product/", "Open product work queue", "Move into the enrichment grid and prioritize records that still need copy, facts, or assets.");
+    appendActionItem(actions, "#/enrich/product/", "Open product work queue", "Move into the enrichment grid and prioritize records that still need copy, facts, or assets.", {primary: true});
     appendActionItem(actions, "#/settings", "Tighten catalog structure", "Review categories, attributes, and families before pushing the team deeper into enrichment.");
     appendActionItem(actions, "#/connect/data-flows", "Review connection health", "Check whether data flows, imports, and downstream handoffs are configured and monitored.");
 
@@ -1134,7 +1283,8 @@
         title: "Connection operations",
         body: "Use this area to monitor integrations, review sync health, and prove that data is moving cleanly between Operator and downstream systems.",
         action: "#/collect/import/",
-        actionLabel: "Review imports and monitored flows"
+        actionLabel: "Review imports and monitored flows",
+        actionType: "link"
       };
     } else if (isSettingsSurface()) {
       config = {
@@ -1142,7 +1292,8 @@
         title: "Catalog structure",
         body: "Categories, attributes, and families define the contract the rest of the workspace depends on. Tighten structure here before broad enrichment begins.",
         action: "#/enrich/product/",
-        actionLabel: "Return to the product work queue"
+        actionLabel: "Return to the product work queue",
+        actionType: "link"
       };
     } else if (isSystemSurface()) {
       config = {
@@ -1150,21 +1301,18 @@
         title: "Platform administration",
         body: "Use system pages for users, roles, and low-level platform configuration. Treat changes here as operational changes, not casual content edits.",
         action: "#/dashboard",
-        actionLabel: "Back to Operator workspace"
+        actionLabel: "Back to Operator workspace",
+        actionType: "link"
       };
     } else if (isProductListSurface()) {
-      var productRoot = document.querySelector(".AknDefault-contentWithBottom");
-      var emptyText = productRoot instanceof HTMLElement ? (productRoot.textContent || "") : "";
-
-      if (/there is no product for your search/i.test(emptyText)) {
-        config = {
-          kind: "products",
-          title: "No products are visible in this view yet",
-          body: "This usually means the catalog was not seeded, the search index is stale, or saved filters are hiding records. The work queue should not look empty in a healthy demo workspace.",
-          action: "#/settings",
-          actionLabel: "Check structure and seed readiness"
-        };
-      }
+      config = {
+        kind: "products",
+        title: "Use products as a work queue, not as a dead-end grid.",
+        body: "Narrow the queue to records that need action, then open the exact product you want to enrich. Filters and taxonomy can stay hidden until you need them.",
+        actionLabel: "Show filters and taxonomy",
+        actionType: "button",
+        onAction: toggleProductsPanels
+      };
     }
 
     document.querySelectorAll(".OperatorRouteBanner").forEach(function (node) {
@@ -1210,11 +1358,26 @@
 
     section.innerHTML = "";
     section.appendChild(createElement("div", "OperatorRouteBanner-eyebrow", "Operator"));
-    section.appendChild(createElement("h2", "OperatorRouteBanner-title", config.title));
+    section.appendChild(createElement("h1", "OperatorRouteBanner-title", config.title));
     section.appendChild(createElement("p", "OperatorRouteBanner-body", config.body));
 
-    var action = createElement("a", "OperatorRouteBanner-action", config.actionLabel);
-    action.href = config.action;
+    var action = createElement(
+      "button" === config.actionType ? "button" : "a",
+      "OperatorRouteBanner-action",
+      config.actionLabel
+    );
+
+    if ("button" === config.actionType) {
+      action.type = "button";
+      action.addEventListener("click", function () {
+        if (typeof config.onAction === "function") {
+          config.onAction();
+        }
+      });
+    } else {
+      action.href = config.action;
+    }
+
     section.appendChild(action);
   };
 
@@ -1251,24 +1414,6 @@
       replaceMatchedText(view, "div, p, span, h1, h2, h3", /^system menu$/i, "Platform administration");
     }
 
-    if (isProductListSurface()) {
-      var productRoot = document.querySelector(".AknDefault-contentWithBottom");
-
-      if (productRoot instanceof HTMLElement) {
-        replaceMatchedText(
-          productRoot,
-          "div, p, span, h1, h2, h3",
-          /sorry, there is no product for your search\./i,
-          "No products are visible in the current catalog view."
-        );
-        replaceMatchedText(
-          productRoot,
-          "div, p, span",
-          /try again with new search criteria\./i,
-          "Clear saved filters, confirm indexing, or reseed the demo catalog to restore the work queue."
-        );
-      }
-    }
   };
 
   var closeGuideDrawer = function () {
@@ -1646,13 +1791,17 @@
   var applyBranding = function () {
     applyThemeRoot();
     syncRouteClasses();
+    syncCompactViewportShell();
     brandMenuLogo();
     brandMainMenu();
     brandVerticalLists();
     brandHeaders();
+    ensureMainLandmark();
     refreshLegacyCopy();
     renderWorkspaceHome();
     renderRouteBanner();
+    enhanceAccessibleFields();
+    applyPrimaryActionSignals();
     bindGuideEvents();
     syncGuide();
   };
