@@ -34,6 +34,7 @@ define(
           busy: false,
           busyRef: null,
         };
+        this.bootstrapRetryTimer = null;
 
         BaseView.prototype.initialize.apply(this, arguments);
       },
@@ -146,8 +147,16 @@ define(
       },
 
       updateWorkflow: function (stageCode, action) {
+        var routeParameters = this.getRouteParameters();
+
+        if (!routeParameters) {
+          this.waitForRouteContext();
+
+          return;
+        }
+
         this.runRequest({
-          url: Routing.generate(this.config.workflowRoute, this.getRouteParameters()),
+          url: Routing.generate(this.config.workflowRoute, routeParameters),
           method: 'POST',
           payload: {stageCode: stageCode, action: action},
           successMessage: __('coppermind_resourcespace.tab.workflow_' + action + '_success'),
@@ -155,8 +164,18 @@ define(
       },
 
       reload: function (query) {
+        var routeParameters;
+
         if (undefined !== query) {
           this.state.query = query;
+        }
+
+        routeParameters = this.getRouteParameters();
+
+        if (!routeParameters) {
+          this.waitForRouteContext();
+
+          return $.Deferred().resolve().promise();
         }
 
         this.state.loading = true;
@@ -168,7 +187,7 @@ define(
           requestData.q = query;
         }
 
-        return $.getJSON(Routing.generate(this.config.listRoute, this.getRouteParameters()), requestData)
+        return $.getJSON(Routing.generate(this.config.listRoute, routeParameters), requestData)
           .done(function (response) {
             this.state.loading = false;
             this.state.data = response;
@@ -186,8 +205,16 @@ define(
       },
 
       mutateLink: function (resourceRef, setPrimary, syncToAkeneo, assetRole) {
+        var routeParameters = this.getRouteParameters();
+
+        if (!routeParameters) {
+          this.waitForRouteContext();
+
+          return;
+        }
+
         this.runRequest({
-          url: Routing.generate(this.config.linkRoute, this.getRouteParameters()),
+          url: Routing.generate(this.config.linkRoute, routeParameters),
           method: 'POST',
           payload: _.extend(
             {resourceRef: resourceRef, setPrimary: setPrimary, syncToAkeneo: syncToAkeneo, assetRole: assetRole},
@@ -247,11 +274,30 @@ define(
       getRouteParameters: function () {
         var formData = this.getFormData();
 
-        if ('product_model' === this.config.ownerType) {
-          return {code: formData.code};
+        if (!formData) {
+          return null;
         }
 
-        return {uuid: formData.meta.id};
+        if ('product_model' === this.config.ownerType) {
+          return formData.code ? {code: formData.code} : null;
+        }
+
+        return formData.meta && formData.meta.id ? {uuid: formData.meta.id} : null;
+      },
+
+      waitForRouteContext: function () {
+        if (this.bootstrapRetryTimer) {
+          return;
+        }
+
+        this.state.loading = true;
+        this.state.error = null;
+        this.render();
+
+        this.bootstrapRetryTimer = window.setTimeout(function () {
+          this.bootstrapRetryTimer = null;
+          this.reload(this.state.query);
+        }.bind(this), 350);
       },
 
       availableAssetRoles: function () {
