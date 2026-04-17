@@ -1840,6 +1840,14 @@ body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search .AknA
   max-width: 100% !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search,
+body.BrandShell--compactNav.BrandRoute--products .AknFilterBox-searchContainer,
+body.BrandShell--compactNav.BrandRoute--products .AknFilterBox-search {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-mainContainer {
   flex-wrap: wrap !important;
   gap: 10px !important;
@@ -1874,6 +1882,15 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
   align-items: center !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--products .AknGrid input[type='checkbox'] {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  transform: scale(1.35);
+  transform-origin: center;
+}
+
 .OperatorWorkspaceEyebrow,
 .OperatorRouteBanner-eyebrow {
   color: #35571c !important;
@@ -1896,6 +1913,9 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb,
 body.BrandShell .BrandShell-pageHeaderBreadcrumb *,
 body.BrandShell .AknTitleContainer-breadcrumbs,
 body.BrandShell .AknTitleContainer-breadcrumbs *,
+body.BrandShell nav[aria-label='Breadcrumb'],
+body.BrandShell nav[aria-label='Breadcrumb'] *,
+body.BrandShell .breadcrumb-tab,
 body.BrandShell [class*='sc-czvZiG'],
 body.BrandShell [class*='sc-ksdxgE'],
 body.BrandShell [class*='sc-fFeiMQ'] {
@@ -1913,8 +1933,18 @@ body.BrandShell [class*='sc-fFeiMQ'] {
 }
 
 body.BrandShell .AknColumn-title,
+body.BrandShell .AknColumn-subtitle,
 body.BrandShell .CoppermindResourceSpaceTab-statLabel {
   color: #394842 !important;
+}
+
+body.BrandShell .CoppermindResourceSpaceTab-sectionTitle {
+  color: #2f4d1a !important;
+}
+
+body.BrandShell .CoppermindResourceSpaceTab-listBadge {
+  background: #0a627e !important;
+  color: #ffffff !important;
 }
 
 .OperatorWorkspaceAction--primary,
