@@ -1762,11 +1762,25 @@ body.BrandShell--compactNav .OperatorRouteBanner {
 .OperatorWorkspaceAction-body,
 .OperatorWorkspaceList-body,
 .OperatorWorkspaceMetric-label,
+.group-label,
 .BrandGuidePanel-note,
 .BrandGuideSection-copy,
 .BrandGuideSection-callout,
 .BrandGuideWalkthroughCard-copy {
   color: #394842 !important;
+}
+
+.BrandShell-pageHeaderBreadcrumb a,
+.BrandShell-pageHeaderBreadcrumb span,
+.AknTitleContainer-breadcrumbs a,
+.AknTitleContainer-breadcrumbs span,
+.AknTitleContainer [class*='sc-ksdxgE'],
+.AknTitleContainer [class*='sc-fFeiMQ'] {
+  color: #2e5f89 !important;
+}
+
+.CoppermindResourceSpaceTab-note {
+  color: #36551f !important;
 }
 
 .OperatorWorkspaceAction--primary,

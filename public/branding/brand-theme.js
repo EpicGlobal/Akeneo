@@ -479,6 +479,48 @@
     });
   };
 
+  var refineProductEditorActions = function () {
+    if (isProductEditorSurface()) {
+      findFirst([
+        ".AknTitleContainer .AknButton--apply",
+        ".AknTitleContainer .AknDropdownButton--apply .AknDropdownButton-button",
+        "button.AknButton--apply"
+      ]) && (function (button) {
+        if (!(button instanceof HTMLElement)) {
+          return;
+        }
+
+        var text = (button.textContent || "").replace(/\s+/g, " ").trim();
+
+        if (/^save$/i.test(text)) {
+          button.textContent = "Save product";
+        }
+
+        button.setAttribute("aria-label", "Save product");
+      })(findFirst([
+        ".AknTitleContainer .AknButton--apply",
+        ".AknTitleContainer .AknDropdownButton--apply .AknDropdownButton-button",
+        "button.AknButton--apply"
+      ]));
+    }
+
+    document.querySelectorAll(".CoppermindResourceSpaceTab-toolbar button.AknButton--apply").forEach(function (button) {
+      if (!(button instanceof HTMLElement)) {
+        return;
+      }
+
+      var text = (button.textContent || "").replace(/\s+/g, " ").trim();
+
+      if (/^search$/i.test(text)) {
+        button.textContent = "Search DAM";
+      }
+
+      button.setAttribute("aria-label", "Search DAM");
+      button.classList.remove("AknButton--apply");
+      button.classList.add("AknButton--action");
+    });
+  };
+
   var applyPrimaryActionSignals = function () {
     document.querySelectorAll("[data-variant='primary']").forEach(function (element) {
       if (element instanceof HTMLElement) {
@@ -1801,6 +1843,7 @@
     renderWorkspaceHome();
     renderRouteBanner();
     enhanceAccessibleFields();
+    refineProductEditorActions();
     applyPrimaryActionSignals();
     bindGuideEvents();
     syncGuide();
