@@ -720,11 +720,17 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   border-left: 1px solid rgba(0, 0, 0, 0.08);
   box-shadow: -18px 0 38px rgba(26, 26, 26, 0.14);
   transform: translateX(100%);
-  transition: transform 220ms ease;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: transform 220ms ease, opacity 180ms ease, visibility 180ms ease;
 }
 
 .BrandGuidePanel.is-open {
   transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 .BrandGuidePanel-header,
@@ -1514,6 +1520,15 @@ body.BrandShell--login {
 
 .BrandShell--login .Form .InputText:focus {
   box-shadow: 0 0 0 3px var(--brand-focus);
+}
+
+body.BrandShell--login .BrandGuideButton,
+body.BrandShell--login .BrandGuideBackdrop,
+body.BrandShell--login .BrandGuidePanel,
+body.BrandShell--login .BrandGuideWalkthroughBackdrop,
+body.BrandShell--login .BrandGuideWalkthroughRing,
+body.BrandShell--login .BrandGuideWalkthroughCard {
+  display: none !important;
 }
 
 .BrandGuideButton {
