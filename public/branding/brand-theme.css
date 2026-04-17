@@ -46,6 +46,11 @@ body.BrandShell {
   background: linear-gradient(135deg, var(--brand-page-start) 0%, var(--brand-page-end) 100%);
 }
 
+html,
+body.BrandShell {
+  max-width: 100%;
+}
+
 ::selection {
   background: rgba(124, 179, 66, 0.2);
 }
@@ -1730,6 +1735,13 @@ body.BrandShell--compactNav .AknDefault-page {
   overflow-x: hidden !important;
 }
 
+body.BrandShell--compactNav {
+  min-width: 0 !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
 body.BrandShell--compactNav .AknHeader nav[aria-label='Main navigation'] {
   width: 80px !important;
   min-width: 80px !important;
@@ -1814,6 +1826,7 @@ body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-buttonsConta
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-actionsContainer {
   width: auto !important;
   margin-left: auto !important;
+  max-width: 100% !important;
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search .AknDropdown,
@@ -1827,9 +1840,33 @@ body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-mainContaine
   gap: 10px !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-breadcrumbs {
+  display: none !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .create-product-button,
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-buttonsContainer,
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-actionsContainer {
+  display: none !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknGrid td,
 body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
   white-space: normal !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknActionButton.AknGridToolbar-actionButton {
+  min-width: 44px !important;
+  min-height: 36px !important;
+  padding: 6px 10px !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell a,
+body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
+  min-width: 44px !important;
+  min-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
 .OperatorWorkspaceEyebrow,
@@ -1854,13 +1891,20 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
 .BrandShell-pageHeaderBreadcrumb span,
 .AknTitleContainer-breadcrumbs a,
 .AknTitleContainer-breadcrumbs span,
-.AknTitleContainer [class*='sc-ksdxgE'],
-.AknTitleContainer [class*='sc-fFeiMQ'] {
+[class*='sc-czvZiG'],
+[class*='sc-ksdxgE'],
+[class*='sc-fFeiMQ'] {
   color: #2e5f89 !important;
 }
 
 .CoppermindResourceSpaceTab-note {
   color: #36551f !important;
+}
+
+.OperatorWorkspaceAction-title,
+.OperatorWorkspaceColumn-title,
+.CoppermindResourceSpaceTab-panelHeader {
+  color: #24351d !important;
 }
 
 .OperatorWorkspaceAction--primary,
@@ -1899,36 +1943,45 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
 }
 
 .AknButton--apply {
-  background: #35571c !important;
-  border-color: #35571c !important;
+  background: #244413 !important;
+  border-color: #244413 !important;
 }
 
 .AknButton--apply:hover,
 .AknButton--apply.AknButton--active {
-  background: #294312 !important;
-  border-color: #294312 !important;
+  background: #1d360f !important;
+  border-color: #1d360f !important;
 }
 
 .AknButton--action {
-  background: #0f84ad !important;
-  border-color: #0f84ad !important;
+  background: #0a627e !important;
+  border-color: #0a627e !important;
 }
 
 .AknButton--action:hover,
 .AknButton--action.AknButton--active {
-  background: #0c6f92 !important;
-  border-color: #0c6f92 !important;
+  background: #094f66 !important;
+  border-color: #094f66 !important;
 }
 
 .AknButton--important {
-  background: #db752f !important;
-  border-color: #db752f !important;
+  background: #a84f18 !important;
+  border-color: #a84f18 !important;
 }
 
 .AknButton--important:hover,
 .AknButton--important.AknButton--active {
-  background: #bd6122 !important;
-  border-color: #bd6122 !important;
+  background: #8d4212 !important;
+  border-color: #8d4212 !important;
+}
+
+.AknButton--apply,
+.AknButton--apply *,
+.AknButton--action,
+.AknButton--action *,
+.AknButton--important,
+.AknButton--important * {
+  color: #ffffff !important;
 }
 
 .AknBadge--enabled,
@@ -1939,7 +1992,7 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
 
 .AknBadge--warning,
 .AknBadge.AknBadge--warning {
-  background: #c66b1c !important;
+  background: #9f530b !important;
   color: #ffffff !important;
 }
 
@@ -1960,4 +2013,9 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
 .sc-ehCJOs.eolegP,
 [class*='sc-ehCJOs'][class*='eolegP'] {
   color: #394842 !important;
+}
+
+.AknPriceList-currency {
+  color: #394842 !important;
+  font-weight: 600 !important;
 }

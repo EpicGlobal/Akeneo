@@ -518,20 +518,25 @@
       ]));
     }
 
-    document.querySelectorAll(".CoppermindResourceSpaceTab-toolbar button.AknButton--apply").forEach(function (button) {
+    document.querySelectorAll(".CoppermindResourceSpaceTab-toolbar button").forEach(function (button) {
       if (!(button instanceof HTMLElement)) {
         return;
       }
 
       var text = (button.textContent || "").replace(/\s+/g, " ").trim();
+      button.type = "button";
 
       if (/^search$/i.test(text)) {
         button.textContent = "Search DAM";
+        button.classList.remove("AknButton--apply");
+        button.classList.add("AknButton--action");
+        button.setAttribute("aria-label", "Search DAM");
+        return;
       }
 
-      button.setAttribute("aria-label", "Search DAM");
-      button.classList.remove("AknButton--apply");
-      button.classList.add("AknButton--action");
+      if (/^refresh$/i.test(text)) {
+        button.setAttribute("aria-label", "Refresh DAM status");
+      }
     });
   };
 
