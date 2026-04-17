@@ -1843,8 +1843,8 @@ body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search .AknA
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search,
 body.BrandShell--compactNav.BrandRoute--products .AknFilterBox-searchContainer,
 body.BrandShell--compactNav.BrandRoute--products .AknFilterBox-search {
-  width: 100% !important;
-  max-width: 100% !important;
+  width: calc(100vw - 184px) !important;
+  max-width: calc(100vw - 184px) !important;
   flex: 1 1 100% !important;
 }
 
@@ -1866,6 +1866,10 @@ body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-actionsConta
 body.BrandShell--compactNav.BrandRoute--products .AknGrid td,
 body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
   white-space: normal !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknGrid {
+  table-layout: fixed !important;
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknActionButton.AknGridToolbar-actionButton {
@@ -1922,6 +1926,12 @@ body.BrandShell [class*='sc-fFeiMQ'] {
   color: #2e5f89 !important;
 }
 
+body.BrandShell .BrandShell-pageHeaderBreadcrumb,
+body.BrandShell .AknTitleContainer-breadcrumbs,
+body.BrandShell nav[aria-label='Breadcrumb'] {
+  display: none !important;
+}
+
 .CoppermindResourceSpaceTab-note {
   color: #36551f !important;
 }
@@ -1945,6 +1955,11 @@ body.BrandShell .CoppermindResourceSpaceTab-sectionTitle {
 body.BrandShell .CoppermindResourceSpaceTab-listBadge {
   background: #0a627e !important;
   color: #ffffff !important;
+}
+
+body.BrandShell .CoppermindResourceSpaceTab-stageName,
+body.BrandShell .CoppermindResourceSpaceTab-targetTitle {
+  color: #2e4321 !important;
 }
 
 .OperatorWorkspaceAction--primary,
