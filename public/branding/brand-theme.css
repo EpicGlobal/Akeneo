@@ -1762,6 +1762,13 @@ body.BrandShell--compactNav .OperatorRouteBanner {
   margin-right: 12px !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--dashboard .BrandShell-pageHeader,
+body.BrandShell--compactNav.BrandRoute--connect .BrandShell-pageHeader,
+body.BrandShell--compactNav.BrandRoute--settings .BrandShell-pageHeader,
+body.BrandShell--compactNav.BrandRoute--system .BrandShell-pageHeader {
+  display: none !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell:nth-child(5),
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-bodyCell:nth-child(5),
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell:nth-child(8),
@@ -1792,6 +1799,21 @@ body.BrandShell--compactNav.BrandRoute--products .mass-actions-panel {
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search {
   flex-wrap: wrap !important;
   gap: 10px !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-line,
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-mainContainer {
+  flex-wrap: wrap !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-userMenuContainer {
+  display: none !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-buttonsContainer,
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-actionsContainer {
+  width: auto !important;
+  margin-left: auto !important;
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search .AknDropdown,
