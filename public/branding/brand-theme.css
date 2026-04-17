@@ -1693,6 +1693,10 @@ body.BrandRoute--products:not(.BrandProductsPanelsOpen) .AknDefault-contentWithB
   max-width: none !important;
 }
 
+body.BrandRoute--dashboard .AknDefault-container .view > :not(header):not(.BrandShell-pageHeader):not(.OperatorWorkspaceHome) {
+  display: none !important;
+}
+
 body.BrandRoute--product-editor .AknDefault-thirdColumnContainer:empty {
   display: none !important;
 }
@@ -1780,9 +1784,30 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-bodyRow {
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-bodyCell--actions,
-body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell.action-column {
-  width: 92px !important;
-  min-width: 92px !important;
+body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell.action-column,
+body.BrandShell--compactNav.BrandRoute--products .mass-actions-panel {
+  display: none !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search {
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search .AknDropdown,
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-search .AknActionButton {
+  width: auto !important;
+  max-width: 100% !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-mainContainer {
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--products .AknGrid td,
+body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
+  white-space: normal !important;
 }
 
 .OperatorWorkspaceEyebrow,
@@ -1817,6 +1842,7 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell.action-colu
 }
 
 .OperatorWorkspaceAction--primary,
+.OperatorRouteBanner-action,
 .OperatorRouteBanner-action[data-variant='primary'] {
   background: #35571c !important;
   border-color: #35571c !important;
@@ -1826,6 +1852,8 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell.action-colu
 
 .OperatorWorkspaceAction--primary:hover,
 .OperatorWorkspaceAction--primary:focus,
+.OperatorRouteBanner-action:hover,
+.OperatorRouteBanner-action:focus,
 .OperatorRouteBanner-action[data-variant='primary']:hover,
 .OperatorRouteBanner-action[data-variant='primary']:focus {
   background: #294312 !important;
