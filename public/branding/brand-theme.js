@@ -1546,19 +1546,7 @@
   };
 
   var maybeAutoOpenGuide = function () {
-    if (
-      !isAuthenticatedShell()
-      || isLoginPage()
-      || guideState.autoOpened
-      || safeStorageGet(guideSeenKey) === "1"
-      || isCompactViewport()
-      || !isDashboardSurface()
-    ) {
-      return;
-    }
-
-    guideState.autoOpened = true;
-    openGuideDrawer(true, "auto");
+    return;
   };
 
   var syncGuide = function () {

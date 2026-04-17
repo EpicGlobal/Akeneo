@@ -84,6 +84,7 @@ $remoteCommands = @(
   'set -e',
   'cd /home/ubuntu/akeneo-pim',
   'export HOME=/root',
+  'sg docker -c "cd /home/ubuntu/akeneo-pim && docker compose exec -T --user root fpm sh -lc ''mkdir -p /srv/pim/var/cache/prod/oro_acl /srv/pim/var/cache/prod/pools /srv/pim/var/logs && chown -R www-data:www-data /srv/pim/var/cache /srv/pim/var/logs''" || true',
   "fixture_root='$FixtureRoot'",
   "akeneo_user='$AkeneoUser'",
   'create_job() {',
