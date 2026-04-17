@@ -477,6 +477,20 @@
         field.setAttribute("aria-label", "Search ResourceSpace assets");
       }
     });
+
+    document.querySelectorAll(".AknFilterBox-search").forEach(function (field) {
+      if (field instanceof HTMLElement && !field.getAttribute("aria-label")) {
+        field.setAttribute("aria-label", "Search products");
+      }
+    });
+
+    document.querySelectorAll(".AknGrid input[type='checkbox']").forEach(function (field, index) {
+      if (!(field instanceof HTMLElement) || field.getAttribute("aria-label")) {
+        return;
+      }
+
+      field.setAttribute("aria-label", 0 === index ? "Select visible products" : "Select product row");
+    });
   };
 
   var refineProductEditorActions = function () {
@@ -1261,13 +1275,13 @@
     appendActionItem(actions, "#/settings", "Tighten catalog structure", "Review categories, attributes, and families before pushing the team deeper into enrichment.");
     appendActionItem(actions, "#/connect/data-flows", "Review connection health", "Check whether data flows, imports, and downstream handoffs are configured and monitored.");
 
-    workflowColumn.appendChild(createElement("h3", "OperatorWorkspaceColumn-title", "What to do next"));
+    workflowColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "What to do next"));
     appendListItem(workflowList, "Catalog structure", "Start with categories, attributes, and families when the model is still thin or inconsistent.");
     appendListItem(workflowList, "Product enrichment", "Move next into products to improve completeness, approvals, and DAM coverage.");
     appendListItem(workflowList, "Operational readiness", "Finish by checking connection health, rights issues, and downstream exceptions.");
     workflowColumn.appendChild(workflowList);
 
-    operationsColumn.appendChild(createElement("h3", "OperatorWorkspaceColumn-title", "Recent operational signals"));
+    operationsColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "Recent operational signals"));
     if (audit.length > 0) {
       appendListItem(
         operationsList,
