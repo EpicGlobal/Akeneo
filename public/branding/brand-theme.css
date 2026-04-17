@@ -1818,6 +1818,11 @@ body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-mainContaine
   flex-wrap: wrap !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-title {
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknTitleContainer-userMenuContainer {
   display: none !important;
 }
@@ -1857,14 +1862,14 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid th {
 
 body.BrandShell--compactNav.BrandRoute--products .AknActionButton.AknGridToolbar-actionButton {
   min-width: 44px !important;
-  min-height: 36px !important;
+  min-height: 44px !important;
   padding: 6px 10px !important;
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell a,
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
   min-width: 44px !important;
-  min-height: 36px !important;
+  min-height: 44px !important;
   display: inline-flex !important;
   align-items: center !important;
 }
@@ -1887,13 +1892,13 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
   color: #394842 !important;
 }
 
-.BrandShell-pageHeaderBreadcrumb a,
-.BrandShell-pageHeaderBreadcrumb span,
-.AknTitleContainer-breadcrumbs a,
-.AknTitleContainer-breadcrumbs span,
-[class*='sc-czvZiG'],
-[class*='sc-ksdxgE'],
-[class*='sc-fFeiMQ'] {
+body.BrandShell .BrandShell-pageHeaderBreadcrumb,
+body.BrandShell .BrandShell-pageHeaderBreadcrumb *,
+body.BrandShell .AknTitleContainer-breadcrumbs,
+body.BrandShell .AknTitleContainer-breadcrumbs *,
+body.BrandShell [class*='sc-czvZiG'],
+body.BrandShell [class*='sc-ksdxgE'],
+body.BrandShell [class*='sc-fFeiMQ'] {
   color: #2e5f89 !important;
 }
 
@@ -1905,6 +1910,11 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
 .OperatorWorkspaceColumn-title,
 .CoppermindResourceSpaceTab-panelHeader {
   color: #24351d !important;
+}
+
+body.BrandShell .AknColumn-title,
+body.BrandShell .CoppermindResourceSpaceTab-statLabel {
+  color: #394842 !important;
 }
 
 .OperatorWorkspaceAction--primary,
@@ -1942,33 +1952,42 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
   text-shadow: none !important;
 }
 
+body.BrandShell .AknButton--apply,
 .AknButton--apply {
   background: #244413 !important;
   border-color: #244413 !important;
 }
 
+body.BrandShell .AknButton--apply:hover,
+body.BrandShell .AknButton--apply.AknButton--active,
 .AknButton--apply:hover,
 .AknButton--apply.AknButton--active {
   background: #1d360f !important;
   border-color: #1d360f !important;
 }
 
+body.BrandShell .AknButton--action,
 .AknButton--action {
   background: #0a627e !important;
   border-color: #0a627e !important;
 }
 
+body.BrandShell .AknButton--action:hover,
+body.BrandShell .AknButton--action.AknButton--active,
 .AknButton--action:hover,
 .AknButton--action.AknButton--active {
   background: #094f66 !important;
   border-color: #094f66 !important;
 }
 
+body.BrandShell .AknButton--important,
 .AknButton--important {
   background: #a84f18 !important;
   border-color: #a84f18 !important;
 }
 
+body.BrandShell .AknButton--important:hover,
+body.BrandShell .AknButton--important.AknButton--active,
 .AknButton--important:hover,
 .AknButton--important.AknButton--active {
   background: #8d4212 !important;
