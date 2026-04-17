@@ -336,6 +336,16 @@
     return /^#\/enrich\/product\/?$/.test(getHashRoute());
   };
 
+  var isProductEditorSurface = function () {
+    var hash = getHashRoute();
+    var hasEditorShell = !!document.querySelector(".entity-edit-form, .AknColumn-main, .AknHorizontalNavtab, .tab-container");
+
+    return hasEditorShell && (
+      /^#\/enrich\/product\/[0-9a-f-]+(?:$|[/?])/i.test(hash)
+      || /^#\/enrich\/product-model\/[^/?]+(?:$|[/?])/i.test(hash)
+    );
+  };
+
   var isConnectSurface = function () {
     return /^#\/connect(?:$|\/)/.test(getHashRoute());
   };
@@ -726,7 +736,11 @@
       return contexts.login;
     }
 
-    if (findResourceSpaceTab() || (/product/.test(route) && /edit/.test(route) && document.querySelector(".AknHorizontalNavtab"))) {
+    if (
+      isProductEditorSurface()
+      || findResourceSpaceTab()
+      || (/product/.test(route) && /edit/.test(route) && document.querySelector(".AknHorizontalNavtab"))
+    ) {
       return contexts.productEdit;
     }
 
