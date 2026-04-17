@@ -15,7 +15,14 @@
     contextId: "",
     elements: null,
     walkthrough: null,
-    autoOpened: false
+    autoOpened: false,
+    openMode: null
+  };
+  var workspaceState = {
+    dashboardData: null,
+    dashboardPromise: null,
+    dashboardLoadedAt: 0,
+    dashboardError: null
   };
 
   var setImportant = function (element, property, value) {
@@ -75,6 +82,18 @@
       window.location.search || "",
       document.title || ""
     ].join(" ").toLowerCase();
+  };
+
+  var getHashRoute = function () {
+    return (window.location.hash || "").toLowerCase();
+  };
+
+  var isCompactViewport = function () {
+    if (typeof window.matchMedia === "function") {
+      return window.matchMedia("(max-width: 900px)").matches;
+    }
+
+    return window.innerWidth <= 900;
   };
 
   var getPageTitleText = function () {
@@ -138,6 +157,42 @@
       ".AknHorizontalNavtab a, .AknHorizontalNavtab-link, [role='tab'], a, button, span",
       /resourcespace dam/i
     );
+  };
+
+  var findTextElement = function (root, selector, matcher) {
+    if (!(root instanceof HTMLElement) || !(matcher instanceof RegExp)) {
+      return null;
+    }
+
+    var nodes = root.querySelectorAll(selector);
+
+    for (var index = 0; index < nodes.length; index += 1) {
+      var node = nodes[index];
+
+      if (!(node instanceof HTMLElement)) {
+        continue;
+      }
+
+      var text = (node.textContent || "").replace(/\s+/g, " ").trim();
+
+      if (text && matcher.test(text)) {
+        return node;
+      }
+    }
+
+    return null;
+  };
+
+  var replaceMatchedText = function (root, selector, matcher, replacement) {
+    var element = findTextElement(root, selector, matcher);
+
+    if (!(element instanceof HTMLElement)) {
+      return null;
+    }
+
+    element.textContent = replacement;
+
+    return element;
   };
 
   var brandMenuLogo = function () {
@@ -271,6 +326,58 @@
     parent.appendChild(list);
   };
 
+  var isDashboardSurface = function () {
+    var hash = getHashRoute();
+
+    return "" === hash || "#" === hash || /^#\/dashboard(?:$|[/?])/.test(hash);
+  };
+
+  var isProductListSurface = function () {
+    return /^#\/enrich\/product\/?$/.test(getHashRoute());
+  };
+
+  var isConnectSurface = function () {
+    return /^#\/connect(?:$|\/)/.test(getHashRoute());
+  };
+
+  var isSettingsSurface = function () {
+    return /^#\/settings(?:$|[/?])/.test(getHashRoute());
+  };
+
+  var isSystemSurface = function () {
+    return /^#\/system(?:$|[/?])/.test(getHashRoute());
+  };
+
+  var knownRouteClasses = [
+    "BrandRoute--dashboard",
+    "BrandRoute--products",
+    "BrandRoute--connect",
+    "BrandRoute--settings",
+    "BrandRoute--system"
+  ];
+
+  var syncRouteClasses = function () {
+    if (!(document.body instanceof HTMLElement)) {
+      return;
+    }
+
+    knownRouteClasses.forEach(function (className) {
+      document.body.classList.remove(className);
+    });
+
+    if (isDashboardSurface()) {
+      document.body.classList.add("BrandRoute--dashboard");
+    } else if (isProductListSurface()) {
+      document.body.classList.add("BrandRoute--products");
+    } else if (isConnectSurface()) {
+      document.body.classList.add("BrandRoute--connect");
+    } else if (isSettingsSurface()) {
+      document.body.classList.add("BrandRoute--settings");
+    } else if (isSystemSurface()) {
+      document.body.classList.add("BrandRoute--system");
+    }
+  };
+
   var resolveStepTarget = function (step) {
     if (!step) {
       return null;
@@ -347,6 +454,68 @@
             title: "Do the work in the main panel",
             body: "Lists, trees, and forms change from page to page, but the main panel is always where the task actually happens.",
             selectors: [".AknDefault-mainContent", ".AknPage-main", "main"]
+          }
+        ]
+      },
+      connect: {
+        id: "connect",
+        label: "Connect",
+        title: "Connections are operational surfaces, not decorative charts.",
+        summary: "Use Connect to monitor flows, confirm sync health, and catch integration issues before they become downstream publishing problems.",
+        flow: [
+          "Monitor the integrations that actually matter to the business.",
+          "Review failures and stale flows before they become channel issues.",
+          "Treat connection setup as part of operations, not a one-time form."
+        ],
+        callout: "If a downstream listing or feed looks wrong, start here before blaming product data.",
+        steps: [
+          {
+            title: "Use the connection summary as an operational briefing",
+            body: "This page should tell you whether data is moving cleanly, not just whether a connector exists.",
+            selectors: [".AknDescriptionHeader", ".AknDefault-mainContent", ".view"]
+          },
+          {
+            title: "Review data flow settings deliberately",
+            body: "Every monitored flow should have an owner, a purpose, and a place in the operating model.",
+            selectors: [".AknVerticalList", ".AknDefault-mainContent", ".view"]
+          }
+        ]
+      },
+      settings: {
+        id: "settings",
+        label: "Settings",
+        title: "Settings pages define the catalog contract the rest of the workspace depends on.",
+        summary: "Categories, attributes, and families are governance decisions. When these pages are weak, every downstream workflow becomes harder.",
+        flow: [
+          "Fix structure before pushing the team deeper into enrichment.",
+          "Keep categories, attributes, and families distinct in purpose.",
+          "Use settings changes carefully because they reshape the editor everywhere else."
+        ],
+        callout: "If the catalog feels inconsistent, the first repair is usually here rather than in the product grid.",
+        steps: [
+          {
+            title: "Treat settings as the model layer",
+            body: "These tiles control the structure, rules, and taxonomy that drive the whole workspace.",
+            selectors: [".AknDefault-container .view", ".AknDefault-container"]
+          }
+        ]
+      },
+      system: {
+        id: "system",
+        label: "System",
+        title: "Use system pages for platform administration, not day-to-day catalog editing.",
+        summary: "This area controls users, permissions, and low-level platform settings, so changes here should be deliberate and auditable.",
+        flow: [
+          "Manage users, groups, and roles carefully.",
+          "Use system configuration to support the operating model, not as a shortcut around it.",
+          "Keep admin changes intentional because they affect every user."
+        ],
+        callout: "If an issue only affects one product, do not reach for system settings first.",
+        steps: [
+          {
+            title: "Use system navigation as an admin workspace",
+            body: "This area should stay focused on platform control, permissions, and operational visibility.",
+            selectors: [".AknDefault-container .view", ".AknDefault-container"]
           }
         ]
       },
@@ -561,6 +730,10 @@
       return contexts.productEdit;
     }
 
+    if (/connect|data flows|connected apps|connection settings/.test(route) || /connect|data flows|connected apps|connection settings/.test(title)) {
+      return contexts.connect;
+    }
+
     if ((/attributes?/.test(route) || /attributes?/.test(title)) && !/family/.test(route)) {
       return contexts.attributes;
     }
@@ -579,6 +752,14 @@
 
     if (/products?/.test(route) || /products?/.test(title) || document.querySelector(".AknGridContainer")) {
       return contexts.products;
+    }
+
+    if (isSettingsSurface()) {
+      return contexts.settings;
+    }
+
+    if (isSystemSurface()) {
+      return contexts.system;
     }
 
     if (isAuthenticatedShell()) {
@@ -679,6 +860,403 @@
     return guideState.elements;
   };
 
+  var ensureSectionAfterHeader = function (view, className) {
+    if (!(view instanceof HTMLElement)) {
+      return null;
+    }
+
+    var selector = "." + String(className || "").trim().replace(/\s+/g, ".");
+    var section = selector ? view.querySelector(selector) : null;
+
+    if (!(section instanceof HTMLElement)) {
+      section = createElement("section", className);
+    }
+
+    var header = view.querySelector(":scope > header, :scope > .AknTitleContainer, :scope > .BrandShell-pageHeader");
+
+    if (header instanceof HTMLElement && header.parentNode === view) {
+      if (header.nextSibling !== section) {
+        view.insertBefore(section, header.nextSibling);
+      }
+    } else if (view.firstChild !== section) {
+      view.insertBefore(section, view.firstChild);
+    }
+
+    return section;
+  };
+
+  var removeOperatorDecorators = function (className) {
+    document.querySelectorAll("." + className).forEach(function (node) {
+      node.remove();
+    });
+  };
+
+  var appendMetricCard = function (parent, label, value, tone) {
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    var card = createElement(
+      "div",
+      "OperatorWorkspaceMetric" + (tone ? " OperatorWorkspaceMetric--" + tone : "")
+    );
+
+    card.appendChild(createElement("div", "OperatorWorkspaceMetric-value", String(value)));
+    card.appendChild(createElement("div", "OperatorWorkspaceMetric-label", label));
+    parent.appendChild(card);
+  };
+
+  var appendActionItem = function (parent, href, title, body) {
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    var item = createElement("a", "OperatorWorkspaceAction");
+    item.href = href;
+    item.appendChild(createElement("div", "OperatorWorkspaceAction-title", title));
+    item.appendChild(createElement("div", "OperatorWorkspaceAction-body", body));
+    parent.appendChild(item);
+  };
+
+  var appendListItem = function (parent, title, body) {
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    var item = createElement("li", "OperatorWorkspaceList-item");
+    item.appendChild(createElement("span", "OperatorWorkspaceList-title", title));
+    item.appendChild(createElement("span", "OperatorWorkspaceList-body", body));
+    parent.appendChild(item);
+  };
+
+  var loadOperatorDashboard = function (force) {
+    var cacheIsFresh = Date.now() - workspaceState.dashboardLoadedAt < 60000;
+
+    if (!force && cacheIsFresh && (workspaceState.dashboardData || workspaceState.dashboardError)) {
+      return Promise.resolve(workspaceState.dashboardData);
+    }
+
+    if (workspaceState.dashboardPromise) {
+      return workspaceState.dashboardPromise;
+    }
+
+    workspaceState.dashboardPromise = window.fetch("/rest/operator/dashboard?limit=6&windowDays=30", {
+      credentials: "same-origin",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    }).then(function (response) {
+      if (!response.ok) {
+        throw new Error("Operator dashboard request failed with HTTP " + response.status + ".");
+      }
+
+      return response.json();
+    }).then(function (payload) {
+      workspaceState.dashboardData = payload || {};
+      workspaceState.dashboardLoadedAt = Date.now();
+      workspaceState.dashboardError = null;
+
+      return workspaceState.dashboardData;
+    }).catch(function (error) {
+      workspaceState.dashboardLoadedAt = Date.now();
+      workspaceState.dashboardError = error;
+
+      return null;
+    }).then(function (result) {
+      workspaceState.dashboardPromise = null;
+      return result;
+    });
+
+    return workspaceState.dashboardPromise;
+  };
+
+  var renderWorkspaceHome = function () {
+    if (!isDashboardSurface()) {
+      removeOperatorDecorators("OperatorWorkspaceHome");
+      return;
+    }
+
+    var view = document.querySelector(".AknDefault-container .view");
+
+    if (!(view instanceof HTMLElement)) {
+      return;
+    }
+
+    var section = ensureSectionAfterHeader(view, "OperatorWorkspaceHome");
+
+    if (!(section instanceof HTMLElement)) {
+      return;
+    }
+
+    var payload = workspaceState.dashboardData;
+    var governance = payload && payload.governance ? payload.governance : {};
+    var approvals = payload && payload.approvals && Array.isArray(payload.approvals.items)
+      ? payload.approvals.items
+      : [];
+    var rights = payload && payload.rights && Array.isArray(payload.rights.items)
+      ? payload.rights.items
+      : [];
+    var exceptions = payload && payload.exceptions ? payload.exceptions : {};
+    var audit = payload && Array.isArray(payload.audit) ? payload.audit : [];
+    var blockedOwners = Number(governance.blocked_owners || 0);
+    var readyOwners = Number(governance.ready_owners || 0);
+    var pendingApprovals = approvals.length || Number(governance.pending_owners || 0);
+    var averageCompleteness = Number(governance.average_completeness || 0).toFixed(0);
+    var failedOutbox = exceptions.failed_outbox_events && exceptions.failed_outbox_events.length
+      ? exceptions.failed_outbox_events.length
+      : 0;
+    var failedIngest = exceptions.failed_ingest_jobs && exceptions.failed_ingest_jobs.length
+      ? exceptions.failed_ingest_jobs.length
+      : 0;
+    var focusMessages = [];
+
+    if (blockedOwners > 0) {
+      focusMessages.push("Resolve blocked records before they reach publishing queues.");
+    }
+
+    if (pendingApprovals > 0) {
+      focusMessages.push("Review pending approvals so records keep moving downstream.");
+    }
+
+    if (rights.length > 0) {
+      focusMessages.push("Address asset rights and expiration issues before media becomes a blocker.");
+    }
+
+    if (0 === focusMessages.length) {
+      focusMessages.push("The workspace is clear enough to continue enrichment, DAM sync, and marketplace prep.");
+    }
+
+    section.innerHTML = "";
+
+    var shell = createElement("div", "OperatorWorkspaceHome-shell");
+    var hero = createElement("div", "OperatorWorkspaceHero");
+    var metrics = createElement("div", "OperatorWorkspaceMetrics");
+    var actions = createElement("div", "OperatorWorkspaceActions");
+    var columns = createElement("div", "OperatorWorkspaceColumns");
+    var workflowColumn = createElement("div", "OperatorWorkspaceColumn");
+    var operationsColumn = createElement("div", "OperatorWorkspaceColumn");
+    var workflowList = createElement("ol", "OperatorWorkspaceList");
+    var operationsList = createElement("ul", "OperatorWorkspaceList");
+
+    hero.appendChild(createElement("div", "OperatorWorkspaceEyebrow", "Operator workspace"));
+    hero.appendChild(createElement("h2", "OperatorWorkspaceTitle", "Run catalog, asset, and marketplace work from one surface."));
+    hero.appendChild(createElement(
+      "p",
+      "OperatorWorkspaceBody",
+      "Use this home screen to move from blocked records to approvals, asset rights, and downstream exceptions without hunting through legacy menus."
+    ));
+    hero.appendChild(createElement("div", "OperatorWorkspaceCallout", focusMessages.join(" ")));
+
+    appendMetricCard(metrics, "Ready records", readyOwners, "good");
+    appendMetricCard(metrics, "Blocked records", blockedOwners, blockedOwners > 0 ? "alert" : "");
+    appendMetricCard(metrics, "Pending approvals", pendingApprovals, pendingApprovals > 0 ? "warn" : "");
+    appendMetricCard(metrics, "Average completeness", averageCompleteness + "%", "");
+
+    appendActionItem(actions, "#/enrich/product/", "Open product work queue", "Move into the enrichment grid and prioritize records that still need copy, facts, or assets.");
+    appendActionItem(actions, "#/settings", "Tighten catalog structure", "Review categories, attributes, and families before pushing the team deeper into enrichment.");
+    appendActionItem(actions, "#/connect/data-flows", "Review connection health", "Check whether data flows, imports, and downstream handoffs are configured and monitored.");
+
+    workflowColumn.appendChild(createElement("h3", "OperatorWorkspaceColumn-title", "What to do next"));
+    appendListItem(workflowList, "Catalog structure", "Start with categories, attributes, and families when the model is still thin or inconsistent.");
+    appendListItem(workflowList, "Product enrichment", "Move next into products to improve completeness, approvals, and DAM coverage.");
+    appendListItem(workflowList, "Operational readiness", "Finish by checking connection health, rights issues, and downstream exceptions.");
+    workflowColumn.appendChild(workflowList);
+
+    operationsColumn.appendChild(createElement("h3", "OperatorWorkspaceColumn-title", "Recent operational signals"));
+    if (audit.length > 0) {
+      appendListItem(
+        operationsList,
+        String((audit[0].subject && audit[0].subject.label) || "Recent audit"),
+        String(audit[0].message || audit[0].action || "A recent Operator event is available for review.")
+      );
+    } else {
+      appendListItem(operationsList, "No recent Operator audit events", "Recent approvals, sync retries, and governance transitions will appear here once work starts moving.");
+    }
+    appendListItem(
+      operationsList,
+      failedOutbox > 0 ? failedOutbox + " failed outbox event(s)" : "Outbox healthy",
+      failedOutbox > 0
+        ? "A marketplace or control-plane handoff needs operator attention."
+        : "Product saves are not currently backing up in the Operator outbox."
+    );
+    appendListItem(
+      operationsList,
+      failedIngest > 0 ? failedIngest + " failed media ingest job(s)" : "Media ingest healthy",
+      failedIngest > 0
+        ? "Some ResourceSpace binaries need to be retried or reviewed."
+        : "No failed DAM binary ingest jobs are waiting right now."
+    );
+    appendListItem(
+      operationsList,
+      rights.length > 0 ? rights.length + " asset rights issue(s)" : "No urgent asset rights issues",
+      rights.length > 0
+        ? "Asset licensing or expiration data needs review before those files are treated as ready."
+        : "Rights and expiration monitoring is currently clear for the sampled window."
+    );
+    operationsColumn.appendChild(operationsList);
+
+    columns.appendChild(workflowColumn);
+    columns.appendChild(operationsColumn);
+
+    shell.appendChild(hero);
+    shell.appendChild(metrics);
+    shell.appendChild(actions);
+    shell.appendChild(columns);
+    section.appendChild(shell);
+
+    if (!payload && !workspaceState.dashboardPromise) {
+      loadOperatorDashboard(false).then(function () {
+        scheduleApply();
+      });
+    }
+  };
+
+  var renderRouteBanner = function () {
+    var config = null;
+
+    if (isConnectSurface()) {
+      config = {
+        kind: "connect",
+        title: "Connection operations",
+        body: "Use this area to monitor integrations, review sync health, and prove that data is moving cleanly between Operator and downstream systems.",
+        action: "#/collect/import/",
+        actionLabel: "Review imports and monitored flows"
+      };
+    } else if (isSettingsSurface()) {
+      config = {
+        kind: "settings",
+        title: "Catalog structure",
+        body: "Categories, attributes, and families define the contract the rest of the workspace depends on. Tighten structure here before broad enrichment begins.",
+        action: "#/enrich/product/",
+        actionLabel: "Return to the product work queue"
+      };
+    } else if (isSystemSurface()) {
+      config = {
+        kind: "system",
+        title: "Platform administration",
+        body: "Use system pages for users, roles, and low-level platform configuration. Treat changes here as operational changes, not casual content edits.",
+        action: "#/dashboard",
+        actionLabel: "Back to Operator workspace"
+      };
+    } else if (isProductListSurface()) {
+      var productRoot = document.querySelector(".AknDefault-contentWithBottom");
+      var emptyText = productRoot instanceof HTMLElement ? (productRoot.textContent || "") : "";
+
+      if (/there is no product for your search/i.test(emptyText)) {
+        config = {
+          kind: "products",
+          title: "No products are visible in this view yet",
+          body: "This usually means the catalog was not seeded, the search index is stale, or saved filters are hiding records. The work queue should not look empty in a healthy demo workspace.",
+          action: "#/settings",
+          actionLabel: "Check structure and seed readiness"
+        };
+      }
+    }
+
+    document.querySelectorAll(".OperatorRouteBanner").forEach(function (node) {
+      if (!(node instanceof HTMLElement)) {
+        return;
+      }
+
+      if (!config || !node.classList.contains("OperatorRouteBanner--" + config.kind)) {
+        node.remove();
+      }
+    });
+
+    if (!config) {
+      return;
+    }
+
+    var host = "products" === config.kind
+      ? document.querySelector(".AknDefault-contentWithBottom")
+      : document.querySelector(".AknDefault-container .view");
+
+    if (!(host instanceof HTMLElement)) {
+      return;
+    }
+
+    var section = host.querySelector(".OperatorRouteBanner--" + config.kind);
+
+    if (!(section instanceof HTMLElement)) {
+      section = createElement("section", "OperatorRouteBanner OperatorRouteBanner--" + config.kind);
+    }
+
+    if ("products" === config.kind) {
+      if (host.firstChild !== section) {
+        host.insertBefore(section, host.firstChild);
+      }
+    } else {
+      ensureSectionAfterHeader(host, section.className);
+      section = host.querySelector(".OperatorRouteBanner--" + config.kind);
+    }
+
+    if (!(section instanceof HTMLElement)) {
+      return;
+    }
+
+    section.innerHTML = "";
+    section.appendChild(createElement("div", "OperatorRouteBanner-eyebrow", "Operator"));
+    section.appendChild(createElement("h2", "OperatorRouteBanner-title", config.title));
+    section.appendChild(createElement("p", "OperatorRouteBanner-body", config.body));
+
+    var action = createElement("a", "OperatorRouteBanner-action", config.actionLabel);
+    action.href = config.action;
+    section.appendChild(action);
+  };
+
+  var refreshLegacyCopy = function () {
+    var view = document.querySelector(".AknDefault-container .view");
+
+    if (isConnectSurface() && view instanceof HTMLElement) {
+      replaceMatchedText(view, "div, p, span, h1, h2, h3", /welcome to data flows!/i, "Monitor data flows");
+      replaceMatchedText(
+        view,
+        "div, p, span",
+        /here, you can track the data flow between your pim and third parties\..*here you go!/i,
+        "Track connection health, throughput, and failures between Operator and connected systems."
+      );
+      replaceMatchedText(
+        view,
+        "div, p, span, h1, h2, h3",
+        /want to see some fancy charts about your connections\?/i,
+        "No monitored data flows are reporting yet."
+      );
+      replaceMatchedText(
+        view,
+        "div, p, span",
+        /create and start tracking your first one here\./i,
+        "Create your first monitored connection to start tracking sync health, throughput, and failures."
+      );
+    }
+
+    if (isSettingsSurface() && view instanceof HTMLElement) {
+      replaceMatchedText(view, "div, p, span, h1, h2, h3", /^settings menu$/i, "Catalog structure");
+    }
+
+    if (isSystemSurface() && view instanceof HTMLElement) {
+      replaceMatchedText(view, "div, p, span, h1, h2, h3", /^system menu$/i, "Platform administration");
+    }
+
+    if (isProductListSurface()) {
+      var productRoot = document.querySelector(".AknDefault-contentWithBottom");
+
+      if (productRoot instanceof HTMLElement) {
+        replaceMatchedText(
+          productRoot,
+          "div, p, span, h1, h2, h3",
+          /sorry, there is no product for your search\./i,
+          "No products are visible in the current catalog view."
+        );
+        replaceMatchedText(
+          productRoot,
+          "div, p, span",
+          /try again with new search criteria\./i,
+          "Clear saved filters, confirm indexing, or reseed the demo catalog to restore the work queue."
+        );
+      }
+    }
+  };
+
   var closeGuideDrawer = function () {
     var elements = ensureGuideElements();
 
@@ -692,9 +1270,10 @@
     elements.panel.classList.remove("is-open");
     elements.panel.setAttribute("aria-hidden", "true");
     document.body.classList.remove("BrandGuide-drawerOpen");
+    guideState.openMode = null;
   };
 
-  var openGuideDrawer = function (trackSeen) {
+  var openGuideDrawer = function (trackSeen, mode) {
     var elements = ensureGuideElements();
 
     if (!elements) {
@@ -709,6 +1288,7 @@
     elements.panel.classList.add("is-open");
     elements.panel.setAttribute("aria-hidden", "false");
     document.body.classList.add("BrandGuide-drawerOpen");
+    guideState.openMode = mode || "manual";
 
     if (trackSeen !== false) {
       safeStorageSet(guideSeenKey, "1");
@@ -966,24 +1546,36 @@
   };
 
   var maybeAutoOpenGuide = function () {
-    if (!isAuthenticatedShell() || isLoginPage() || guideState.autoOpened || safeStorageGet(guideSeenKey) === "1") {
+    if (
+      !isAuthenticatedShell()
+      || isLoginPage()
+      || guideState.autoOpened
+      || safeStorageGet(guideSeenKey) === "1"
+      || isCompactViewport()
+      || !isDashboardSurface()
+    ) {
       return;
     }
 
     guideState.autoOpened = true;
-    openGuideDrawer(true);
+    openGuideDrawer(true, "auto");
   };
 
   var syncGuide = function () {
     var signature = getRouteSignature();
     var context = getCurrentContext();
     var elements = ensureGuideElements();
+    var routeChanged = guideState.routeSignature !== signature || guideState.contextId !== context.id;
 
     if (!elements) {
       return;
     }
 
-    if (guideState.routeSignature !== signature || guideState.contextId !== context.id) {
+    if (routeChanged) {
+      if (elements.panel.classList.contains("is-open") && ("auto" === guideState.openMode || isCompactViewport())) {
+        closeGuideDrawer();
+      }
+
       guideState.routeSignature = signature;
       renderGuideDrawer();
 
@@ -1012,7 +1604,7 @@
       if (elements.panel.classList.contains("is-open")) {
         closeGuideDrawer();
       } else {
-        openGuideDrawer(true);
+        openGuideDrawer(true, "manual");
       }
     });
 
@@ -1051,10 +1643,14 @@
 
   var applyBranding = function () {
     applyThemeRoot();
+    syncRouteClasses();
     brandMenuLogo();
     brandMainMenu();
     brandVerticalLists();
     brandHeaders();
+    refreshLegacyCopy();
+    renderWorkspaceHome();
+    renderRouteBanner();
     bindGuideEvents();
     syncGuide();
   };
