@@ -440,6 +440,65 @@
     }
   };
 
+  var normalizeFieldText = function (value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+  };
+
+  var getClosestFieldLabel = function (element) {
+    if (!(element instanceof HTMLElement)) {
+      return "";
+    }
+
+    var container = element.closest(
+      ".AknFieldContainer, .AknField, .AknFormContainer, .field, [data-attribute-code]"
+    );
+
+    if (!(container instanceof HTMLElement)) {
+      return "";
+    }
+
+    var labelSelectors = [
+      ".AknFieldContainer-header .AknFieldContainer-label",
+      ".AknFieldContainer-header label",
+      ".AknFieldContainer-label",
+      ".AknField-label",
+      ".AknLabel",
+      "label"
+    ];
+    var labels = [];
+
+    labelSelectors.forEach(function (selector) {
+      container.querySelectorAll(selector).forEach(function (node) {
+        var text = normalizeFieldText(node.textContent || "");
+
+        if (text && -1 === labels.indexOf(text)) {
+          labels.push(text);
+        }
+      });
+    });
+
+    return labels.length ? labels[0] : "";
+  };
+
+  var applyFieldAriaLabel = function (field, fallbackSuffix) {
+    if (!(field instanceof HTMLElement) || field.getAttribute("aria-label")) {
+      return;
+    }
+
+    var label = getClosestFieldLabel(field);
+
+    if (!label) {
+      return;
+    }
+
+    var resolved = fallbackSuffix ? label + " " + fallbackSuffix : label;
+    field.setAttribute("aria-label", resolved);
+
+    if (!field.getAttribute("title") && /^(a|button)$/i.test(field.tagName)) {
+      field.setAttribute("title", resolved);
+    }
+  };
+
   var enhanceAccessibleFields = function () {
     document.querySelectorAll("button[data-original-title]").forEach(function (button) {
       if (!(button instanceof HTMLElement)) {
@@ -490,6 +549,14 @@
       }
 
       field.setAttribute("aria-label", 0 === index ? "Select visible products" : "Select product row");
+    });
+
+    document.querySelectorAll("textarea.AknTextareaField, textarea.AknTextareaField--localizable").forEach(function (field) {
+      applyFieldAriaLabel(field);
+    });
+
+    document.querySelectorAll(".select2-choice, .select2-search-choice-close").forEach(function (field) {
+      applyFieldAriaLabel(field, "selector");
     });
   };
 

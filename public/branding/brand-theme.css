@@ -2169,3 +2169,35 @@ body.BrandShell .AknButton--important.AknButton--active,
   color: #394842 !important;
   font-weight: 600 !important;
 }
+
+body.BrandShell .sc-TBWPX.sc-jIkXHa,
+body.BrandShell button.sc-TBWPX.sc-jIkXHa {
+  background: #58657a !important;
+  border-color: #58657a !important;
+  color: #ffffff !important;
+}
+
+body.BrandShell .sc-TBWPX.sc-jIkXHa:hover,
+body.BrandShell .sc-TBWPX.sc-jIkXHa:focus,
+body.BrandShell button.sc-TBWPX.sc-jIkXHa:hover,
+body.BrandShell button.sc-TBWPX.sc-jIkXHa:focus {
+  background: #465368 !important;
+  border-color: #465368 !important;
+  color: #ffffff !important;
+}
+
+body.BrandShell .sc-jOxtWs.isSRDt,
+body.BrandShell button.sc-jOxtWs.isSRDt {
+  background: #ffffff !important;
+  border-color: #7b8a98 !important;
+  color: #2f3e4a !important;
+}
+
+body.BrandShell .sc-jOxtWs.isSRDt:hover,
+body.BrandShell .sc-jOxtWs.isSRDt:focus,
+body.BrandShell button.sc-jOxtWs.isSRDt:hover,
+body.BrandShell button.sc-jOxtWs.isSRDt:focus {
+  background: #eef3f7 !important;
+  border-color: #607080 !important;
+  color: #24333f !important;
+}
