@@ -2242,6 +2242,16 @@ body.BrandShell--compactNav.BrandRoute--exports .ui-multiselect.ui-corner-all {
   padding: 8px 12px !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--imports .AknIconButton.AknIconButton--small,
+body.BrandShell--compactNav.BrandRoute--exports .AknIconButton.AknIconButton--small {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
 .OperatorWorkspaceEyebrow,
 .OperatorRouteBanner-eyebrow {
   color: #35571c !important;
