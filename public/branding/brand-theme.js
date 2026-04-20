@@ -10,6 +10,8 @@
     accentSurface: "linear-gradient(90deg, rgba(241, 248, 233, 0.98), rgba(241, 248, 233, 0.6) 100%)"
   };
   var guideSeenKey = "operator.brandGuide.seen.v1";
+  var simpleModeKey = "operator.simpleMode.v1";
+  var setupWizardStepKey = "operator.setupWizard.step.v1";
   var guideState = {
     routeSignature: "",
     contextId: "",
@@ -24,6 +26,60 @@
     dashboardLoadedAt: 0,
     dashboardError: null
   };
+  var setupWizardSteps = [
+    {
+      title: "Groups first",
+      body: "Start with categories so every product has a clear home.",
+      actionLabel: "Open categories",
+      action: function () {
+        return clickTextTarget(/^categories$/i);
+      }
+    },
+    {
+      title: "Fact fields second",
+      body: "Create attributes so editors know which facts and copy fields they must fill in.",
+      actionLabel: "Open attributes",
+      action: function () {
+        return clickTextTarget(/^attributes$/i);
+      }
+    },
+    {
+      title: "Product types third",
+      body: "Use families to decide what each kind of product must contain.",
+      actionLabel: "Open families",
+      action: function () {
+        return clickTextTarget(/^families$/i);
+      }
+    },
+    {
+      title: "Products next",
+      body: "Open the product work queue and improve one record at a time.",
+      actionLabel: "Open products",
+      action: function () {
+        goToHash("#/enrich/product/");
+        return true;
+      }
+    },
+    {
+      title: "Pictures and files",
+      body: "Use the DAM tab after the main facts are in place so media supports the product instead of leading it.",
+      actionLabel: "Open the first product",
+      action: function () {
+        goToHash("#/enrich/product/");
+        window.setTimeout(openFirstVisibleProduct, 300);
+        return true;
+      }
+    },
+    {
+      title: "Publishing health last",
+      body: "Finish by checking data flows and downstream publishing health.",
+      actionLabel: "Open connect health",
+      action: function () {
+        goToHash("#/connect/data-flows");
+        return true;
+      }
+    }
+  ];
 
   var setImportant = function (element, property, value) {
     if (element instanceof HTMLElement) {
@@ -65,6 +121,31 @@
     }
 
     return value;
+  };
+
+  var isSimpleModeEnabled = function () {
+    return "0" !== safeStorageGet(simpleModeKey);
+  };
+
+  var setSimpleModeEnabled = function (enabled) {
+    safeStorageSet(simpleModeKey, enabled ? "1" : "0");
+    setBodyClass("OperatorSimpleMode", enabled);
+  };
+
+  var getSetupWizardStepIndex = function () {
+    var value = Number(safeStorageGet(setupWizardStepKey) || 0);
+
+    if (!Number.isFinite(value) || value < 0) {
+      return 0;
+    }
+
+    return Math.min(value, Math.max(0, setupWizardSteps.length - 1));
+  };
+
+  var setSetupWizardStepIndex = function (value) {
+    var nextIndex = Math.min(Math.max(Number(value) || 0, 0), Math.max(0, setupWizardSteps.length - 1));
+    safeStorageSet(setupWizardStepKey, String(nextIndex));
+    return nextIndex;
   };
 
   var getRouteSignature = function () {
@@ -150,6 +231,37 @@
     }
 
     return null;
+  };
+
+  var goToHash = function (hash) {
+    if ("string" !== typeof hash || !hash) {
+      return;
+    }
+
+    if (window.location.hash === hash) {
+      scheduleApply();
+      return;
+    }
+
+    window.location.hash = hash;
+  };
+
+  var clickElement = function (element) {
+    if (!(element instanceof HTMLElement)) {
+      return false;
+    }
+
+    try {
+      element.click();
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  var clickTextTarget = function (matcher, selector) {
+    var target = findByText(selector || "a, button, [role='button'], div, span", matcher);
+    return clickElement(target);
   };
 
   var findResourceSpaceTab = function () {
@@ -1219,6 +1331,94 @@
     }
   };
 
+  var toggleSimpleMode = function () {
+    setSimpleModeEnabled(!isSimpleModeEnabled());
+    scheduleApply();
+  };
+
+  var openFirstVisibleProduct = function () {
+    var rows = document.querySelectorAll("tbody tr, .AknGrid-bodyRow");
+    var ignoreMatcher = /^(enabled|disabled|in progress|complete|n\/a|edit attributes of the product|classify the product|delete the product|toggle status)$/i;
+
+    for (var rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+      var row = rows[rowIndex];
+
+      if (!(row instanceof HTMLElement)) {
+        continue;
+      }
+
+      var candidates = row.querySelectorAll("a, button, span, div");
+
+      for (var itemIndex = 0; itemIndex < candidates.length; itemIndex += 1) {
+        var candidate = candidates[itemIndex];
+
+        if (!(candidate instanceof HTMLElement)) {
+          continue;
+        }
+
+        var text = normalizeFieldText(candidate.textContent || "");
+
+        if (!text || text.length < 5 || ignoreMatcher.test(text) || /^\d+%?$/.test(text) || /^\d{2}\/\d{2}\/\d{4}$/.test(text)) {
+          continue;
+        }
+
+        if (clickElement(candidate)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  var openCreateProduct = function () {
+    return clickTextTarget(/^create$/i, ".create-product-button, .AknButton, button, a, span");
+  };
+
+  var findSaveProductButton = function () {
+    return findFirst([
+      ".AknTitleContainer .AknButton--apply",
+      ".AknTitleContainer .AknDropdownButton--apply .AknDropdownButton-button",
+      "button.AknButton--apply"
+    ]);
+  };
+
+  var openSettingsShortcut = function (matcher) {
+    if (!isSettingsSurface()) {
+      goToHash("#/settings");
+      window.setTimeout(function () {
+        clickTextTarget(matcher, "a, button, div, span");
+      }, 300);
+      return true;
+    }
+
+    return clickTextTarget(matcher, "a, button, div, span");
+  };
+
+  var openSystemShortcut = function (matcher) {
+    if (!isSystemSurface()) {
+      goToHash("#/system");
+      window.setTimeout(function () {
+        clickTextTarget(matcher, "a, button, div, span");
+      }, 300);
+      return true;
+    }
+
+    return clickTextTarget(matcher, "a, button, div, span");
+  };
+
+  var openConnectShortcut = function (matcher) {
+    if (!isConnectSurface()) {
+      goToHash("#/connect/data-flows");
+      window.setTimeout(function () {
+        clickTextTarget(matcher, "a, button, div, span");
+      }, 300);
+      return true;
+    }
+
+    return clickTextTarget(matcher, "a, button, div, span");
+  };
+
   var appendListItem = function (parent, title, body) {
     if (!(parent instanceof HTMLElement)) {
       return;
@@ -1254,6 +1454,95 @@
     item.appendChild(createElement("span", "OperatorWorkspaceGlossary-term", term));
     item.appendChild(createElement("span", "OperatorWorkspaceGlossary-body", meaning));
     parent.appendChild(item);
+  };
+
+  var appendTaskAction = function (parent, title, body, options) {
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    var config = options || {};
+    var action = createElement("button", "OperatorTaskAction");
+
+    action.type = "button";
+
+    if (config.primary) {
+      action.classList.add("OperatorTaskAction--primary");
+    }
+
+    if (config.secondary) {
+      action.classList.add("OperatorTaskAction--secondary");
+    }
+
+    action.appendChild(createElement("span", "OperatorTaskAction-title", title));
+    action.appendChild(createElement("span", "OperatorTaskAction-body", body));
+    action.addEventListener("click", function () {
+      if (typeof config.onAction === "function") {
+        config.onAction();
+      }
+    });
+    parent.appendChild(action);
+  };
+
+  var renderSetupWizardCard = function () {
+    var stepIndex = getSetupWizardStepIndex();
+    var step = setupWizardSteps[stepIndex];
+
+    if (!step) {
+      return null;
+    }
+
+    var panel = createElement("section", "OperatorTaskPanel OperatorTaskPanel--wizard");
+    var header = createElement("div", "OperatorTaskPanel-header");
+    var body = createElement("div", "OperatorTaskPanel-body");
+    var actions = createElement("div", "OperatorTaskActions");
+    var helper = createElement("div", "OperatorTaskMiniList");
+    var previous = createElement("button", "OperatorTaskAction OperatorTaskAction--secondary", "Back");
+    var next = createElement("button", "OperatorTaskAction OperatorTaskAction--secondary", stepIndex === setupWizardSteps.length - 1 ? "Start over" : "Next step");
+    var open = createElement("button", "OperatorTaskAction OperatorTaskAction--primary", step.actionLabel);
+
+    panel.setAttribute("aria-label", "Simple setup wizard");
+
+    header.appendChild(createElement("div", "OperatorTaskPanel-eyebrow", "Simple setup wizard"));
+    header.appendChild(createElement("h2", "OperatorTaskPanel-title", "Learn the app in the safest order."));
+    header.appendChild(createElement("p", "OperatorTaskPanel-copy", "Move through these steps in order so the catalog stays understandable."));
+
+    body.appendChild(createElement("div", "OperatorTaskStep", "Step " + (stepIndex + 1) + " of " + setupWizardSteps.length));
+    body.appendChild(createElement("h3", "OperatorTaskStep-title", step.title));
+    body.appendChild(createElement("p", "OperatorTaskStep-body", step.body));
+
+    appendListItem(helper, "Current move", step.title);
+    appendListItem(helper, "Why now", step.body);
+    body.appendChild(helper);
+
+    previous.type = "button";
+    previous.disabled = 0 === stepIndex;
+    previous.addEventListener("click", function () {
+      setSetupWizardStepIndex(stepIndex - 1);
+      scheduleApply();
+    });
+
+    next.type = "button";
+    next.addEventListener("click", function () {
+      setSetupWizardStepIndex(stepIndex === setupWizardSteps.length - 1 ? 0 : stepIndex + 1);
+      scheduleApply();
+    });
+
+    open.type = "button";
+    open.addEventListener("click", function () {
+      if (typeof step.action === "function") {
+        step.action();
+      }
+    });
+
+    actions.appendChild(previous);
+    actions.appendChild(open);
+    actions.appendChild(next);
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(actions);
+
+    return panel;
   };
 
   var openGuideForCurrentScreen = function () {
@@ -1395,6 +1684,8 @@
       onAction: openGuideForCurrentScreen
     });
 
+    var wizardCard = renderSetupWizardCard();
+
     workflowColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "What to do next"));
     appendListItem(workflowList, "Build the skeleton", "Use setup pages when the catalog still feels thin or inconsistent.");
     appendListItem(workflowList, "Fill in products", "Open products only after the setup is good enough to guide the editor.");
@@ -1457,6 +1748,9 @@
     shell.appendChild(hero);
     shell.appendChild(metrics);
     shell.appendChild(actions);
+    if (wizardCard instanceof HTMLElement) {
+      shell.appendChild(wizardCard);
+    }
     shell.appendChild(columns);
     section.appendChild(shell);
 
@@ -1465,6 +1759,240 @@
         scheduleApply();
       });
     }
+  };
+
+  var simplifySurfaceCards = function () {
+    document.querySelectorAll(".OperatorSimpleMode-hidden, .OperatorSimpleMode-primary, .OperatorSimpleMode-muted").forEach(function (node) {
+      node.classList.remove("OperatorSimpleMode-hidden", "OperatorSimpleMode-primary", "OperatorSimpleMode-muted");
+    });
+
+    var markByText = function (matcher, className) {
+      document.querySelectorAll("a, button, div, span, h2, h3").forEach(function (node) {
+        if (!(node instanceof HTMLElement)) {
+          return;
+        }
+
+        var text = normalizeFieldText(node.textContent || "");
+
+        if (!text || !matcher.test(text)) {
+          return;
+        }
+
+        var container = node.closest("a, button, [role='button'], li, section, article, .AknSubsection-item, .AknVerticalList-item, .AknButtonList-item, .AknActionButton")
+          || node;
+        container.classList.add(className);
+      });
+    };
+
+    if (isSettingsSurface()) {
+      markByText(/^(measurements|association types|group types|groups)$/i, "OperatorSimpleMode-hidden");
+      markByText(/^(categories|attributes|families|channels|locales|currencies)$/i, "OperatorSimpleMode-primary");
+    }
+
+    if (isSystemSurface()) {
+      markByText(/^(catalog volume monitoring|configuration|system information)$/i, "OperatorSimpleMode-hidden");
+      markByText(/^(users|user groups|roles)$/i, "OperatorSimpleMode-primary");
+    }
+
+    if (isConnectSurface()) {
+      markByText(/^(app store|connected apps)$/i, "OperatorSimpleMode-hidden");
+      markByText(/^(data flows|connection settings)$/i, "OperatorSimpleMode-primary");
+    }
+
+    if (isProductListSurface()) {
+      markByText(/^(display:|variant:|columns|bulk actions|sequential edit|delete|quick export)$/i, "OperatorSimpleMode-hidden");
+      markByText(/^create$/i, "OperatorSimpleMode-primary");
+    }
+  };
+
+  var renderTaskPanel = function () {
+    if (isDashboardSurface()) {
+      removeOperatorDecorators("OperatorTaskPanelRoute");
+      return;
+    }
+
+    var config = null;
+
+    if (isProductListSurface()) {
+      config = {
+        kind: "products",
+        eyebrow: "Simple product flow",
+        title: "Do only the next useful thing.",
+        body: "Create a product, open one product, or show the side filters. Leave the heavy grid tools hidden until you really need them.",
+        checklist: [
+          "Create only when the product type already exists.",
+          "Open one product and finish the facts before jumping around.",
+          "Use filters only when the list feels too crowded."
+        ],
+        actions: [
+          {
+            title: "Create one product",
+            body: "Open the native create flow.",
+            primary: true,
+            onAction: openCreateProduct
+          },
+          {
+            title: "Open the first visible product",
+            body: "Jump into editing instead of browsing the whole grid.",
+            onAction: openFirstVisibleProduct
+          },
+          {
+            title: "Show or hide side filters",
+            body: "Use the category and filter rail only when you need it.",
+            onAction: toggleProductsPanels
+          },
+          {
+            title: isSimpleModeEnabled() ? "Show advanced grid tools" : "Hide advanced grid tools",
+            body: isSimpleModeEnabled() ? "Reveal bulk actions, exports, and other expert controls." : "Return to the simpler product work view.",
+            secondary: true,
+            onAction: toggleSimpleMode
+          }
+        ]
+      };
+    } else if (isSettingsSurface()) {
+      config = {
+        kind: "settings",
+        eyebrow: "Simple setup",
+        title: "Use only the setup pieces that matter first.",
+        body: "Most teams need categories, attributes, families, and channels before they need anything more advanced.",
+        checklist: [
+          "Categories give products a home.",
+          "Attributes define the facts and copy fields.",
+          "Families tell editors what each product type needs."
+        ],
+        actions: [
+          { title: "Categories", body: "Open the catalog groups.", primary: true, onAction: function () { return openSettingsShortcut(/^categories$/i); } },
+          { title: "Attributes", body: "Open the fact-field builder.", onAction: function () { return openSettingsShortcut(/^attributes$/i); } },
+          { title: "Families", body: "Open the product type templates.", onAction: function () { return openSettingsShortcut(/^families$/i); } },
+          { title: isSimpleModeEnabled() ? "Show advanced setup" : "Hide advanced setup", body: isSimpleModeEnabled() ? "Reveal measurements, associations, and group tools." : "Return to the smaller setup list.", secondary: true, onAction: toggleSimpleMode }
+        ]
+      };
+    } else if (isSystemSurface()) {
+      config = {
+        kind: "system",
+        eyebrow: "Admin basics",
+        title: "Stay with people and permissions unless you are doing platform work.",
+        body: "Most operator teams only need users, roles, and user groups here.",
+        checklist: [
+          "Add or edit people here.",
+          "Use roles when access needs to change for many people.",
+          "Leave platform diagnostics for advanced admins."
+        ],
+        actions: [
+          { title: "Users", body: "Open user accounts.", primary: true, onAction: function () { return openSystemShortcut(/^users$/i); } },
+          { title: "Roles", body: "Open shared permissions.", onAction: function () { return openSystemShortcut(/^roles$/i); } },
+          { title: "User groups", body: "Open grouped access control.", onAction: function () { return openSystemShortcut(/^user groups$/i); } },
+          { title: isSimpleModeEnabled() ? "Show advanced admin" : "Hide advanced admin", body: isSimpleModeEnabled() ? "Reveal system diagnostics and low-level configuration." : "Return to the smaller admin view.", secondary: true, onAction: toggleSimpleMode }
+        ]
+      };
+    } else if (isConnectSurface()) {
+      config = {
+        kind: "connect",
+        eyebrow: "Publishing health",
+        title: "Look for movement, not just settings.",
+        body: "Start with data flows and imports. Go to deeper connection pages only when the health view says something is wrong.",
+        checklist: [
+          "Check data flows first.",
+          "Verify imports before assuming the catalog is wrong.",
+          "Use connection settings only when troubleshooting."
+        ],
+        actions: [
+          { title: "Data flows", body: "Stay on the health overview.", primary: true, onAction: function () { return openConnectShortcut(/^data flows$/i); } },
+          { title: "Imports", body: "Jump to import monitoring.", onAction: function () { return clickTextTarget(/^imports$/i, ".AknHeader-menuItem, .AknHeader-menuItem a, a, button, span"); } },
+          { title: "Connection settings", body: "Open deeper connector rules.", onAction: function () { return openConnectShortcut(/^connection settings$/i); } },
+          { title: isSimpleModeEnabled() ? "Show advanced connections" : "Hide advanced connections", body: isSimpleModeEnabled() ? "Reveal app store and connected-app surfaces." : "Return to the smaller connection view.", secondary: true, onAction: toggleSimpleMode }
+        ]
+      };
+    } else if (isProductEditorSurface()) {
+      config = {
+        kind: "product-editor",
+        eyebrow: "Ready-to-publish checklist",
+        title: "Finish this product in a simple order.",
+        body: "Use this page as a short checklist: facts, pictures, readiness, then save.",
+        checklist: [
+          "Fill the fact fields that are still empty.",
+          "Open the ResourceSpace DAM tab and link the right files.",
+          "Save before leaving this product."
+        ],
+        actions: [
+          { title: "Save product", body: "Use the native save action.", primary: true, onAction: function () { return clickElement(findSaveProductButton()); } },
+          { title: "Open the DAM tab", body: "Go straight to pictures and files.", onAction: function () { return clickElement(findResourceSpaceTab()); } },
+          { title: "Back to products", body: "Return to the work queue.", onAction: function () { goToHash("#/enrich/product/"); return true; } },
+          { title: isSimpleModeEnabled() ? "Show advanced editor" : "Hide advanced editor", body: isSimpleModeEnabled() ? "Reveal the full editor chrome and expert tools." : "Return to the smaller product-edit view.", secondary: true, onAction: toggleSimpleMode }
+        ]
+      };
+    }
+
+    document.querySelectorAll(".OperatorTaskPanelRoute").forEach(function (node) {
+      if (!(node instanceof HTMLElement)) {
+        return;
+      }
+
+      if (!config || !node.classList.contains("OperatorTaskPanelRoute--" + config.kind)) {
+        node.remove();
+      }
+    });
+
+    if (!config) {
+      return;
+    }
+
+    var host = "products" === config.kind
+      ? document.querySelector(".AknDefault-contentWithBottom")
+      : document.querySelector(".AknDefault-container .view");
+
+    if (!(host instanceof HTMLElement)) {
+      return;
+    }
+
+    var panel = host.querySelector(".OperatorTaskPanelRoute--" + config.kind);
+
+    if (!(panel instanceof HTMLElement)) {
+      panel = createElement("section", "OperatorTaskPanelRoute OperatorTaskPanelRoute--" + config.kind);
+    }
+
+    if ("products" === config.kind) {
+      var banner = host.querySelector(".OperatorRouteBanner--products");
+
+      if (banner instanceof HTMLElement) {
+        if (banner.nextSibling !== panel) {
+          host.insertBefore(panel, banner.nextSibling);
+        }
+      } else if (host.firstChild !== panel) {
+        host.insertBefore(panel, host.firstChild);
+      }
+    } else {
+      ensureSectionAfterHeader(host, panel.className);
+      panel = host.querySelector(".OperatorTaskPanelRoute--" + config.kind);
+    }
+
+    if (!(panel instanceof HTMLElement)) {
+      return;
+    }
+
+    panel.innerHTML = "";
+
+    var header = createElement("div", "OperatorTaskPanel-header");
+    var body = createElement("div", "OperatorTaskPanel-body");
+    var actionRow = createElement("div", "OperatorTaskActions");
+    var checklist = createElement("ul", "OperatorTaskChecklist");
+
+    header.appendChild(createElement("div", "OperatorTaskPanel-eyebrow", config.eyebrow));
+    header.appendChild(createElement("h2", "OperatorTaskPanel-title", config.title));
+    header.appendChild(createElement("p", "OperatorTaskPanel-copy", config.body));
+
+    config.checklist.forEach(function (item) {
+      checklist.appendChild(createElement("li", "OperatorTaskChecklist-item", item));
+    });
+
+    config.actions.forEach(function (action) {
+      appendTaskAction(actionRow, action.title, action.body, action);
+    });
+
+    body.appendChild(checklist);
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(actionRow);
   };
 
   var renderRouteBanner = function () {
@@ -1938,6 +2466,10 @@
     return;
   };
 
+  var syncSimpleMode = function () {
+    setBodyClass("OperatorSimpleMode", isSimpleModeEnabled());
+  };
+
   var syncGuide = function () {
     var signature = getRouteSignature();
     var context = getCurrentContext();
@@ -2020,6 +2552,7 @@
 
   var applyBranding = function () {
     applyThemeRoot();
+    syncSimpleMode();
     syncRouteClasses();
     syncCompactViewportShell();
     brandMenuLogo();
@@ -2030,6 +2563,8 @@
     refreshLegacyCopy();
     renderWorkspaceHome();
     renderRouteBanner();
+    simplifySurfaceCards();
+    renderTaskPanel();
     enhanceAccessibleFields();
     refineProductEditorActions();
     applyPrimaryActionSignals();

@@ -1285,9 +1285,175 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   text-decoration: none;
 }
 
+.OperatorTaskPanel,
+.OperatorTaskPanelRoute {
+  margin: 18px 24px 0;
+  padding: 22px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--brand-radius-xl);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 248, 233, 0.68) 100%);
+  box-shadow: var(--brand-shadow-md);
+}
+
+.OperatorTaskPanelRoute {
+  display: grid;
+  gap: 14px;
+}
+
+.OperatorTaskPanel-header {
+  display: grid;
+  gap: 8px;
+}
+
+.OperatorTaskPanel-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  width: fit-content;
+  padding: 0 10px;
+  border-radius: var(--brand-radius-md);
+  background: rgba(241, 248, 233, 0.98);
+  color: var(--brand-green-dark);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.OperatorTaskPanel-title {
+  margin: 0;
+  color: var(--brand-ink);
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.OperatorTaskPanel-copy,
+.OperatorTaskStep-body,
+.OperatorTaskAction-body {
+  margin: 0;
+  color: #4d5b56;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.OperatorTaskPanel-body {
+  display: grid;
+  gap: 12px;
+}
+
+.OperatorTaskStep {
+  color: #36571f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.OperatorTaskStep-title {
+  margin: 0;
+  color: #24351d;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.OperatorTaskMiniList,
+.OperatorTaskChecklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.OperatorTaskChecklist-item,
+.OperatorTaskMiniList .OperatorWorkspaceList-item {
+  padding: 12px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--brand-radius-lg);
+  background: rgba(255, 255, 255, 0.92);
+  color: #415049;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.OperatorTaskActions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.OperatorTaskAction {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  min-height: 84px;
+  padding: 14px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: var(--brand-radius-lg);
+  background: #ffffff;
+  color: #24351d;
+  box-shadow: var(--brand-shadow-xs);
+  cursor: pointer;
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.OperatorTaskAction:hover,
+.OperatorTaskAction:focus {
+  transform: translateY(-1px);
+  border-color: rgba(124, 179, 66, 0.24);
+  box-shadow: var(--brand-shadow-sm);
+}
+
+.OperatorTaskAction:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+  transform: none;
+  box-shadow: none;
+}
+
+.OperatorTaskAction--primary {
+  background: #35571c;
+  border-color: #35571c;
+  color: #ffffff;
+}
+
+.OperatorTaskAction--primary .OperatorTaskAction-title,
+.OperatorTaskAction--primary .OperatorTaskAction-body {
+  color: #ffffff;
+}
+
+.OperatorTaskAction--secondary {
+  background: #ffffff;
+  border-color: rgba(83, 101, 120, 0.22);
+}
+
+.OperatorTaskAction-title {
+  color: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+body.OperatorSimpleMode .OperatorSimpleMode-hidden {
+  display: none !important;
+}
+
+body.OperatorSimpleMode .OperatorSimpleMode-primary {
+  box-shadow: inset 3px 0 0 #7cb342, var(--brand-shadow-xs) !important;
+  border-color: rgba(124, 179, 66, 0.24) !important;
+  background: linear-gradient(90deg, rgba(241, 248, 233, 0.98), rgba(255, 255, 255, 0.98)) !important;
+}
+
+body:not(.OperatorSimpleMode) .OperatorTaskAction--secondary {
+  background: #eef3f7;
+}
+
 @media (max-width: 900px) {
   .OperatorWorkspaceHome,
-  .OperatorRouteBanner {
+  .OperatorRouteBanner,
+  .OperatorTaskPanel,
+  .OperatorTaskPanelRoute {
     margin-left: 16px;
     margin-right: 16px;
   }
@@ -1305,14 +1471,18 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 @media (max-width: 640px) {
   .OperatorWorkspaceHome,
-  .OperatorRouteBanner {
+  .OperatorRouteBanner,
+  .OperatorTaskPanel,
+  .OperatorTaskPanelRoute {
     margin-top: 16px;
     margin-left: 12px;
     margin-right: 12px;
   }
 
   .OperatorWorkspaceHome-shell,
-  .OperatorRouteBanner {
+  .OperatorRouteBanner,
+  .OperatorTaskPanel,
+  .OperatorTaskPanelRoute {
     padding: 18px;
   }
 
@@ -1323,7 +1493,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
   .OperatorWorkspaceMetrics,
   .OperatorWorkspaceActions,
-  .OperatorWorkspaceColumns {
+  .OperatorWorkspaceColumns,
+  .OperatorTaskActions {
     grid-template-columns: 1fr;
   }
 
