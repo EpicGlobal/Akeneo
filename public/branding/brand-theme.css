@@ -1226,10 +1226,10 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  background: var(--brand-green-dark);
+  background: #36571f;
   color: #ffffff;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
 }
 
 .OperatorWorkspacePath-content {
@@ -1334,7 +1334,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   .OperatorWorkspacePath-number {
     width: 32px;
     height: 32px;
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .BrandGuideButton {
