@@ -629,20 +629,20 @@
       home: {
         id: "home",
         label: "Home",
-        title: "Use the shell as a control center, not as the place where the real work begins.",
-        summary: "Most teams get lost by editing products before the catalog model is clean. Categories, attributes, and families come first.",
+        title: "Start with setup, then fill in products.",
+        summary: "If you are new, follow this order: groups first, fact fields second, product types third, then products and pictures.",
         flow: [
-          "Categories organize browsing and merchandising structure.",
-          "Attributes define what facts and copy fields exist.",
-          "Families decide what each product type must contain.",
-          "Products are enriched after the structure is stable.",
-          "Channels, locales, and currencies shape downstream output."
+          "Categories are the groups shoppers browse.",
+          "Attributes are the fact fields and copy fields you fill in.",
+          "Families are product templates that decide what each item must contain.",
+          "Products are filled in after the setup is stable.",
+          "Channels and connections decide where the data goes next."
         ],
-        callout: "If you only remember one path, remember this: categories, attributes, families, products, then channels.",
+        callout: "If you only remember one path, remember this: groups, fields, product types, products, pictures, then publishing.",
         steps: [
           {
             title: "Navigate from the left menu",
-            body: "Use the menu to move between setup pages, product work, and downstream publishing settings.",
+            body: "Use the menu to move between setup, product work, and publishing settings.",
             selectors: [".AknHeader-menu"]
           },
           {
@@ -660,17 +660,17 @@
       connect: {
         id: "connect",
         label: "Connect",
-        title: "Connections are operational surfaces, not decorative charts.",
-        summary: "Use Connect to monitor flows, confirm sync health, and catch integration issues before they become downstream publishing problems.",
+        title: "Check whether data is moving.",
+        summary: "Use Connect to see whether imports and exports are healthy before you assume the product data is wrong.",
         flow: [
-          "Monitor the integrations that actually matter to the business.",
-          "Review failures and stale flows before they become channel issues.",
-          "Treat connection setup as part of operations, not a one-time form."
+          "Look for failed or stale imports first.",
+          "Fix broken data flows before chasing product bugs.",
+          "Treat connection setup as ongoing operations work."
         ],
-        callout: "If a downstream listing or feed looks wrong, start here before blaming product data.",
+        callout: "If a feed or listing looks wrong, start here before blaming the product record.",
         steps: [
           {
-            title: "Use the connection summary as an operational briefing",
+            title: "Use the summary like a health check",
             body: "This page should tell you whether data is moving cleanly, not just whether a connector exists.",
             selectors: [".AknDescriptionHeader", ".AknDefault-mainContent", ".view"]
           },
@@ -684,18 +684,18 @@
       settings: {
         id: "settings",
         label: "Settings",
-        title: "Settings pages define the catalog contract the rest of the workspace depends on.",
-        summary: "Categories, attributes, and families are governance decisions. When these pages are weak, every downstream workflow becomes harder.",
+        title: "Build the product skeleton here.",
+        summary: "Categories, attributes, and families decide how the rest of the app behaves. Weak setup makes every product harder to edit.",
         flow: [
-          "Fix structure before pushing the team deeper into enrichment.",
-          "Keep categories, attributes, and families distinct in purpose.",
-          "Use settings changes carefully because they reshape the editor everywhere else."
+          "Fix setup before you push the team into enrichment.",
+          "Keep groups, fact fields, and product types separate in your mind.",
+          "Remember that changes here affect every editor screen."
         ],
-        callout: "If the catalog feels inconsistent, the first repair is usually here rather than in the product grid.",
+        callout: "If the catalog feels messy, the first repair is usually here, not in the product grid.",
         steps: [
           {
             title: "Treat settings as the model layer",
-            body: "These tiles control the structure, rules, and taxonomy that drive the whole workspace.",
+            body: "These tiles control the groups, rules, and product templates that drive the whole workspace.",
             selectors: [".AknDefault-container .view", ".AknDefault-container"]
           }
         ]
@@ -703,14 +703,14 @@
       system: {
         id: "system",
         label: "System",
-        title: "Use system pages for platform administration, not day-to-day catalog editing.",
-        summary: "This area controls users, permissions, and low-level platform settings, so changes here should be deliberate and auditable.",
+        title: "Use this area for admin work only.",
+        summary: "This area controls people, permissions, and low-level platform settings. Most everyday catalog work happens somewhere else.",
         flow: [
           "Manage users, groups, and roles carefully.",
-          "Use system configuration to support the operating model, not as a shortcut around it.",
-          "Keep admin changes intentional because they affect every user."
+          "Do not use admin settings as a shortcut around weak setup.",
+          "Make admin changes carefully because they affect everyone."
         ],
-        callout: "If an issue only affects one product, do not reach for system settings first.",
+        callout: "If the problem affects one product, do not start here.",
         steps: [
           {
             title: "Use system navigation as an admin workspace",
@@ -722,14 +722,14 @@
       products: {
         id: "products",
         label: "Products",
-        title: "Treat product lists as a queue, then open a record for real enrichment.",
-        summary: "The list view is for filtering, prioritizing, and finding records. Actual enrichment happens inside the product editor.",
+        title: "Use this page to find the right product, then open it.",
+        summary: "Think of this page as a to-do list. The real editing happens after you open one product.",
         flow: [
-          "Filter by family, completeness, status, or search terms.",
+          "Search or filter until you see the right records.",
           "Open the exact product or product model you need to improve.",
-          "Save meaningful batches of work from the header rather than waiting until the end."
+          "Save solid batches of work from the header instead of waiting until the end."
         ],
-        callout: "If a product is missing images, copy, or required data, move into the editor instead of staying in the grid.",
+        callout: "If a product is missing facts, copy, or pictures, open it instead of staying in the grid.",
         steps: [
           {
             title: "Filter before you edit",
@@ -738,7 +738,7 @@
           },
           {
             title: "Use the grid as a work queue",
-            body: "The grid helps you spot problems. Open a record to manage tabs, assets, completeness, and deeper content.",
+            body: "The grid helps you spot problems. Open a record to manage fields, pictures, completeness, and deeper content.",
             selectors: [".AknGridContainer", ".AknGrid-body", ".AknDefault-mainContent"]
           },
           {
@@ -751,15 +751,15 @@
       productEdit: {
         id: "product-edit",
         label: "Product editor",
-        title: "This is where enrichment actually happens.",
-        summary: "The editor splits work into tabs so you can manage attributes, relationships, completeness, and media without losing the structure of the record.",
+        title: "Fix one product at a time on this page.",
+        summary: "The tabs break the job into smaller steps, so you do not need to understand the whole record at once.",
         flow: [
-          "Use the tabs to break the job into smaller sections.",
-          "Complete required attributes first so the record is structurally sound.",
-          "Use the ResourceSpace DAM tab to link and sync assets.",
+          "Use the tabs as steps instead of reading the whole page at once.",
+          "Fill in the required fact fields first.",
+          "Use the ResourceSpace DAM tab to link pictures and files.",
           "Save from the header after each solid pass."
         ],
-        callout: "If the record has weak media, missing facts, or unclear copy, this is the page where you fix it before publishing.",
+        callout: "If the record has weak media, missing facts, or unclear copy, this is where you fix it before publishing.",
         steps: [
           {
             title: "Check the page header first",
@@ -1115,14 +1115,24 @@
       return;
     }
 
-    var item = createElement("a", "OperatorWorkspaceAction");
     var config = options || {};
+    var item = createElement(config.actionType === "button" ? "button" : "a", "OperatorWorkspaceAction");
 
     if (config.primary) {
       item.classList.add("OperatorWorkspaceAction--primary");
     }
 
-    item.href = href;
+    if ("button" === config.actionType) {
+      item.type = "button";
+      item.addEventListener("click", function () {
+        if (typeof config.onAction === "function") {
+          config.onAction();
+        }
+      });
+    } else {
+      item.href = href;
+    }
+
     item.appendChild(createElement("div", "OperatorWorkspaceAction-title", title));
     item.appendChild(createElement("div", "OperatorWorkspaceAction-body", body));
     parent.appendChild(item);
@@ -1151,6 +1161,36 @@
     item.appendChild(createElement("span", "OperatorWorkspaceList-title", title));
     item.appendChild(createElement("span", "OperatorWorkspaceList-body", body));
     parent.appendChild(item);
+  };
+
+  var appendPathStep = function (parent, number, title, body) {
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    var item = createElement("li", "OperatorWorkspacePath-step");
+    item.appendChild(createElement("div", "OperatorWorkspacePath-number", String(number)));
+
+    var content = createElement("div", "OperatorWorkspacePath-content");
+    content.appendChild(createElement("span", "OperatorWorkspacePath-title", title));
+    content.appendChild(createElement("span", "OperatorWorkspacePath-body", body));
+    item.appendChild(content);
+    parent.appendChild(item);
+  };
+
+  var appendGlossaryItem = function (parent, term, meaning) {
+    if (!(parent instanceof HTMLElement)) {
+      return;
+    }
+
+    var item = createElement("li", "OperatorWorkspaceGlossary-item");
+    item.appendChild(createElement("span", "OperatorWorkspaceGlossary-term", term));
+    item.appendChild(createElement("span", "OperatorWorkspaceGlossary-body", meaning));
+    parent.appendChild(item);
+  };
+
+  var openGuideForCurrentScreen = function () {
+    openGuideDrawer(false, "manual");
   };
 
   var loadOperatorDashboard = function (force) {
@@ -1259,31 +1299,39 @@
     var columns = createElement("div", "OperatorWorkspaceColumns");
     var workflowColumn = createElement("div", "OperatorWorkspaceColumn");
     var operationsColumn = createElement("div", "OperatorWorkspaceColumn");
+    var pathColumn = createElement("div", "OperatorWorkspaceColumn");
+    var glossaryColumn = createElement("div", "OperatorWorkspaceColumn");
     var workflowList = createElement("ol", "OperatorWorkspaceList");
     var operationsList = createElement("ul", "OperatorWorkspaceList");
+    var pathList = createElement("ol", "OperatorWorkspacePath");
+    var glossaryList = createElement("ul", "OperatorWorkspaceGlossary");
 
     hero.appendChild(createElement("div", "OperatorWorkspaceEyebrow", "Operator workspace"));
-    hero.appendChild(createElement("h1", "OperatorWorkspaceTitle", "Run catalog, asset, and marketplace work from one surface."));
+    hero.appendChild(createElement("h1", "OperatorWorkspaceTitle", "Start here. Build the product skeleton before you edit lots of products."));
     hero.appendChild(createElement(
       "p",
       "OperatorWorkspaceBody",
-      "Use this home screen to move from blocked records to approvals, asset rights, and downstream exceptions without hunting through legacy menus."
+      "This page is the simplest place to begin. Follow the cards in order, and use the left menu only after you know which step comes next."
     ));
     hero.appendChild(createElement("div", "OperatorWorkspaceCallout", focusMessages.join(" ")));
 
-    appendMetricCard(metrics, "Ready records", readyOwners, "good");
-    appendMetricCard(metrics, "Blocked records", blockedOwners, blockedOwners > 0 ? "alert" : "");
-    appendMetricCard(metrics, "Pending approvals", pendingApprovals, pendingApprovals > 0 ? "warn" : "");
-    appendMetricCard(metrics, "Average completeness", averageCompleteness + "%", "");
+    appendMetricCard(metrics, "Ready to keep moving", readyOwners, "good");
+    appendMetricCard(metrics, "Need attention", blockedOwners, blockedOwners > 0 ? "alert" : "");
+    appendMetricCard(metrics, "Waiting for approval", pendingApprovals, pendingApprovals > 0 ? "warn" : "");
+    appendMetricCard(metrics, "Average filled in", averageCompleteness + "%", "");
 
-    appendActionItem(actions, "#/enrich/product/", "Open product work queue", "Move into the enrichment grid and prioritize records that still need copy, facts, or assets.", {primary: true});
-    appendActionItem(actions, "#/settings", "Tighten catalog structure", "Review categories, attributes, and families before pushing the team deeper into enrichment.");
-    appendActionItem(actions, "#/connect/data-flows", "Review connection health", "Check whether data flows, imports, and downstream handoffs are configured and monitored.");
+    appendActionItem(actions, "#/settings", "1. Build the setup", "Start with categories, attributes, and families so products have a clean structure.", {primary: true});
+    appendActionItem(actions, "#/enrich/product/", "2. Fill in products", "Open the products list when the setup is ready and start improving one record at a time.");
+    appendActionItem(actions, "#/connect/data-flows", "3. Check publishing health", "Review imports, exports, and handoffs before you trust downstream feeds.");
+    appendActionItem(actions, "#", "Need help right now?", "Open the guide for simple, screen-by-screen instructions.", {
+      actionType: "button",
+      onAction: openGuideForCurrentScreen
+    });
 
     workflowColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "What to do next"));
-    appendListItem(workflowList, "Catalog structure", "Start with categories, attributes, and families when the model is still thin or inconsistent.");
-    appendListItem(workflowList, "Product enrichment", "Move next into products to improve completeness, approvals, and DAM coverage.");
-    appendListItem(workflowList, "Operational readiness", "Finish by checking connection health, rights issues, and downstream exceptions.");
+    appendListItem(workflowList, "Build the skeleton", "Use setup pages when the catalog still feels thin or inconsistent.");
+    appendListItem(workflowList, "Fill in products", "Open products only after the setup is good enough to guide the editor.");
+    appendListItem(workflowList, "Check publishing health", "Finish by checking connection health, rights issues, and downstream exceptions.");
     workflowColumn.appendChild(workflowList);
 
     operationsColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "Recent operational signals"));
@@ -1319,8 +1367,25 @@
     );
     operationsColumn.appendChild(operationsList);
 
+    pathColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "Simple path"));
+    appendPathStep(pathList, 1, "Groups", "Create or clean up categories so products have a home.");
+    appendPathStep(pathList, 2, "Fact fields", "Create attributes so people know what facts and copy to fill in.");
+    appendPathStep(pathList, 3, "Product types", "Use families to decide what each kind of product must contain.");
+    appendPathStep(pathList, 4, "Products", "Open one product at a time and fill in facts, copy, and completeness.");
+    appendPathStep(pathList, 5, "Pictures and files", "Use the ResourceSpace DAM tab to link media after the main facts are in place.");
+    pathColumn.appendChild(pathList);
+
+    glossaryColumn.appendChild(createElement("h2", "OperatorWorkspaceColumn-title", "What the words mean"));
+    appendGlossaryItem(glossaryList, "Category", "A group or folder that helps people browse products.");
+    appendGlossaryItem(glossaryList, "Attribute", "A fact field or copy field, like color, size, or description.");
+    appendGlossaryItem(glossaryList, "Family", "A product template that says which fields a product type needs.");
+    appendGlossaryItem(glossaryList, "DAM", "The picture and file library connected through ResourceSpace.");
+    glossaryColumn.appendChild(glossaryList);
+
     columns.appendChild(workflowColumn);
     columns.appendChild(operationsColumn);
+    columns.appendChild(pathColumn);
+    columns.appendChild(glossaryColumn);
 
     shell.appendChild(hero);
     shell.appendChild(metrics);
@@ -1350,8 +1415,13 @@
     } else if (isSettingsSurface()) {
       config = {
         kind: "settings",
-        title: "Catalog structure",
-        body: "Categories, attributes, and families define the contract the rest of the workspace depends on. Tighten structure here before broad enrichment begins.",
+        title: "Build the product skeleton here.",
+        body: "Use setup pages before heavy editing. This is where you define groups, fact fields, and product types.",
+        points: [
+          "Categories are groups shoppers browse.",
+          "Attributes are fact fields and copy fields.",
+          "Families are product templates."
+        ],
         action: "#/enrich/product/",
         actionLabel: "Return to the product work queue",
         actionType: "link"
@@ -1359,8 +1429,13 @@
     } else if (isSystemSurface()) {
       config = {
         kind: "system",
-        title: "Platform administration",
-        body: "Use system pages for users, roles, and low-level platform configuration. Treat changes here as operational changes, not casual content edits.",
+        title: "Use this area for admin work only.",
+        body: "This is for people, roles, and platform rules. Most everyday catalog work happens somewhere else.",
+        points: [
+          "Use system pages when the change affects many users.",
+          "Do not start here for a single product problem.",
+          "Treat changes here as careful admin work."
+        ],
         action: "#/dashboard",
         actionLabel: "Back to Operator workspace",
         actionType: "link"
@@ -1368,11 +1443,30 @@
     } else if (isProductListSurface()) {
       config = {
         kind: "products",
-        title: "Use products as a work queue, not as a dead-end grid.",
-        body: "Narrow the queue to records that need action, then open the exact product you want to enrich. Filters and taxonomy can stay hidden until you need them.",
+        title: "Use this page to find the right product, then open it.",
+        body: "Think of this page as a to-do list. Find the right record here, then open it to do the real editing.",
+        points: [
+          "Search or filter until you see the right records.",
+          "Open one product to edit facts, copy, and pictures.",
+          "Save in the header after each solid pass."
+        ],
         actionLabel: "Show filters and taxonomy",
         actionType: "button",
         onAction: toggleProductsPanels
+      };
+    } else if (isProductEditorSurface()) {
+      config = {
+        kind: "product-editor",
+        title: "Fix one product at a time on this page.",
+        body: "Use the tabs like steps so the page feels smaller: facts first, pictures next, then save.",
+        points: [
+          "Fill in required fact fields first.",
+          "Open the ResourceSpace DAM tab for pictures and files.",
+          "Save from the header after each good pass."
+        ],
+        actionLabel: "Show the guide for this screen",
+        actionType: "button",
+        onAction: openGuideForCurrentScreen
       };
     }
 
@@ -1421,6 +1515,14 @@
     section.appendChild(createElement("div", "OperatorRouteBanner-eyebrow", "Operator"));
     section.appendChild(createElement("h1", "OperatorRouteBanner-title", config.title));
     section.appendChild(createElement("p", "OperatorRouteBanner-body", config.body));
+
+    if (Array.isArray(config.points) && config.points.length) {
+      var list = createElement("ol", "OperatorRouteBanner-list");
+      config.points.forEach(function (point) {
+        list.appendChild(createElement("li", "OperatorRouteBanner-listItem", point));
+      });
+      section.appendChild(list);
+    }
 
     var action = createElement(
       "button" === config.actionType ? "button" : "a",

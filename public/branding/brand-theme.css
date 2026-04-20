@@ -1069,7 +1069,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .OperatorWorkspaceMetrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -1113,7 +1113,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .OperatorWorkspaceActions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -1129,6 +1129,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   text-decoration: none;
   box-shadow: var(--brand-shadow-xs);
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+  text-align: left;
+  cursor: pointer;
 }
 
 .OperatorWorkspaceAction:hover,
@@ -1154,7 +1156,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .OperatorWorkspaceColumns {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 16px;
 }
 
@@ -1195,6 +1197,67 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   font-size: 13px;
 }
 
+.OperatorWorkspacePath,
+.OperatorWorkspaceGlossary,
+.OperatorRouteBanner-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.OperatorWorkspacePath-step,
+.OperatorWorkspaceGlossary-item,
+.OperatorRouteBanner-listItem {
+  display: grid;
+  gap: 8px;
+  align-items: start;
+}
+
+.OperatorWorkspacePath-step {
+  grid-template-columns: 36px minmax(0, 1fr);
+}
+
+.OperatorWorkspacePath-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--brand-surface-alt);
+  color: var(--brand-green-dark);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.OperatorWorkspacePath-content {
+  display: grid;
+  gap: 4px;
+}
+
+.OperatorWorkspacePath-title,
+.OperatorWorkspaceGlossary-term {
+  color: #32403a;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.OperatorWorkspacePath-body,
+.OperatorWorkspaceGlossary-body,
+.OperatorRouteBanner-listItem {
+  color: #5a6962;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.OperatorRouteBanner-list {
+  padding-left: 18px;
+  list-style: decimal;
+}
+
 .OperatorRouteBanner {
   display: grid;
   gap: 10px;
@@ -1232,7 +1295,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   .OperatorWorkspaceMetrics,
   .OperatorWorkspaceActions,
   .OperatorWorkspaceColumns {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   }
 
   .BrandGuidePanel {
@@ -1262,6 +1325,16 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   .OperatorWorkspaceActions,
   .OperatorWorkspaceColumns {
     grid-template-columns: 1fr;
+  }
+
+  .OperatorWorkspacePath-step {
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .OperatorWorkspacePath-number {
+    width: 32px;
+    height: 32px;
+    font-size: 13px;
   }
 
   .BrandGuideButton {
