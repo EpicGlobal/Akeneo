@@ -908,7 +908,7 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .BrandGuideActionButton--primary:hover,
 .BrandGuideActionButton--primary:focus {
-  background: var(--brand-green-dark);
+  background: #36571f;
 }
 
 .BrandGuideActionButton--ghost {
