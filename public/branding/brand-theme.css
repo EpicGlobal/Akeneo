@@ -1956,6 +1956,24 @@ body.BrandRoute--products:not(.BrandProductsPanelsOpen) .AknDefault-contentWithB
   max-width: none !important;
 }
 
+body.BrandRoute--imports .AknDefault-contentWithColumn,
+body.BrandRoute--exports .AknDefault-contentWithColumn {
+  display: block !important;
+}
+
+body.BrandRoute--imports .AknDefault-thirdColumnContainer,
+body.BrandRoute--imports .AknDefault-thirdColumn,
+body.BrandRoute--exports .AknDefault-thirdColumnContainer,
+body.BrandRoute--exports .AknDefault-thirdColumn {
+  display: none !important;
+}
+
+body.BrandRoute--imports .AknDefault-contentWithBottom,
+body.BrandRoute--exports .AknDefault-contentWithBottom {
+  width: 100% !important;
+  max-width: none !important;
+}
+
 body.BrandRoute--dashboard .AknDefault-container .view > :not(header):not(.BrandShell-pageHeader):not(.OperatorWorkspaceHome) {
   display: none !important;
 }
@@ -2054,12 +2072,36 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-bodyCell:nth-child(11)
   display: none !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-headerCell:nth-child(3),
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-bodyCell:nth-child(3),
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-headerCell:nth-child(4),
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-bodyCell:nth-child(4),
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-headerCell:nth-child(3),
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-bodyCell:nth-child(3),
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-headerCell:nth-child(4),
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-bodyCell:nth-child(4) {
+  display: none !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknGrid,
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-header,
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-body,
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-bodyRow {
   width: 100% !important;
   min-width: 0 !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid,
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-header,
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-body,
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-bodyRow,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-header,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-body,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-bodyRow {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
 }
 
 body.BrandShell--compactNav.BrandRoute--products .AknGrid-bodyCell--actions,
@@ -2140,7 +2182,27 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid {
   table-layout: fixed !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid td,
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid th,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid td,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid th {
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid {
+  table-layout: fixed !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknActionButton.AknGridToolbar-actionButton {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  padding: 6px 10px !important;
+}
+
+body.BrandShell--compactNav.BrandRoute--imports .AknActionButton.AknGridToolbar-actionButton,
+body.BrandShell--compactNav.BrandRoute--exports .AknActionButton.AknGridToolbar-actionButton {
   min-width: 44px !important;
   min-height: 44px !important;
   padding: 6px 10px !important;
@@ -2154,6 +2216,16 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid-headerCell button {
   align-items: center !important;
 }
 
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-headerCell a,
+body.BrandShell--compactNav.BrandRoute--imports .AknGrid-headerCell button,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-headerCell a,
+body.BrandShell--compactNav.BrandRoute--exports .AknGrid-headerCell button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
 body.BrandShell--compactNav.BrandRoute--products .AknGrid input[type='checkbox'] {
   width: 32px !important;
   height: 32px !important;
@@ -2161,6 +2233,13 @@ body.BrandShell--compactNav.BrandRoute--products .AknGrid input[type='checkbox']
   min-height: 32px !important;
   transform: scale(1.35);
   transform-origin: center;
+}
+
+body.BrandShell--compactNav.BrandRoute--imports .ui-multiselect.ui-corner-all,
+body.BrandShell--compactNav.BrandRoute--exports .ui-multiselect.ui-corner-all {
+  min-width: 52px !important;
+  min-height: 44px !important;
+  padding: 8px 12px !important;
 }
 
 .OperatorWorkspaceEyebrow,
