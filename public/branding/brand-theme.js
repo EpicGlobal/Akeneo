@@ -307,6 +307,33 @@
     return element;
   };
 
+  var replaceLeafText = function (root, selector, matcher, replacement) {
+    if (!(root instanceof HTMLElement) || "string" !== typeof selector || !(matcher instanceof RegExp)) {
+      return null;
+    }
+
+    var nodes = root.querySelectorAll(selector);
+
+    for (var index = 0; index < nodes.length; index += 1) {
+      var node = nodes[index];
+
+      if (!(node instanceof HTMLElement) || node.children.length > 0) {
+        continue;
+      }
+
+      var text = normalizeFieldText(node.textContent || "");
+
+      if (!text || !matcher.test(text)) {
+        continue;
+      }
+
+      node.textContent = replacement;
+      return node;
+    }
+
+    return null;
+  };
+
   var brandMenuLogo = function () {
     document.querySelectorAll(".AknHeader-logoImage").forEach(function (image) {
       if (!(image instanceof HTMLImageElement)) {
@@ -363,6 +390,52 @@
       setImportant(item, "border-left-width", "4px");
       setImportant(item, "padding-right", "4px");
       setImportant(item, "background", colors.accentSurface);
+    });
+  };
+
+  var simplifyMainNavigation = function () {
+    var nav = document.querySelector("nav[aria-label='Main navigation']");
+
+    if (!(nav instanceof HTMLElement)) {
+      return;
+    }
+
+    nav.querySelectorAll(".OperatorSimpleMode-hiddenMenuItem").forEach(function (node) {
+      node.classList.remove("OperatorSimpleMode-hiddenMenuItem");
+    });
+
+    [
+      { matcher: /^activity$/i, replacement: "Workspace" },
+      { matcher: /^connect$/i, replacement: "Publishing" },
+      { matcher: /^imports$/i, replacement: "Incoming data" },
+      { matcher: /^exports$/i, replacement: "Outgoing data" },
+      { matcher: /^settings$/i, replacement: "Setup" },
+      { matcher: /^system$/i, replacement: "Admin" },
+      { matcher: /^activity dashboard$/i, replacement: "Workspace home" },
+      { matcher: /^data quality insights$/i, replacement: "Catalog quality" },
+      { matcher: /^process tracker$/i, replacement: "Job history" },
+      { matcher: /^activity navigation$/i, replacement: "Workspace tools" }
+    ].forEach(function (entry) {
+      replaceLeafText(nav, "span, div, a", entry.matcher, entry.replacement);
+    });
+
+    nav.querySelectorAll("a, [role='menuitem'], .AknHeader-menuItem").forEach(function (item) {
+      if (!(item instanceof HTMLElement)) {
+        return;
+      }
+
+      var text = normalizeFieldText(item.textContent || "");
+
+      if (!text) {
+        return;
+      }
+
+      item.setAttribute("title", text);
+      item.setAttribute("aria-label", text);
+
+      if (isSimpleModeEnabled() && /^(catalog quality|job history)$/i.test(text)) {
+        item.classList.add("OperatorSimpleMode-hiddenMenuItem");
+      }
     });
   };
 
@@ -459,6 +532,10 @@
         main.setAttribute("aria-label", "Product work queue");
       } else if (isDashboardSurface()) {
         main.setAttribute("aria-label", "Operator workspace");
+      } else if (isImportSurface()) {
+        main.setAttribute("aria-label", "Incoming data");
+      } else if (isExportSurface()) {
+        main.setAttribute("aria-label", "Outgoing data");
       } else {
         main.setAttribute("aria-label", "Main content");
       }
@@ -503,6 +580,14 @@
     return /^#\/connect(?:$|\/)/.test(getHashRoute());
   };
 
+  var isImportSurface = function () {
+    return /^#\/collect\/import(?:$|\/)/.test(getHashRoute());
+  };
+
+  var isExportSurface = function () {
+    return /^#\/spread\/export(?:$|\/)/.test(getHashRoute());
+  };
+
   var isSettingsSurface = function () {
     return /^#\/settings(?:$|[/?])/.test(getHashRoute());
   };
@@ -516,6 +601,8 @@
     "BrandRoute--products",
     "BrandRoute--product-editor",
     "BrandRoute--connect",
+    "BrandRoute--imports",
+    "BrandRoute--exports",
     "BrandRoute--settings",
     "BrandRoute--system"
   ];
@@ -537,6 +624,10 @@
       document.body.classList.add("BrandRoute--products");
     } else if (isConnectSurface()) {
       document.body.classList.add("BrandRoute--connect");
+    } else if (isImportSurface()) {
+      document.body.classList.add("BrandRoute--imports");
+    } else if (isExportSurface()) {
+      document.body.classList.add("BrandRoute--exports");
     } else if (isSettingsSurface()) {
       document.body.classList.add("BrandRoute--settings");
     } else if (isSystemSurface()) {
@@ -860,6 +951,44 @@
           }
         ]
       },
+      imports: {
+        id: "imports",
+        label: "Incoming data",
+        title: "Use imports when data is coming into Operator.",
+        summary: "Most teams only need to review one import profile, run it, or confirm whether the feed succeeded.",
+        flow: [
+          "Start with the import list, not the low-level job history.",
+          "Open one import profile when a feed looks stale or broken.",
+          "Go back to publishing health when you are done."
+        ],
+        callout: "Treat imports like intake lanes. Only change a profile when the incoming feed itself needs help.",
+        steps: [
+          {
+            title: "Review the import profile list",
+            body: "Use this page to find the profile that owns the incoming feed you care about.",
+            selectors: [".AknGridContainer", ".AknDefault-mainContent", ".view"]
+          }
+        ]
+      },
+      exports: {
+        id: "exports",
+        label: "Outgoing data",
+        title: "Use exports when data is leaving Operator.",
+        summary: "This area is for outbound feeds and files. Most teams only need to review one export profile at a time.",
+        flow: [
+          "Find the export profile that owns the destination feed.",
+          "Open one profile when a downstream system looks stale or wrong.",
+          "Return to publishing health after the feed is understood."
+        ],
+        callout: "Treat exports like delivery lanes. Keep them simple and only open the profile that owns the destination you are checking.",
+        steps: [
+          {
+            title: "Review the export profile list",
+            body: "Use this page to find the profile that owns the outbound feed you care about.",
+            selectors: [".AknGridContainer", ".AknDefault-mainContent", ".view"]
+          }
+        ]
+      },
       settings: {
         id: "settings",
         label: "Settings",
@@ -1117,6 +1246,14 @@
       return contexts.connect;
     }
 
+    if (/collect\/import|import profiles?|incoming data/.test(route) || /import profiles?|incoming data/.test(title)) {
+      return contexts.imports;
+    }
+
+    if (/spread\/export|export profiles?|outgoing data/.test(route) || /export profiles?|outgoing data/.test(title)) {
+      return contexts.exports;
+    }
+
     if ((/attributes?/.test(route) || /attributes?/.test(title)) && !/family/.test(route)) {
       return contexts.attributes;
     }
@@ -1366,6 +1503,35 @@
           return true;
         }
       }
+    }
+
+    return false;
+  };
+
+  var openFirstVisibleProfile = function () {
+    var candidates = document.querySelectorAll(
+      ".AknDefault-mainContent a, .AknGridContainer a, .AknVerticalList a, .AknDefault-mainContent button"
+    );
+
+    for (var index = 0; index < candidates.length; index += 1) {
+      var candidate = candidates[index];
+
+      if (!(candidate instanceof HTMLElement)) {
+        continue;
+      }
+
+      var text = normalizeFieldText(candidate.textContent || "");
+      var rect = candidate.getBoundingClientRect();
+
+      if (!text || rect.width < 8 || rect.height < 8) {
+        continue;
+      }
+
+      if (/^(guide|help|create|back|incoming data|outgoing data|workspace|publishing)$/i.test(text)) {
+        continue;
+      }
+
+      return clickElement(candidate);
     }
 
     return false;
@@ -1880,6 +2046,40 @@
           { title: isSimpleModeEnabled() ? "Show advanced connections" : "Hide advanced connections", body: isSimpleModeEnabled() ? "Reveal app store and connected-app surfaces." : "Return to the smaller connection view.", secondary: true, onAction: toggleSimpleMode }
         ]
       };
+    } else if (isImportSurface()) {
+      config = {
+        kind: "imports",
+        eyebrow: "Incoming data",
+        title: "Use one import profile at a time.",
+        body: "Stay with the list until you know which feed owns the problem. Open only the profile you need, then return to publishing health.",
+        checklist: [
+          "Pick the import profile that owns the incoming feed.",
+          "Open one profile when a feed looks stale or broken.",
+          "Return to publishing health after you confirm the problem."
+        ],
+        actions: [
+          { title: "Open the first visible import", body: "Jump into one real import profile.", primary: true, onAction: openFirstVisibleProfile },
+          { title: "Back to publishing health", body: "Return to the health overview.", onAction: function () { goToHash("#/connect/data-flows"); return true; } },
+          { title: isSimpleModeEnabled() ? "Show advanced import tools" : "Hide advanced import tools", body: isSimpleModeEnabled() ? "Reveal the fuller import surface." : "Return to the simpler import view.", secondary: true, onAction: toggleSimpleMode }
+        ]
+      };
+    } else if (isExportSurface()) {
+      config = {
+        kind: "exports",
+        eyebrow: "Outgoing data",
+        title: "Use one export profile at a time.",
+        body: "Stay with the list until you know which outbound feed matters. Open only the profile you need, then return to publishing health.",
+        checklist: [
+          "Pick the export profile that owns the downstream feed.",
+          "Open one profile when a destination looks stale or wrong.",
+          "Return to publishing health after the export is understood."
+        ],
+        actions: [
+          { title: "Open the first visible export", body: "Jump into one real export profile.", primary: true, onAction: openFirstVisibleProfile },
+          { title: "Back to publishing health", body: "Return to the health overview.", onAction: function () { goToHash("#/connect/data-flows"); return true; } },
+          { title: isSimpleModeEnabled() ? "Show advanced export tools" : "Hide advanced export tools", body: isSimpleModeEnabled() ? "Reveal the fuller export surface." : "Return to the simpler export view.", secondary: true, onAction: toggleSimpleMode }
+        ]
+      };
     } else if (isProductEditorSurface()) {
       config = {
         kind: "product-editor",
@@ -1982,6 +2182,34 @@
         body: "Use this area to monitor integrations, review sync health, and prove that data is moving cleanly between Operator and downstream systems.",
         action: "#/collect/import/",
         actionLabel: "Review imports and monitored flows",
+        actionType: "link"
+      };
+    } else if (isImportSurface()) {
+      config = {
+        kind: "imports",
+        title: "Incoming data lives here.",
+        body: "Use import profiles to bring data into Operator. Stay with one profile at a time so the feed remains understandable.",
+        points: [
+          "Imports bring outside data into the catalog.",
+          "Open only the profile that owns the feed you are checking.",
+          "Go back to publishing health when you finish reviewing the profile."
+        ],
+        action: "#/connect/data-flows",
+        actionLabel: "Back to publishing health",
+        actionType: "link"
+      };
+    } else if (isExportSurface()) {
+      config = {
+        kind: "exports",
+        title: "Outgoing data lives here.",
+        body: "Use export profiles to send data out of Operator. Stay with one profile at a time so the delivery path remains understandable.",
+        points: [
+          "Exports send catalog data to downstream systems.",
+          "Open only the profile that owns the destination you are checking.",
+          "Go back to publishing health when you finish reviewing the profile."
+        ],
+        action: "#/connect/data-flows",
+        actionLabel: "Back to publishing health",
         actionType: "link"
       };
     } else if (isSettingsSurface()) {
@@ -2141,6 +2369,14 @@
         /create and start tracking your first one here\./i,
         "Create your first monitored connection to start tracking sync health, throughput, and failures."
       );
+    }
+
+    if (isImportSurface() && view instanceof HTMLElement) {
+      replaceMatchedText(view, "div, p, span, h1, h2, h3", /^import profiles?$/i, "Incoming data profiles");
+    }
+
+    if (isExportSurface() && view instanceof HTMLElement) {
+      replaceMatchedText(view, "div, p, span, h1, h2, h3", /^export profiles?$/i, "Outgoing data profiles");
     }
 
     if (isSettingsSurface() && view instanceof HTMLElement) {
@@ -2536,6 +2772,7 @@
     syncCompactViewportShell();
     brandMenuLogo();
     brandMainMenu();
+    simplifyMainNavigation();
     brandVerticalLists();
     brandHeaders();
     ensureMainLandmark();

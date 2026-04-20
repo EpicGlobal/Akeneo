@@ -1449,6 +1449,10 @@ body.OperatorSimpleMode .OperatorSimpleMode-hidden {
   display: none !important;
 }
 
+body.OperatorSimpleMode .OperatorSimpleMode-hiddenMenuItem {
+  display: none !important;
+}
+
 body.OperatorSimpleMode .OperatorSimpleMode-primary {
   box-shadow: inset 3px 0 0 #7cb342, var(--brand-shadow-xs) !important;
   border-color: rgba(124, 179, 66, 0.24) !important;
@@ -2030,6 +2034,8 @@ body.BrandShell--compactNav .OperatorRouteBanner {
 
 body.BrandShell--compactNav.BrandRoute--dashboard .BrandShell-pageHeader,
 body.BrandShell--compactNav.BrandRoute--connect .BrandShell-pageHeader,
+body.BrandShell--compactNav.BrandRoute--imports .BrandShell-pageHeader,
+body.BrandShell--compactNav.BrandRoute--exports .BrandShell-pageHeader,
 body.BrandShell--compactNav.BrandRoute--settings .BrandShell-pageHeader,
 body.BrandShell--compactNav.BrandRoute--system .BrandShell-pageHeader {
   display: none !important;
