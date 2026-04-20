@@ -1312,8 +1312,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   width: fit-content;
   padding: 0 10px;
   border-radius: var(--brand-radius-md);
-  background: rgba(241, 248, 233, 0.98);
-  color: var(--brand-green-dark);
+  background: #dfeccf;
+  color: #213610;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1330,7 +1330,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
 
 .OperatorTaskPanel-copy,
 .OperatorTaskStep-body,
-.OperatorTaskAction-body {
+.OperatorTaskAction-body,
+.OperatorTaskNote {
   margin: 0;
   color: #4d5b56;
   font-size: 14px;
@@ -1383,6 +1384,10 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   gap: 12px;
 }
 
+.OperatorTaskPanel--wizard .OperatorTaskActions {
+  grid-template-columns: minmax(0, 320px);
+}
+
 .OperatorTaskAction {
   display: grid;
   gap: 6px;
@@ -1433,6 +1438,11 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   font-size: 15px;
   font-weight: 700;
   line-height: 1.35;
+}
+
+.OperatorTaskNote {
+  font-size: 13px;
+  color: #36571f;
 }
 
 body.OperatorSimpleMode .OperatorSimpleMode-hidden {

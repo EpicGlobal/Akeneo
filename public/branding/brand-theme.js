@@ -1487,6 +1487,7 @@
   var renderSetupWizardCard = function () {
     var stepIndex = getSetupWizardStepIndex();
     var step = setupWizardSteps[stepIndex];
+    var nextStep = setupWizardSteps[(stepIndex + 1) % setupWizardSteps.length];
 
     if (!step) {
       return null;
@@ -1496,48 +1497,32 @@
     var header = createElement("div", "OperatorTaskPanel-header");
     var body = createElement("div", "OperatorTaskPanel-body");
     var actions = createElement("div", "OperatorTaskActions");
-    var helper = createElement("div", "OperatorTaskMiniList");
-    var previous = createElement("button", "OperatorTaskAction OperatorTaskAction--secondary", "Back");
-    var next = createElement("button", "OperatorTaskAction OperatorTaskAction--secondary", stepIndex === setupWizardSteps.length - 1 ? "Start over" : "Next step");
-    var open = createElement("button", "OperatorTaskAction OperatorTaskAction--primary", step.actionLabel);
+    var open = createElement("button", "OperatorTaskAction OperatorTaskAction--secondary", step.actionLabel);
+    var nextNote = createElement("p", "OperatorTaskNote");
 
     panel.setAttribute("aria-label", "Simple setup wizard");
 
     header.appendChild(createElement("div", "OperatorTaskPanel-eyebrow", "Simple setup wizard"));
     header.appendChild(createElement("h2", "OperatorTaskPanel-title", "Learn the app in the safest order."));
-    header.appendChild(createElement("p", "OperatorTaskPanel-copy", "Move through these steps in order so the catalog stays understandable."));
+    header.appendChild(createElement("p", "OperatorTaskPanel-copy", "Use one step at a time. This card advances after you open the current step."));
 
     body.appendChild(createElement("div", "OperatorTaskStep", "Step " + (stepIndex + 1) + " of " + setupWizardSteps.length));
     body.appendChild(createElement("h3", "OperatorTaskStep-title", step.title));
     body.appendChild(createElement("p", "OperatorTaskStep-body", step.body));
-
-    appendListItem(helper, "Current move", step.title);
-    appendListItem(helper, "Why now", step.body);
-    body.appendChild(helper);
-
-    previous.type = "button";
-    previous.disabled = 0 === stepIndex;
-    previous.addEventListener("click", function () {
-      setSetupWizardStepIndex(stepIndex - 1);
-      scheduleApply();
-    });
-
-    next.type = "button";
-    next.addEventListener("click", function () {
-      setSetupWizardStepIndex(stepIndex === setupWizardSteps.length - 1 ? 0 : stepIndex + 1);
-      scheduleApply();
-    });
+    if (nextStep) {
+      nextNote.textContent = "Next after this: " + nextStep.title + ".";
+      body.appendChild(nextNote);
+    }
 
     open.type = "button";
     open.addEventListener("click", function () {
+      setSetupWizardStepIndex(stepIndex === setupWizardSteps.length - 1 ? 0 : stepIndex + 1);
       if (typeof step.action === "function") {
         step.action();
       }
     });
 
-    actions.appendChild(previous);
     actions.appendChild(open);
-    actions.appendChild(next);
     panel.appendChild(header);
     panel.appendChild(body);
     panel.appendChild(actions);
@@ -1679,10 +1664,6 @@
     appendActionItem(actions, "#/settings", "1. Build the setup", "Start with categories, attributes, and families so products have a clean structure.", {primary: true});
     appendActionItem(actions, "#/enrich/product/", "2. Fill in products", "Open the products list when the setup is ready and start improving one record at a time.");
     appendActionItem(actions, "#/connect/data-flows", "3. Check publishing health", "Review imports, exports, and handoffs before you trust downstream feeds.");
-    appendActionItem(actions, "#", "Need help right now?", "Open the guide for simple, screen-by-screen instructions.", {
-      actionType: "button",
-      onAction: openGuideForCurrentScreen
-    });
 
     var wizardCard = renderSetupWizardCard();
 
@@ -1786,22 +1767,18 @@
 
     if (isSettingsSurface()) {
       markByText(/^(measurements|association types|group types|groups)$/i, "OperatorSimpleMode-hidden");
-      markByText(/^(categories|attributes|families|channels|locales|currencies)$/i, "OperatorSimpleMode-primary");
     }
 
     if (isSystemSurface()) {
       markByText(/^(catalog volume monitoring|configuration|system information)$/i, "OperatorSimpleMode-hidden");
-      markByText(/^(users|user groups|roles)$/i, "OperatorSimpleMode-primary");
     }
 
     if (isConnectSurface()) {
       markByText(/^(app store|connected apps)$/i, "OperatorSimpleMode-hidden");
-      markByText(/^(data flows|connection settings)$/i, "OperatorSimpleMode-primary");
     }
 
     if (isProductListSurface()) {
       markByText(/^(display:|variant:|columns|bulk actions|sequential edit|delete|quick export)$/i, "OperatorSimpleMode-hidden");
-      markByText(/^create$/i, "OperatorSimpleMode-primary");
     }
   };
 
@@ -2119,24 +2096,26 @@
       section.appendChild(list);
     }
 
-    var action = createElement(
-      "button" === config.actionType ? "button" : "a",
-      "OperatorRouteBanner-action",
-      config.actionLabel
-    );
+    if (!isSimpleModeEnabled() && config.actionLabel) {
+      var action = createElement(
+        "button" === config.actionType ? "button" : "a",
+        "OperatorRouteBanner-action",
+        config.actionLabel
+      );
 
-    if ("button" === config.actionType) {
-      action.type = "button";
-      action.addEventListener("click", function () {
-        if (typeof config.onAction === "function") {
-          config.onAction();
-        }
-      });
-    } else {
-      action.href = config.action;
+      if ("button" === config.actionType) {
+        action.type = "button";
+        action.addEventListener("click", function () {
+          if (typeof config.onAction === "function") {
+            config.onAction();
+          }
+        });
+      } else {
+        action.href = config.action;
+      }
+
+      section.appendChild(action);
     }
-
-    section.appendChild(action);
   };
 
   var refreshLegacyCopy = function () {
