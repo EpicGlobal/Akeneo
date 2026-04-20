@@ -1226,8 +1226,8 @@ body.BrandShell .BrandShell-pageHeaderBreadcrumb a,
   width: 36px;
   height: 36px;
   border-radius: 999px;
-  background: var(--brand-surface-alt);
-  color: var(--brand-green-dark);
+  background: var(--brand-green-dark);
+  color: #ffffff;
   font-size: 14px;
   font-weight: 700;
 }
